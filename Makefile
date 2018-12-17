@@ -1,8 +1,8 @@
 
-CXXFLAGS = -Wall -Wextra -pedantic -Weffc++
+CXXFLAGS = -std=c++17 -Wall -Wextra -pedantic -Weffc++
 
-src = $(wildcard src/*.cpp) \
-	  $(wildcard src/*.cc)
+src = $(wildcard src/*.cc) \
+	  $(wildcard src/*.cpp)
 obj := $(addsuffix .o,$(basename $(src)))
 
 LDFLAGS = -lGLEW -lglfw3 -lGL -lm -lX11 -lpthread -ldl

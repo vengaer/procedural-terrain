@@ -1,3 +1,4 @@
+#include "shader.h"
 #include "window.h"
 #include <iostream>
 
@@ -8,6 +9,7 @@ int main() {
 
 	try{
 		Window window{"test", width, height};
+		Shader test("/home/vilhelm/repos/c++/procedural_terrain/src/shaders/test.vert", ShaderType::VERTEX, "/home/vilhelm/repos/c++/procedural_terrain/src/shaders/test.vert", ShaderType::FRAGMENT);
 		
 		while(!window.should_close()){
 			window.clear();

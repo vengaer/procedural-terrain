@@ -13,5 +13,9 @@ struct GLException : public std::runtime_error {
 	GLException(std::string const& what_msg) : std::runtime_error{what_msg} {} 
 };
 
+struct ArgumentMismatchException : public std::runtime_error {
+	ArgumentMismatchException(std::string const& what_msg) : std::runtime_error{what_msg} {}
+};
+
 
 #endif
