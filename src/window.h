@@ -5,6 +5,7 @@
 #include "exception.h"
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <iostream>
 #include <string>
 
 class Window{
@@ -24,6 +25,8 @@ class Window{
 		unsigned width_, height_;
 		
 		void init(std::string const& name, unsigned width, unsigned height);
+		
+		static void resize(GLFWwindow* window, int width, int height);
 };
 
 #endif

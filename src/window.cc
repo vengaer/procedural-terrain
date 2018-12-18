@@ -43,5 +43,14 @@ void Window::init(std::string const& name, unsigned width, unsigned height){
 	if(glewInit() != GLEW_OK)
 		throw GLException{"Failed to initialize GLEW\n"};
 
-	/* TODO: window pointer and resize callback */
+	glfwSetWindowUserPointer(window_, this);
+	glfwSetWindowSizeCallback(window_, resize);
 }
+
+void Window::resize(GLFWwindow* glfw_window, int width, int height){
+	Window* instance = static_cast<Window*>(glfwGetWindowUserPointer(glfw_window));
+	instance->width_ = width;
+	instance->height_ = height;
+	glViewport(0, 0, width, height);
+}
+	

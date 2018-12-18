@@ -4,32 +4,45 @@
 #pragma once
 #include "exception.h"
 #include <algorithm>
+#include <array>
 #include <cstddef>
 #include <fstream>
 #include <iostream>
 #include <stack>
+#include <sstream>
 #include <string>
 #include <vector>
 #include <GL/glew.h>
 
-enum class ShaderType { NA = -1, VERTEX, FRAGMENT };
 
 
 class Shader {
 	public:
-		Shader(std::string const& shader1, ShaderType type1, std::string const& shader2, ShaderType type2, unsigned include_depth = 8);
+		enum class Type { VERTEX, FRAGMENT };
 
-		struct IncludeResult {
-			bool well_formed;
-			std::string content;
-		};
+
+		Shader(std::string const& shader1, Type type1, std::string const& shader2, Type type2, unsigned include_depth = 8);
+
 	private:
-		GLuint program_;
-		unsigned max_depth_; /* Max include depth */
+		unsigned depth_; /* Max recursive include depth */
+		GLuint program_; /* Shader program id */
+
+		enum class StatusQuery { COMPILE, LINK };
+		
+		struct AssertResult{
+			bool succeeded;
+			std::string msg;
+		};
+	
+		GLuint init(std::string const& shader1, Type type1, std::string const& shader2, Type type2);
 		
 		std::string read_source(std::string const& source) const;
-		std::string format_header_guard(std::string const& path) const;
-		IncludeResult process_include(std::string const& directive, std::string const& source, std::size_t idx) const;
+		std::string format_header_guard(std::string path) const;
+		std::string process_include_directive(std::string const& directive, std::string const& source, std::size_t idx) const;
+		GLuint compile(std::string const& source, Type type) const;
+		GLuint link(GLuint vertex_id, GLuint fragment_id) const;
+
+		AssertResult assert_shader_status_ok(GLuint id, StatusQuery sq) const;
 
 };
 
