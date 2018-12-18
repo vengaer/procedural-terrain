@@ -4,14 +4,14 @@
 #include <iostream>
 
 
-
 int main() {
 	unsigned constexpr width = 960, height = 540;
 
 
+
 	try{
 		Window window{"test", width, height};
-		Shader test("/home/vilhelm/repos/c++/procedural_terrain/src/shaders/bubble.vert", Shader::Type::VERTEX, "/home/vilhelm/repos/c++/procedural_terrain/src/shaders/bubble.frag", Shader::Type::FRAGMENT);
+//		Shader test("/home/vilhelm/repos/c++/procedural_terrain/src/shaders/bubble.vert", Shader::Type::VERTEX, "/home/vilhelm/repos/c++/procedural_terrain/src/shaders/bubble.frag", Shader::Type::FRAGMENT);
 		
 		while(!window.should_close()){
 			window.clear();
