@@ -1,5 +1,5 @@
-#ifndef TMP_UTILITY_H
-#define TMP_UTILITY_H
+#ifndef META_UTILITY_H
+#define META_UTILITY_H
 
 #pragma once
 #include <array>
