@@ -32,6 +32,10 @@ struct is_c_array : std::false_type { };
 template <typename T, std::size_t N>
 struct is_c_array<T[N]> : std::true_type { };
 
+/* Unbounded c array true */
+template <typename T>
+struct is_c_array<T[]> : std::true_type { };
+
 
 /* Alias templates */
 template <typename T>
