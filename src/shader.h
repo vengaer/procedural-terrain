@@ -29,7 +29,7 @@ class Shader {
 
 		enum class StatusQuery { COMPILE, LINK };
 		
-		struct AssertResult{
+		struct AssertionResult{
 			bool succeeded;
 			std::string msg;
 		};
@@ -42,7 +42,7 @@ class Shader {
 		GLuint compile(std::string const& source, Type type) const;
 		GLuint link(GLuint vertex_id, GLuint fragment_id) const;
 
-		AssertResult assert_shader_status_ok(GLuint id, StatusQuery sq) const;
+		AssertionResult assert_shader_status_ok(GLuint id, StatusQuery sq) const;
 
 };
 

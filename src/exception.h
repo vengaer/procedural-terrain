@@ -17,6 +17,10 @@ struct GLException : std::runtime_error {
 	GLException(std::string const& what_msg) : std::runtime_error{what_msg} {} 
 };
 
+struct InvalidArgumentException : std::runtime_error {
+	InvalidArgumentException(std::string const& what_msg) : std::runtime_error{what_msg} {}
+};
+
 struct ShaderCompilationException : std::runtime_error {
 	ShaderCompilationException(std::string const& what_msg) : std::runtime_error{what_msg} {}
 };

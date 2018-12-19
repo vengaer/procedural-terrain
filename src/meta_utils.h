@@ -98,6 +98,9 @@ struct wraps_numeric_type : std::false_type { };
 template <typename T>
 struct wraps_numeric_type<T, std::void_t<typename T::value_type>> : std::is_arithmetic<typename T::value_type> { };
 
+template <typename T>
+struct wraps_numeric_type<T&, std::void_t<typename T::value_type>> : std::is_arithmetic<typename T::value_type> { };
+
 template <typename T, std::size_t N>
 struct wraps_numeric_type<T[N]> : std::is_arithmetic<T> { };
 
@@ -105,14 +108,12 @@ template <typename T>
 struct wraps_numeric_type<T[]> : std::is_arithmetic<T> { };
 
 
-
-
 /* Alias templates */
-template <typename T>
-inline bool constexpr is_contiguously_stored_v = is_contiguously_stored<T>::value;
-
 template <typename T, typename... P0toN>
 inline bool constexpr is_one_of_v = is_one_of<T, P0toN...>::value;
+
+template <typename T>
+inline bool constexpr is_contiguously_stored_v = is_contiguously_stored<T>::value;
 
 template <typename T, typename U = void>
 inline bool constexpr wraps_numeric_type_v = wraps_numeric_type<T,U>::value;

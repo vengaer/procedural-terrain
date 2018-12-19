@@ -62,13 +62,13 @@ std::string Shader::read_source(std::string const& source) const{
 				/* c/c++ style header guard to prevent redefinition */		
 				std::string header_guard = format_header_guard(incl_path);
 
-				/* Append header guard */
-				contents << "#ifndef " << header_guard << "\n#define " << header_guard << "\n";
-
 				std::ifstream file{incl_path};					
 				
 				if(!file.is_open())
 					throw FileIOException{"Unable to open file " + incl_path + " included from " + source};
+
+				/* Append header guard */
+				contents << "#ifndef " << header_guard << "\n#define " << header_guard << "\n";
 
 				streams.push(std::move(file));
 				
@@ -141,7 +141,7 @@ GLuint Shader::compile(std::string const& source, Type type) const{
 	glShaderSource(id, 1, &c_source, nullptr);
 	glCompileShader(id);
 	
-	AssertResult result = assert_shader_status_ok(id, StatusQuery::COMPILE);	
+	AssertionResult result = assert_shader_status_ok(id, StatusQuery::COMPILE);	
 
 	if(!result.succeeded)
 		throw ShaderCompilationException{result.msg};
@@ -157,7 +157,7 @@ GLuint Shader::link(GLuint vertex_id, GLuint fragment_id) const {
 
 	glLinkProgram(program_id);
 	
-	AssertResult result = assert_shader_status_ok(program_id, StatusQuery::LINK);
+	AssertionResult result = assert_shader_status_ok(program_id, StatusQuery::LINK);
 
 	/* Clean up regardless of success */
 	glDetachShader(program_id, vertex_id);
@@ -172,8 +172,8 @@ GLuint Shader::link(GLuint vertex_id, GLuint fragment_id) const {
 	return program_id;
 }
 
-Shader::AssertResult Shader::assert_shader_status_ok(GLuint id, StatusQuery sq) const{
-	AssertResult res{ true, std::string{} };
+Shader::AssertionResult Shader::assert_shader_status_ok(GLuint id, StatusQuery sq) const{
+	AssertionResult res{ true, std::string{} };
 
 	GLint succeeded = 0;
 

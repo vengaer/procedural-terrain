@@ -1,7 +1,10 @@
+#include "plane.h"
 #include "renderer.h"
 #include "shader.h"
 #include "window.h"
 #include <iostream>
+
+
 
 
 int main() {
@@ -10,6 +13,7 @@ int main() {
 	try{
 		Window window{"test", width, height};
 		Shader test("/home/vilhelm/repos/c++/procedural_terrain/src/shaders/bubble.vert", Shader::Type::VERTEX, "/home/vilhelm/repos/c++/procedural_terrain/src/shaders/bubble.frag", Shader::Type::FRAGMENT);
+		Plane p{1, .2, 1, .2};
 		
 		while(!window.should_close()){
 			window.clear();
