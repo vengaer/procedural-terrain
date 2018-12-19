@@ -12,8 +12,8 @@
 template <typename T, typename... P0toN>
 struct is_one_of;
 
-template <typename P0>
-struct is_one_of<P0> : std::false_type { };
+template <typename T>
+struct is_one_of<T> : std::false_type { };
 
 template <typename T, typename... P0toN>
 struct is_one_of<T, T, P0toN...> : std::true_type { };
