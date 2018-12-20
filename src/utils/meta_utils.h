@@ -8,6 +8,12 @@
 #include <utility>
 #include <vector>
 
+template <typename T>
+struct type_is {
+	using type = T;
+};
+
+
 /* Type T is same as one of types in parameter pack */
 template <typename T, typename... P0toN>
 struct is_one_of;
@@ -81,14 +87,14 @@ template <typename T, std::size_t N>
 struct is_contiguously_stored<T[N]> : std::true_type { };
 
 template <typename T, std::size_t N>
-struct is_contiguously_stored<T (&)[N]> : std::true_type { };
+struct is_contiguously_stored<T(&)[N]> : std::true_type { };
 
 /* Unbounded array */
 template <typename T>
 struct is_contiguously_stored<T[]> : std::true_type { };
 
 template <typename T>
-struct is_contiguously_stored<T (&)[]> : std::true_type { };
+struct is_contiguously_stored<T(&)[]> : std::true_type { };
 
 
 /* Class/structure wraps numeric type */
@@ -108,7 +114,29 @@ template <typename T>
 struct wraps_numeric_type<T[]> : std::is_arithmetic<T> { };
 
 
+template <typename T, typename = void>
+struct get_value_type { };
+
+template <typename T>
+struct get_value_type<T, std::void_t<typename T::value_type>> : type_is<typename T::value_type> { };
+
+template <typename T, std::size_t N>
+struct get_value_type<T[N]> : type_is<T> { };
+
+template <typename T, std::size_t N>
+struct get_value_type<T(&)[N]> : type_is<T> { };
+
+template <typename T>
+struct get_value_type<T[]> : type_is<T> { };
+
+template <typename T>
+struct get_value_type<T(&)[]> : type_is<T> { };
+
+
 /* Alias templates */
+template <typename T>
+using type_is_t = typename type_is<T>::type;
+
 template <typename T, typename... P0toN>
 inline bool constexpr is_one_of_v = is_one_of<T, P0toN...>::value;
 
@@ -117,6 +145,9 @@ inline bool constexpr is_contiguously_stored_v = is_contiguously_stored<T>::valu
 
 template <typename T, typename U = void>
 inline bool constexpr wraps_numeric_type_v = wraps_numeric_type<T,U>::value;
+
+template <typename T, typename U = void>
+using get_value_type_t = typename get_value_type<T,U>::type;
 
 
 #endif
