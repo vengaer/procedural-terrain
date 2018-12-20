@@ -1,21 +1,21 @@
 
 
-src = $(wildcard src/*.cc) \
-	  $(wildcard src/*.cpp) \
-	  $(wildcard src/engine/*.cc)
-obj := $(addsuffix .o,$(basename $(src)))
+SRC = $(wildcard src/*.cc) \
+	  $(wildcard src/engine/*.cc) \
+	  $(wildcard src/geometry/*.cc)
+OBJ := $(addsuffix .o,$(basename $(SRC)))
 
-inc = -I src/ -I src/engine/
+INC = -I src/ -I src/engine/ -I src/geometry/
 
-CXXFLAGS = -std=c++17 -Wall -Wextra -pedantic -Weffc++ $(inc)
+CXXFLAGS = -std=c++17 -Wall -Wextra -pedantic -Weffc++ $(INC)
 LDFLAGS = -lGLEW -lglfw3 -lGL -lm -lX11 -lpthread -ldl
 
-terrain: $(obj)
-	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS) $(inc)
+terrain: $(OBJ)
+	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS) $(INC)
 
 .PHONY: clean run
 clean:
-	rm -f $(obj) terrain
+	rm -f $(OBJ) terrain
 
 run: terrain
 	./terrain
