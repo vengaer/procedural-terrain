@@ -23,7 +23,13 @@ inline bool constexpr is_renderable_v = is_renderable<T>::value;
 template <typename T>
 class Renderer {
 	public:
+		/* TODO: make protected */
+		Renderer() {
+			static_assert(is_renderable_v<T>, "Type is not renderable\n");
+		}
 		static GLuint constexpr VERTEX_SIZE = 8u;
+
+	protected:
 	
 	private:
 };

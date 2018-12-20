@@ -16,16 +16,14 @@
 
 class Plane : public Renderer<Plane> {
 	public:
-		Plane(GLfloat x_len = 1.f, GLfloat dx = .2f, GLfloat y_len = 1.f, GLfloat dy = .2f);
+		Plane(GLfloat x_len = 1.f, GLfloat dx = .2f, GLfloat z_len = 1.f, GLfloat dz = .2f);
 		
 		std::vector<GLfloat> const& vertices() const;
 	
 	private:
 		std::vector<GLfloat> vertices_;	
 		
-		void init(GLfloat x_len, GLfloat dx, GLfloat y_len, GLfloat dy);
-
-
+		void init(GLfloat x_len, GLfloat dx, GLfloat z_len, GLfloat dz);
 };
 
 #endif
