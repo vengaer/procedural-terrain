@@ -20,11 +20,13 @@ class Shader {
 	public:
 		enum class Type { VERTEX, FRAGMENT };
 
-
 		Shader(std::string const& shader1, Type type1, std::string const& shader2, Type type2, unsigned include_depth = 8);
 
+		void enable() const;
+		static void disable();
+
 	private:
-		unsigned depth_; /* Max recursive include depth */
+		unsigned const depth_; /* Max recursive include depth */
 		GLuint program_; /* Shader program id */
 
 		enum class StatusQuery { COMPILE, LINK };

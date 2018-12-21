@@ -21,8 +21,8 @@ struct is_one_of;
 template <typename T>
 struct is_one_of<T> : std::false_type { };
 
-template <typename T, typename... P0toN>
-struct is_one_of<T, T, P0toN...> : std::true_type { };
+template <typename T, typename... P1toN>
+struct is_one_of<T, T, P1toN...> : std::true_type { };
 
 template <typename T, typename P0, typename... P1toN>
 struct is_one_of<T, P0, P1toN...> : is_one_of<T, P1toN...> { };
@@ -110,8 +110,36 @@ struct wraps_numeric_type<T&, std::void_t<typename T::value_type>> : std::is_ari
 template <typename T, std::size_t N>
 struct wraps_numeric_type<T[N]> : std::is_arithmetic<T> { };
 
+template <typename T, std::size_t N>
+struct wraps_numeric_type<T(&)[N]> : std::is_arithmetic<T> { };
+
 template <typename T>
 struct wraps_numeric_type<T[]> : std::is_arithmetic<T> { };
+
+template <typename T>
+struct wraps_numeric_type<T(&)[]> : std::is_arithmetic<T> { };
+
+
+template <typename T, typename = void>
+struct wraps_integral_type : std::false_type { };
+
+template <typename T>
+struct wraps_integral_type<T, std::void_t<typename T::value_type>> : std::is_integral<typename T::value_type> { };
+
+template <typename T>
+struct wraps_integral_type<T&, std::void_t<typename T::value_type>> : std::is_integral<typename T::value_type> { };
+
+template <typename T, std::size_t N>
+struct wraps_integral_type<T[N]> : std::is_integral<T> { };
+
+template <typename T, std::size_t N>
+struct wraps_integral_type<T(&)[N]> : std::is_integral<T> { };
+
+template <typename T>
+struct wraps_integral_type<T[]> : std::is_integral<T> { };
+
+template <typename T>
+struct wraps_integral_type<T(&)[]> : std::is_integral<T> { };
 
 
 template <typename T, typename = void>
@@ -119,6 +147,9 @@ struct get_value_type { };
 
 template <typename T>
 struct get_value_type<T, std::void_t<typename T::value_type>> : type_is<typename T::value_type> { };
+
+template <typename T>
+struct get_value_type<T&, std::void_t<typename T::value_type>> : type_is<typename T::value_type> { };
 
 template <typename T, std::size_t N>
 struct get_value_type<T[N]> : type_is<T> { };
@@ -145,6 +176,9 @@ inline bool constexpr is_contiguously_stored_v = is_contiguously_stored<T>::valu
 
 template <typename T, typename U = void>
 inline bool constexpr wraps_numeric_type_v = wraps_numeric_type<T,U>::value;
+
+template <typename T, typename U = void>
+inline bool constexpr wraps_integral_type_v = wraps_integral_type<T,U>::value;
 
 template <typename T, typename U = void>
 using get_value_type_t = typename get_value_type<T,U>::type;

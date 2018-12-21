@@ -12,12 +12,15 @@ int main() {
 
 	try{
 		Window window{"test", width, height};
-		Shader test("/home/vilhelm/repos/c++/procedural_terrain/src/shaders/bubble.vert", Shader::Type::VERTEX, "/home/vilhelm/repos/c++/procedural_terrain/src/shaders/bubble.frag", Shader::Type::FRAGMENT);
-		Plane p{1, .2, 1, .2};
-		
+		Shader test("/home/vilhelm/repos/c++/procedural_terrain/src/shaders/plane.vert", Shader::Type::VERTEX, "/home/vilhelm/repos/c++/procedural_terrain/src/shaders/plane.frag", Shader::Type::FRAGMENT);
+		Plane p{1, 1, 1, 1};
+		glClearColor(0.1f, 0.2f, 0.4f, 0.5f);
 		while(!window.should_close()){
 			window.clear();
+			test.enable();
+			p.render();
 
+			Shader::disable();
 			window.update();
 		}
 	}

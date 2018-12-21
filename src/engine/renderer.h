@@ -8,6 +8,7 @@
 #include <type_traits>
 #include <utility>
 
+/* TODO: add init requirement */
 template <typename T>
 struct is_renderable{
 	private:
@@ -16,7 +17,7 @@ struct is_renderable{
 
 	public:
 		static bool constexpr value = is_contiguously_stored_v<try_get_vertices_t> && wraps_numeric_type_v<try_get_vertices_t> &&
-									  is_contiguously_stored_v<try_get_indices_t>  && wraps_numeric_type_v<try_get_indices_t>;
+									  is_contiguously_stored_v<try_get_indices_t>  && wraps_integral_type_v<try_get_indices_t>;
 };
 
 template <typename T>
@@ -25,15 +26,19 @@ inline bool constexpr is_renderable_v = is_renderable<T>::value;
 template <typename T>
 class Renderer {
 	public:
-		/* TODO: make protected */
-		Renderer() {
-			static_assert(is_renderable_v<T>, "Type is not renderable\n");
-		}
+		void render() const;
+		
 		static GLuint constexpr VERTEX_SIZE = 8u;
 
 	protected:
-	
+		Renderer();
+
+		template <typename... Args>
+		void init(Args... args);
 	private:
+		GLuint vao_, vbo_;
+		GLuint idx_buffer_;
+		GLuint idx_size_;
 };
 
 #include "renderer.tcc"

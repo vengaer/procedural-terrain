@@ -2,6 +2,14 @@
 
 Shader::Shader(std::string const& shader1, Type type1, std::string const& shader2, Type type2, unsigned max_depth) : depth_{max_depth}, program_{init(shader1, type1, shader2, type2)} {}
 
+void Shader::enable() const {
+	glUseProgram(program_);
+}
+
+void Shader::disable() {
+	glUseProgram(0);
+}
+
 GLuint Shader::init(std::string const& shader1, Type type1, std::string const& shader2, Type type2){
 	if(type1 == type2)
 		throw ArgumentMismatchException{"Provided shader types must differ\n"};

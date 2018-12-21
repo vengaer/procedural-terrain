@@ -21,11 +21,11 @@ class Plane : public Renderer<Plane> {
 		std::vector<GLfloat> const& vertices() const;
 		std::vector<GLuint> const& indices() const;
 	
-	private:
-		std::vector<GLfloat> vertices_;	
-		std::vector<GLuint> indices_;
-		
 		void init(GLfloat x_len, GLfloat dx, GLfloat z_len, GLfloat dz);
+	private:
+		std::vector<GLfloat> vertices_{};	
+		std::vector<GLuint> indices_{};
+		
 };
 
 #endif
