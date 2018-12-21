@@ -120,6 +120,7 @@ template <typename T>
 struct wraps_numeric_type<T(&)[]> : std::is_arithmetic<T> { };
 
 
+/* Class/structure wraps integral type */
 template <typename T, typename = void>
 struct wraps_integral_type : std::false_type { };
 
@@ -142,6 +143,7 @@ template <typename T>
 struct wraps_integral_type<T(&)[]> : std::is_integral<T> { };
 
 
+/* Get value_type or equivalent */
 template <typename T, typename = void>
 struct get_value_type { };
 
@@ -162,6 +164,7 @@ struct get_value_type<T[]> : type_is<T> { };
 
 template <typename T>
 struct get_value_type<T(&)[]> : type_is<T> { };
+
 
 
 /* Alias templates */

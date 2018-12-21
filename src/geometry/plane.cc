@@ -17,7 +17,6 @@ void Plane::init(GLfloat x_len, GLfloat dx, GLfloat z_len, GLfloat dz){
 
 	vertices_.reserve(VERTEX_SIZE*x_iters*z_iters);
 	
-	auto idx = 0u;
 	{
 		GLfloat x_start = -static_cast<GLfloat>(x_len/2);
 		GLfloat x = x_start;
@@ -27,26 +26,15 @@ void Plane::init(GLfloat x_len, GLfloat dx, GLfloat z_len, GLfloat dz){
 		for(auto i = 0u; i < z_iters; i++, z += dz, x = x_start){
 			t = interpolation::linear(static_cast<GLfloat>(i)/static_cast<GLfloat>(z_iters-1));
 
-			for(auto j = 0u; j < x_iters; j++, x += dx, idx += VERTEX_SIZE){
+			for(auto j = 0u; j < x_iters; j++, x += dx){
 				s = interpolation::linear(static_cast<GLfloat>(j)/static_cast<GLfloat>(x_iters-1));
-				/* Position */
-				//vertex[0] = x;
-				//vertex[1] = 0.f;
-				//vertex[2] = z;
-				/* Normal */
-				//vertex[3] = 0.f;
-				//vertex[4] = 1.f;	
-				//vertex[5] = 0.f;
-				/* Texture */
-				//vertex[6] = s;
-				//vertex[7] = t;
-				vertex[0] = x;
-				vertex[1] = z;
-				vertex[2] = 0.f;
-				vertex[3] = 0.f;
-				vertex[4] = 0.f;
-				vertex[5] = 1.f;
-				vertex[6] = s;
+				vertex[0] = x;   /* Position */
+				vertex[1] = 0.f;
+				vertex[2] = z;
+				vertex[3] = 0.f; /* Normal */
+				vertex[4] = 1.f;	
+				vertex[5] = 0.f;
+				vertex[6] = s;   /* Texture */
 				vertex[7] = t;
 			
 				vertices_.insert(std::end(vertices_), std::begin(vertex), std::end(vertex));
@@ -57,20 +45,17 @@ void Plane::init(GLfloat x_len, GLfloat dx, GLfloat z_len, GLfloat dz){
 	indices_.reserve(3*x_iters*(z_iters-1));
 	std::array<GLuint, 3> triangle_indices;
 	
-	idx = 0u;
+	auto idx = 0u;
 	for(auto i = 0u; i < z_iters-1; i++){
-		for(auto j = 0u; j < x_iters; j++){
+		for(auto j = 0u; j < x_iters; j++, idx++){
 			triangle_indices[0] = idx;
 			if(j % 2){
-				//triangle_indices[1] = idx + VERTEX_SIZE;
-				//triangle_indices[2] = idx + VERTEX_SIZE - 1;
 				triangle_indices[1] = idx + x_iters;
 				triangle_indices[2] = idx + x_iters - 1;
 			}
 			else{
 				triangle_indices[1] = idx + 1;
 				triangle_indices[2] = idx + x_iters;
-				//triangle_indices[2] = idx + VERTEX_SIZE;
 			}
 			
 			indices_.insert(std::end(indices_), std::begin(triangle_indices), std::end(triangle_indices));

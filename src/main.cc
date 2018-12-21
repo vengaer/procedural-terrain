@@ -1,3 +1,4 @@
+#include "ellipsoid.h"
 #include "plane.h"
 #include "renderer.h"
 #include "shader.h"
@@ -14,11 +15,14 @@ int main() {
 		Window window{"test", width, height};
 		Shader test("/home/vilhelm/repos/c++/procedural_terrain/src/shaders/plane.vert", Shader::Type::VERTEX, "/home/vilhelm/repos/c++/procedural_terrain/src/shaders/plane.frag", Shader::Type::FRAGMENT);
 		Plane p{1, 1, 1, 1};
+		Ellipsoid e{};
+
 		glClearColor(0.1f, 0.2f, 0.4f, 0.5f);
 		while(!window.should_close()){
 			window.clear();
 			test.enable();
-			p.render();
+			//p.render();
+			e.render();
 
 			Shader::disable();
 			window.update();
