@@ -60,7 +60,7 @@ class Renderer {
 		Renderer();
 
 		template <typename... Args>
-		void init(Args... args);
+		void init(Args&&... args);
 	private:
 		GLuint vao_, vbo_;
 		GLuint idx_buffer_;

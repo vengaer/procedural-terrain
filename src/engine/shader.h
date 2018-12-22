@@ -7,12 +7,12 @@
 #include <array>
 #include <cstddef>
 #include <fstream>
+#include <GL/glew.h>
 #include <iostream>
 #include <stack>
 #include <sstream>
 #include <string>
 #include <vector>
-#include <GL/glew.h>
 
 
 

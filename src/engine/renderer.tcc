@@ -14,7 +14,7 @@ void Renderer<T>::render() const {
 
 template <typename T>
 template <typename... Args>
-void Renderer<T>::init(Args... args) {
+void Renderer<T>::init(Args&&... args) {
 	/* Initialize T */
 	static_cast<T&>(*this).init(std::forward<Args>(args)...);
 
@@ -33,10 +33,10 @@ void Renderer<T>::init(Args... args) {
 
 		auto const VALUE_TYPE_SIZE  = sizeof(value_type);
 		
-		GLuint const SIZE = VALUE_TYPE_SIZE * vertices.size() * VERTEX_SIZE;
+		GLuint const TOTAL_SIZE = VALUE_TYPE_SIZE * vertices.size() * VERTEX_SIZE;
 
 		/* Upload to gpu */
-		glBufferData(GL_ARRAY_BUFFER, SIZE, &vertices[0], GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, TOTAL_SIZE, &vertices[0], GL_STATIC_DRAW);
 
 		glEnableVertexAttribArray(0); /* Positions */
 		glEnableVertexAttribArray(1); /* Normals */
@@ -56,14 +56,14 @@ void Renderer<T>::init(Args... args) {
 	
 		idx_size_ = static_cast<GLuint>(indices.size());
 	
-		GLuint const SIZE = VALUE_TYPE_SIZE * indices.size();
+		GLuint const TOTAL_SIZE = VALUE_TYPE_SIZE * indices.size();
 
 
 		/* Upload indices to gpu */
 		glGenBuffers(1, &idx_buffer_);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idx_buffer_);
 
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, SIZE, &indices[0], GL_STATIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, TOTAL_SIZE, &indices[0], GL_STATIC_DRAW);
 	}
 	
 	/* Unbind */
