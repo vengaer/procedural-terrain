@@ -10,12 +10,13 @@
 
 int main() {
 	unsigned constexpr width = 960, height = 540;
+	
 
 	try{
 		Window window{"test", width, height};
 		Shader test("/home/vilhelm/repos/c++/procedural_terrain/src/shaders/plane.vert", Shader::Type::VERTEX, "/home/vilhelm/repos/c++/procedural_terrain/src/shaders/plane.frag", Shader::Type::FRAGMENT);
 		Plane p{1, 1, 1, 1};
-		Ellipsoid e{};
+		Ellipsoid e{5u, 5u, 1.f, 1.f, 1.f};
 
 		glClearColor(0.1f, 0.2f, 0.4f, 0.5f);
 		while(!window.should_close()){
