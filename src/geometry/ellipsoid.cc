@@ -114,14 +114,14 @@ void Ellipsoid::init(GLuint vertical_segments, GLuint horizontal_segments, GLflo
 				idx++;
 			}
 
-		/* Triangles for last quad in each horizontal belt */
-		if((triangle_indices[2] % horizontal_segments) == 1){
-			triangle_indices[2] -= horizontal_segments;
-			if((triangle_indices[0] % horizontal_segments) == 1)
-				triangle_indices[0] -= horizontal_segments;
-		}
+			/* Triangles for last quad in each horizontal belt */
+			if((triangle_indices[2] % horizontal_segments) == 1){
+				triangle_indices[2] -= horizontal_segments;
+				if((triangle_indices[0] % horizontal_segments) == 1)
+					triangle_indices[0] -= horizontal_segments;
+			}
 
-		indices_.insert(std::end(indices_), std::begin(triangle_indices), std::end(triangle_indices));
+			indices_.insert(std::end(indices_), std::begin(triangle_indices), std::end(triangle_indices));
 		}
 	}
 
