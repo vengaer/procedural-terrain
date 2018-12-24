@@ -16,9 +16,11 @@
  * 2. T must name a public function indices() that returns a container that's, again, stored contiguously but wraps an integral type 
  *    (std::is_integral_v<typename T::value_type> == true, or similarly). Cv and ref modifiers for the container are accepted, pointers are not. 
  *
- * 3. T must name a public function init(Args...), taking any number of arguments. This should not be called explicitly in the constructor of T. Instead, the constructor of 
- *    T should call Renderer<T>::init(Args...) and pass along all the arguments that T::init(Args...) needs. Renderer<T>::init(Args...) will then call T::init(Args...) and 
- *    forward the parameters it receives from the T constructor. This ensures that the objects are contructed in the correct order.
+ * 3. T must name a public function init(Args...), taking any number of arguments. The only requirements for the function is that the object needs to be completely constructed once the function returns.
+ *    T::init should not be called explicitly in the constructor of T. Instead, the constructor of T should call Renderer<T>::init(Args&&...) and pass along all the arguments that T::init(Args...) 
+ *    needs. Renderer<T>::init(Args&&...) will then call T::init(Args...) and forward the parameters it receives from the T constructor. This ensures that the objects are contructed in the correct order.
+ *
+ * 4. T must be default constructible
  *
  * Any attempt to inherit from Renderer with a class that does not fulfill these requirements will trigger a static assert in the Renderer contructor */
 
