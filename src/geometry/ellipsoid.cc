@@ -21,7 +21,6 @@ void Ellipsoid::init(GLuint vertical_segments, GLuint horizontal_segments, GLflo
 	{
 		using std::sin;
 		using std::cos;
-		using std::abs;
 
 		std::array<GLfloat, VERTEX_SIZE> vertex;
 		GLfloat x,y,z;
