@@ -10,13 +10,12 @@
 #include <glm/glm.hpp>
 #include <vector>
 
-inline GLfloat constexpr PI = 3.14159265359;
 
 class Ellipsoid : public Renderer<Ellipsoid> {
 	public:
 		Ellipsoid(GLuint vertical_segments = 5u, GLuint horizontal_segments = 5u,  GLfloat x_scale = 1.f, GLfloat y_scale = 1.f, GLfloat z_scale = 1.f);
 
-		void init(GLuint vertices_segments, GLuint horizontal_segments, GLfloat x_scale, GLfloat y_scale, GLfloat z_scale);
+		void init(GLuint vertical_segments, GLuint horizontal_segments, GLfloat x_scale, GLfloat y_scale, GLfloat z_scale);
 
 		std::vector<GLfloat> const& vertices() const;
 		std::vector<GLuint> const& indices() const;
@@ -24,6 +23,7 @@ class Ellipsoid : public Renderer<Ellipsoid> {
 		std::vector<GLfloat> vertices_;
 		std::vector<GLuint> indices_;
 
+		static GLfloat constexpr PI = 3.14159265359;
 };
 
 #endif
