@@ -4,6 +4,7 @@
 #pragma once
 #include <array>
 #include <cstddef>
+#include <limits>
 #include <type_traits>
 #include <utility>
 #include <vector>
@@ -40,7 +41,6 @@ struct is_one_of<T, P0, P1toN...> : is_one_of<T, P1toN...> { };
 template <typename T, typename... P0toN>
 inline bool constexpr is_one_of_v = is_one_of<T, P0toN...>::value;
 
-
 /* impls (if applicable) */
 namespace {
 	template <typename T>
@@ -57,7 +57,6 @@ namespace {
 	
 	template <typename T>
 	struct is_contiguously_stored_impl<T[]> : std::true_type { };
-
 
 	template <typename T, typename = void>
 	struct wraps_numeric_type_impl : std::false_type { };
@@ -86,6 +85,19 @@ namespace {
 
 
 	template <typename T, typename = void>
+	struct wraps_unsigned_type_impl : std::false_type { };
+
+	template <typename T>
+	struct wraps_unsigned_type_impl<T, std::void_t<typename T::value_type>> : std::is_unsigned<typename T::value_type> { };
+
+	template <typename T, std::size_t N>
+	struct wraps_unsigned_type_impl<T[N]> : std::is_unsigned<T> { };
+
+	template <typename T>
+	struct wraps_unsigned_type_impl<T[]> : std::is_unsigned<T> { };
+
+
+	template <typename T, typename = void>
 	struct get_value_type_impl { };
 
 	template <typename T>
@@ -110,6 +122,10 @@ struct wraps_numeric_type : wraps_numeric_type_impl<remove_cvref_t<T>, U> { };
 template <typename T, typename U = void>
 struct wraps_integral_type : wraps_integral_type_impl<remove_cvref_t<T>, U> { };
 
+/* Class/structure wraps unsigned type */
+template <typename T, typename U = void>
+struct wraps_unsigned_type : wraps_unsigned_type_impl<remove_cvref_t<T>, U> { };
+
 /* Get value_type or equivalent */
 template <typename T, typename U = void>
 struct get_value_type : get_value_type_impl<remove_cvref_t<T>, void> { };
@@ -123,6 +139,9 @@ inline bool constexpr wraps_numeric_type_v = wraps_numeric_type<T,U>::value;
 
 template <typename T, typename U = void>
 inline bool constexpr wraps_integral_type_v = wraps_integral_type<T,U>::value;
+
+template <typename T, typename U = void>
+inline bool constexpr wraps_unsigned_type_v = wraps_unsigned_type<T,U>::value;
 
 template <typename T, typename U = void>
 using get_value_type_t = typename get_value_type<T,U>::type;
