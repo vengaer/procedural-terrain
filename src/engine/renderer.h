@@ -63,9 +63,9 @@ namespace {
 			
 		public:
 			static bool constexpr value = (is_contiguously_stored_v<try_get_vertices_t> || (std::is_pointer_v<try_get_vertices_t> && has_vertices_size_v<T>)) && 
-										  wraps_numeric_type_v<std::remove_pointer_t<try_get_vertices_t>> &&
+										  wraps_numeric_type_v<try_get_vertices_t> &&
 										  (is_contiguously_stored_v<try_get_indices_t> || (std::is_pointer_v<try_get_indices_t> && has_indices_size_v<T>))  && 
-										  wraps_integral_type_v<std::remove_pointer_t<try_get_indices_t>> &&
+										  wraps_integral_type_v<try_get_indices_t> &&
 										  has_arbitrary_init<T>::value;
 	};
 
