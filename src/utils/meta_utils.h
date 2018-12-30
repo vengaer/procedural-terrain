@@ -98,16 +98,13 @@ namespace {
 
 
 	template <typename T, typename = void>
-	struct get_value_type_impl { };
+	struct get_fundamental_type_impl { };
 
 	template <typename T>
-	struct get_value_type_impl<T, std::void_t<typename T::value_type>> : type_is<typename T::value_type> { };
+	struct get_fundamental_type_impl<T, std::void_t<typename T::value_type>> : type_is<typename T::value_type> { };
 	
-	template <typename T, std::size_t N>
-	struct get_value_type_impl<T[N]> : type_is<T> { };
-
 	template <typename T>
-	struct get_value_type_impl<T[]> : type_is<T> { };
+	struct get_fundamental_type_impl<T*> : type_is<T> { };
 }
 
 /* Container stored contiguously in memory */
@@ -128,7 +125,7 @@ struct wraps_unsigned_type : wraps_unsigned_type_impl<remove_cvref_t<T>, U> { };
 
 /* Get value_type or equivalent */
 template <typename T, typename U = void>
-struct get_value_type : get_value_type_impl<remove_cvref_t<T>, void> { };
+struct get_fundamental_type : get_fundamental_type_impl<std::decay_t<T>, void> { };
 
 /* Alias templates */
 template <typename T>
@@ -144,7 +141,7 @@ template <typename T, typename U = void>
 inline bool constexpr wraps_unsigned_type_v = wraps_unsigned_type<T,U>::value;
 
 template <typename T, typename U = void>
-using get_value_type_t = typename get_value_type<T,U>::type;
+using get_fundamental_type_t = typename get_fundamental_type<T,U>::type;
 
 
 #endif
