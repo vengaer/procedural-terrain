@@ -62,10 +62,10 @@ namespace {
 			using try_get_indices_t = decltype(std::declval<T>().indices());
 			
 		public:
-			static bool constexpr value = (is_contiguously_stored_v<try_get_vertices_t> || (std::is_pointer_v<try_get_vertices_t> && has_vertices_size_v<T>)) && 
-										  wraps_numeric_type_v<try_get_vertices_t> &&
-										  (is_contiguously_stored_v<try_get_indices_t> || (std::is_pointer_v<try_get_indices_t> && has_indices_size_v<T>))  && 
-										  wraps_integral_type_v<try_get_indices_t> &&
+			static bool constexpr value = ((is_contiguously_stored_v<try_get_vertices_t> && wraps_numeric_type_v<try_get_vertices_t>) || 
+										   (std::is_pointer_v<try_get_vertices_t> && has_vertices_size_v<T> && std::is_integral_v<get_fundamental_type_t<try_get_vertices_t>)) &&
+										  ((is_contiguously_stored_v<try_get_indices_t> && wraps_integral_type_v<try_get_indices_t>) || 
+										   (std::is_pointer_v<try_get_indices_t> && has_indices_size_v<T> && std::is_integral_v<get_fundamental_type_t<try_get_indices_t>)) &&
 										  has_arbitrary_init<T>::value;
 	};
 
@@ -90,6 +90,22 @@ class Renderer {
 		GLuint vao_, vbo_;
 		GLuint idx_buffer_;
 		GLuint idx_size_;
+
+		enum class DataCategory { VERTICES, INDICES };
+
+		template <typename U, DataCategory C>
+		using size_type = std::conditional_t<
+					is_contiguously_stored_v<U>,
+					decltype(std::size(std::declval<U>())),
+					std::conditional_t<
+						C == DataCategory::VERTICES,
+						decltype(std::declval<T>().vertices_size()),
+						decltype(std::declval<T>().indices_size())
+					>
+				>;
+
+		template <typename U, DataCategory C>	
+		size_type<U,C> size();
 };
 
 #include "renderer.tcc"

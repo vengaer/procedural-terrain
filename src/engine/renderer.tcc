@@ -29,11 +29,14 @@ void Renderer<T>::init(Args&&... args) {
 	{
 		/* Get ref to vertices */
 		auto const& vertices = static_cast<T&>(*this).vertices();
-		using value_type = get_value_type_t<decltype(vertices)>;
+		using value_type = get_fundamental_type_t<decltype(vertices)>;
 
 		auto const VALUE_TYPE_SIZE  = sizeof(value_type);
+	
+		//auto const NUMBER_OF_VERTICES = size<decltype(vertices), DataCategory::VERTICES>();
 		
 		GLuint const TOTAL_SIZE = VALUE_TYPE_SIZE * vertices.size() * VERTEX_SIZE;
+		//GLuint const TOTAL_SIZE = VALUE_TYPE_SIZE * NUMBER_OF_VERTICES * VERTEX_SIZE;
 
 		/* Upload to gpu */
 		glBufferData(GL_ARRAY_BUFFER, TOTAL_SIZE, &vertices[0], GL_STATIC_DRAW);
@@ -51,12 +54,13 @@ void Renderer<T>::init(Args&&... args) {
 		/* Get ref to indices */
 		auto const& indices = static_cast<T&>(*this).indices();
 		
-		using value_type = get_value_type_t<decltype(indices)>;
+		using value_type = get_fundamental_type_t<decltype(indices)>;
 		auto const VALUE_TYPE_SIZE = sizeof(value_type);
 	
 		idx_size_ = static_cast<GLuint>(indices.size());
+		//idx_size_ = static_cast<GLuint>(size<decltype(indices), DataCategory::INDICES>());
 	
-		GLuint const TOTAL_SIZE = VALUE_TYPE_SIZE * indices.size();
+		GLuint const TOTAL_SIZE = VALUE_TYPE_SIZE * idx_size_;
 
 
 		/* Upload indices to gpu */
@@ -70,4 +74,24 @@ void Renderer<T>::init(Args&&... args) {
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+template <typename T>
+template <typename U, Renderer<T>::DataCategory C>
+Renderer<T>::size_type<U,C> Renderer<T>::size() {
+	size_type<U,C> container_size;
+	if constexpr(is_contiguously_stored_v<U>){
+		if constexpr(C == DataCategory::VERTICES)
+			container_size = std::size(static_cast<T&>(*this).vertices());
+		else
+			container_size = std::size(static_cast<T&>(*this).indices());
+	}
+	else{
+		if constexpr(C == DataCategory::VERTICES)
+			container_size = static_cast<T&>(*this).vertices_size();
+		else
+			container_size = static_cast<T&>(*this).indices_size();
+	}
+
+	return container_size;
 }
