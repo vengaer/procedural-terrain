@@ -32,11 +32,10 @@ void Renderer<T>::init(Args&&... args) {
 		using value_type = get_fundamental_type_t<decltype(vertices)>;
 
 		auto const VALUE_TYPE_SIZE  = sizeof(value_type);
+
+		auto const NUMBER_OF_VERTICES = size<ContainerContent::VERTICES>();
 	
-		//auto const NUMBER_OF_VERTICES = size<decltype(vertices), DataCategory::VERTICES>();
-		
-		GLuint const TOTAL_SIZE = VALUE_TYPE_SIZE * vertices.size() * VERTEX_SIZE;
-		//GLuint const TOTAL_SIZE = VALUE_TYPE_SIZE * NUMBER_OF_VERTICES * VERTEX_SIZE;
+		GLuint const TOTAL_SIZE = VALUE_TYPE_SIZE * NUMBER_OF_VERTICES * VERTEX_SIZE;
 
 		/* Upload to gpu */
 		glBufferData(GL_ARRAY_BUFFER, TOTAL_SIZE, &vertices[0], GL_STATIC_DRAW);
@@ -57,8 +56,7 @@ void Renderer<T>::init(Args&&... args) {
 		using value_type = get_fundamental_type_t<decltype(indices)>;
 		auto const VALUE_TYPE_SIZE = sizeof(value_type);
 	
-		idx_size_ = static_cast<GLuint>(indices.size());
-		//idx_size_ = static_cast<GLuint>(size<decltype(indices), DataCategory::INDICES>());
+		idx_size_ = size<ContainerContent::INDICES>();
 	
 		GLuint const TOTAL_SIZE = VALUE_TYPE_SIZE * idx_size_;
 
@@ -77,21 +75,23 @@ void Renderer<T>::init(Args&&... args) {
 }
 
 template <typename T>
-template <typename U, Renderer<T>::DataCategory C>
-Renderer<T>::size_type<U,C> Renderer<T>::size() {
-	size_type<U,C> container_size;
-	if constexpr(is_contiguously_stored_v<U>){
-		if constexpr(C == DataCategory::VERTICES)
+template <ContainerContent C>
+constexpr GLuint Renderer<T>::size() {
+	GLuint container_size;
+
+	if constexpr(C == ContainerContent::VERTICES) {
+		if constexpr(is_contiguously_stored_v<decltype(static_cast<T&>(*this).vertices())>)
 			container_size = std::size(static_cast<T&>(*this).vertices());
 		else
-			container_size = std::size(static_cast<T&>(*this).indices());
-	}
-	else{
-		if constexpr(C == DataCategory::VERTICES)
 			container_size = static_cast<T&>(*this).vertices_size();
+	}
+	else {
+		if constexpr(is_contiguously_stored_v<decltype(static_cast<T&>(*this).indices())>)
+			container_size = std::size(static_cast<T&>(*this).indices());
 		else
 			container_size = static_cast<T&>(*this).indices_size();
 	}
 
 	return container_size;
 }
+		

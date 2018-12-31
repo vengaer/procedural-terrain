@@ -8,8 +8,6 @@
 #include <type_traits>
 #include <utility>
 
-// TODO: Deal with c-style dynamic arrays in Renderer<T>::init
-
 /* Inheriting (through CRTP) from Renderer will enable rendering (through the render() member function) for any type that fulfills the rendering criteria.
  * For a class T, the criteria are as follows:
  * 1. T must name public a function vertices() that returns a container that's stored contiguously in memory (std::vector, std::array or c array)
@@ -25,7 +23,7 @@
  * Any attempt to inherit from Renderer with a class that does not fulfill these requirements will trigger a static assert in the Renderer contructor */
 
 namespace {	
-	template <typename T, typename = void>
+	template <typename, typename = void>
 	struct has_arbitrary_init : std::false_type { };
 
 	template <typename T>
@@ -34,8 +32,7 @@ namespace {
 	template <typename T>
 	inline bool constexpr has_arbitrary_init_v = has_arbitrary_init<T>::value;
 
-
-	template <typename T, typename = void>
+	template <typename, typename = void>
 	struct has_vertices_size : std::false_type { };
 
 	template <typename T>
@@ -43,9 +40,8 @@ namespace {
 
 	template <typename T, typename U = void>
 	inline bool constexpr has_vertices_size_v = has_vertices_size<T,U>::value;
-
-
-	template <typename T, typename = void>
+		
+	template <typename, typename = void>
 	struct has_indices_size : std::false_type { };
 
 	template <typename T>
@@ -54,25 +50,34 @@ namespace {
 	template <typename T, typename U = void>
 	inline bool constexpr has_indices_size_v = has_indices_size<T,U>::value;
 
-
 	template <typename T>
 	struct is_renderable{
 		private:
 			using try_get_vertices_t = decltype(std::declval<T>().vertices());
 			using try_get_indices_t = decltype(std::declval<T>().indices());
+
+			static bool constexpr vertices_is_applicable_stl_container = is_contiguously_stored_v<try_get_vertices_t> && wraps_numeric_type_v<try_get_vertices_t>;
+			static bool constexpr indices_is_applicable_stl_container = is_contiguously_stored_v<try_get_indices_t> && wraps_integral_type_v<try_get_indices_t>;
+
+			static bool constexpr vertices_is_applicable_c_array = std::is_pointer_v<try_get_vertices_t> && std::is_arithmetic_v<get_fundamental_type_t<try_get_vertices_t>> &&
+																   has_vertices_size_v<T> && std::is_integral_v<get_fundamental_type_t<try_get_vertices_t>>;
+			static bool constexpr indices_is_applicable_c_array = std::is_pointer_v<try_get_indices_t> && std::is_integral_v<get_fundamental_type_t<try_get_indices_t>> &&
+																   has_indices_size_v<T> && std::is_integral_v<get_fundamental_type_t<try_get_indices_t>>;	
 			
 		public:
-			static bool constexpr value = ((is_contiguously_stored_v<try_get_vertices_t> && wraps_numeric_type_v<try_get_vertices_t>) || 
-										   (std::is_pointer_v<try_get_vertices_t> && has_vertices_size_v<T> && std::is_integral_v<get_fundamental_type_t<try_get_vertices_t>)) &&
-										  ((is_contiguously_stored_v<try_get_indices_t> && wraps_integral_type_v<try_get_indices_t>) || 
-										   (std::is_pointer_v<try_get_indices_t> && has_indices_size_v<T> && std::is_integral_v<get_fundamental_type_t<try_get_indices_t>)) &&
-										  has_arbitrary_init<T>::value;
+			static bool constexpr value = (vertices_is_applicable_stl_container || vertices_is_applicable_c_array) &&
+										  (indices_is_applicable_stl_container || indices_is_applicable_c_array);
 	};
 
 	template <typename T>
 	inline bool constexpr is_renderable_v = is_renderable<T>::value;
 
 }
+
+namespace {
+	enum class ContainerContent { VERTICES, INDICES };
+}
+
 
 template <typename T>
 class Renderer {
@@ -90,22 +95,9 @@ class Renderer {
 		GLuint vao_, vbo_;
 		GLuint idx_buffer_;
 		GLuint idx_size_;
-
-		enum class DataCategory { VERTICES, INDICES };
-
-		template <typename U, DataCategory C>
-		using size_type = std::conditional_t<
-					is_contiguously_stored_v<U>,
-					decltype(std::size(std::declval<U>())),
-					std::conditional_t<
-						C == DataCategory::VERTICES,
-						decltype(std::declval<T>().vertices_size()),
-						decltype(std::declval<T>().indices_size())
-					>
-				>;
-
-		template <typename U, DataCategory C>	
-		size_type<U,C> size();
+	
+		template <ContainerContent C>	
+		constexpr GLuint size();
 };
 
 #include "renderer.tcc"
