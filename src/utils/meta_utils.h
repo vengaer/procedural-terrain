@@ -101,7 +101,11 @@ namespace {
 	struct get_fundamental_type_impl { };
 
 	template <typename T>
-	struct get_fundamental_type_impl<T, std::void_t<typename T::value_type>> : type_is<typename T::value_type> { };
+	struct get_fundamental_type_impl<T, std::void_t<typename T::value_type>> : std::conditional_t<
+																					std::is_fundamental_v<typename T::value_type>,
+																					type_is<typename T::value_type>,
+																					get_fundamental_type_impl<typename T::value_type>
+																				> { };
 	
 	template <typename T>
 	struct get_fundamental_type_impl<T*> : type_is<T> { };
