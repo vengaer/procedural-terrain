@@ -43,7 +43,7 @@ inline bool constexpr is_one_of_v = is_one_of<T, P0toN...>::value;
 
 /* impls (if applicable) */
 namespace {
-	template <typename T>
+	template <typename>
 	struct is_contiguously_stored_impl : std::false_type { };
 	
 	template <typename T, typename... Ts>
@@ -58,7 +58,8 @@ namespace {
 	template <typename T>
 	struct is_contiguously_stored_impl<T[]> : std::true_type { };
 
-	template <typename T, typename = void>
+
+	template <typename, typename = void>
 	struct wraps_numeric_type_impl : std::false_type { };
 
 	template <typename T>
@@ -71,7 +72,7 @@ namespace {
 	struct wraps_numeric_type_impl<T[]> : std::is_arithmetic<T> { };
 
 
-	template <typename T, typename = void>
+	template <typename, typename = void>
 	struct wraps_integral_type_impl : std::false_type { };
 
 	template <typename T>
@@ -84,7 +85,7 @@ namespace {
 	struct wraps_integral_type_impl<T[]> : std::is_integral<T> { };
 
 
-	template <typename T, typename = void>
+	template <typename, typename = void>
 	struct wraps_unsigned_type_impl : std::false_type { };
 
 	template <typename T>
@@ -97,7 +98,7 @@ namespace {
 	struct wraps_unsigned_type_impl<T[]> : std::is_unsigned<T> { };
 
 
-	template <typename T, typename = void>
+	template <typename, typename = void>
 	struct get_fundamental_type_impl { };
 
 	template <typename T>
@@ -146,6 +147,5 @@ inline bool constexpr wraps_unsigned_type_v = wraps_unsigned_type<T,U>::value;
 
 template <typename T, typename U = void>
 using get_fundamental_type_t = typename get_fundamental_type<T,U>::type;
-
 
 #endif
