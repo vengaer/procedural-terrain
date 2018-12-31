@@ -104,12 +104,12 @@ void Ellipsoid::init(GLuint vertical_segments, GLuint horizontal_segments, GLflo
 		for(auto j = 0u; j < 2*horizontal_segments; j++) {
 			triangle_indices[0] = idx;
 			if(j % 2){
-				triangle_indices[1] = idx - 1;
-				triangle_indices[2] = idx + horizontal_segments;
+				triangle_indices[1] = idx + horizontal_segments;
+				triangle_indices[2] = idx + horizontal_segments - 1;
 			}
 			else {
-				triangle_indices[1] = idx + horizontal_segments;
-				triangle_indices[2] = idx + horizontal_segments + 1;
+				triangle_indices[1] = idx + 1;
+				triangle_indices[2] = idx + horizontal_segments;
 				idx++;
 			}
 
