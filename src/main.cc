@@ -9,11 +9,8 @@
 #include <iostream>
 
 
-
-
 int main() {
 	unsigned constexpr width = 960, height = 540;
-	
 
 	try{
 		Window window{"test", width, height};
@@ -30,9 +27,9 @@ int main() {
 			window.clear();
 			test.enable();
 			//p.render();
-			//e.render();
+			e.render();
 			//c.render();
-			cyl.render();
+			//cyl.render();
 
 			Shader::disable();
 			window.update();
