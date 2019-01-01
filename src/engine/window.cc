@@ -1,6 +1,9 @@
 #include "window.h"
 
 Window::Window(std::string const& name, unsigned width, unsigned height, float opengl_version) : window_{nullptr}, width_{width}, height_{height} {
+	if(std::signbit(opengl_version))
+		throw InvalidVersionException{"OpenGL version must be positive\n"};
+
 	init(name, width, height, opengl_version);
 }
 
@@ -24,9 +27,6 @@ void Window::update() const{
 
 
 void Window::init(std::string const& name, unsigned width, unsigned height, float opengl_version){
-	if(std::signbit(opengl_version))
-		throw InvalidVersionException{"OpenGL version must be positive\n"};
-
 	if(!glfwInit())
 		throw GLException{"Failed to initialize GLFW\n"};
 
