@@ -1,5 +1,5 @@
 #ifndef CONSTANTS_H
-#define CONTANST_H
+#define CONSTANTS_H
 
 #pragma once
 
