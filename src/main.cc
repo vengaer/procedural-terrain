@@ -8,7 +8,6 @@
 #include "window.h"
 #include <iostream>
 
-
 int main() {
 	unsigned constexpr width = 960, height = 540;
 
@@ -16,7 +15,7 @@ int main() {
 		Window window{"test", width, height};
 		Shader test("/home/vilhelm/repos/c++/procedural_terrain/src/shaders/plane.vert", Shader::Type::VERTEX, "/home/vilhelm/repos/c++/procedural_terrain/src/shaders/plane.frag", Shader::Type::FRAGMENT);
 		Plane p{1, 1, 1, 1};
-		Ellipsoid e{5u, 5u, 1.f, 1.f, 1.f};
+		Ellipsoid e{};
 		Cuboid c{};
 		Cylinder cyl{};
 
