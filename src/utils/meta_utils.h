@@ -4,7 +4,6 @@
 #pragma once
 #include <array>
 #include <cstddef>
-#include <limits>
 #include <type_traits>
 #include <utility>
 #include <vector>
@@ -27,19 +26,17 @@ using remove_cvref_t = typename remove_cvref<T>::type;
 
 /* Type T is same as one of types in parameter pack */
 template <typename T, typename... P0toN>
-struct is_one_of;
-
-template <typename T>
-struct is_one_of<T> : std::false_type { };
-
-template <typename T, typename... P1toN>
-struct is_one_of<T, T, P1toN...> : std::true_type { };
-
-template <typename T, typename P0, typename... P1toN>
-struct is_one_of<T, P0, P1toN...> : is_one_of<T, P1toN...> { };
+struct is_one_of : std::bool_constant<(std::is_same_v<T, P0toN> || ...)> { };
 
 template <typename T, typename... P0toN>
 inline bool constexpr is_one_of_v = is_one_of<T, P0toN...>::value;
+
+/* T and all types in pack are the same */
+template <typename T, typename... P0toN>
+struct all_same : std::bool_constant<(std::is_same_v<T, P0toN> && ...)> { };
+
+template <typename T, typename... P0toN>
+inline bool constexpr all_same_v = all_same<T, P0toN...>::value;
 
 /* impls (if applicable) */
 namespace {
@@ -102,6 +99,9 @@ namespace {
 	struct get_fundamental_type_impl { };
 
 	template <typename T>
+	struct get_fundamental_type_impl<T, std::enable_if_t<std::is_fundamental_v<T>>> : type_is<T> { };
+
+	template <typename T>
 	struct get_fundamental_type_impl<T, std::void_t<typename T::value_type>> : std::conditional_t<
 																					std::is_fundamental_v<typename T::value_type>,
 																					type_is<typename T::value_type>,
@@ -116,34 +116,33 @@ namespace {
 template <typename T>
 struct is_contiguously_stored : is_contiguously_stored_impl<remove_cvref_t<T>> { };
 
+template <typename T>
+inline bool constexpr is_contiguously_stored_v = is_contiguously_stored<T>::value;
+
 /* Class/structure wraps numeric type */
 template <typename T, typename U = void>
 struct wraps_numeric_type : wraps_numeric_type_impl<remove_cvref_t<T>, U> { };
+
+template <typename T, typename U = void>
+inline bool constexpr wraps_numeric_type_v = wraps_numeric_type<T,U>::value;
 
 /* Class/structure wraps integral type */
 template <typename T, typename U = void>
 struct wraps_integral_type : wraps_integral_type_impl<remove_cvref_t<T>, U> { };
 
+template <typename T, typename U = void>
+inline bool constexpr wraps_integral_type_v = wraps_integral_type<T,U>::value;
+
 /* Class/structure wraps unsigned type */
 template <typename T, typename U = void>
 struct wraps_unsigned_type : wraps_unsigned_type_impl<remove_cvref_t<T>, U> { };
 
+template <typename T, typename U = void>
+inline bool constexpr wraps_unsigned_type_v = wraps_unsigned_type<T,U>::value;
+
 /* Get value_type or equivalent */
 template <typename T, typename U = void>
 struct get_fundamental_type : get_fundamental_type_impl<std::decay_t<T>, void> { };
-
-/* Alias templates */
-template <typename T>
-inline bool constexpr is_contiguously_stored_v = is_contiguously_stored<T>::value;
-
-template <typename T, typename U = void>
-inline bool constexpr wraps_numeric_type_v = wraps_numeric_type<T,U>::value;
-
-template <typename T, typename U = void>
-inline bool constexpr wraps_integral_type_v = wraps_integral_type<T,U>::value;
-
-template <typename T, typename U = void>
-inline bool constexpr wraps_unsigned_type_v = wraps_unsigned_type<T,U>::value;
 
 template <typename T, typename U = void>
 using get_fundamental_type_t = typename get_fundamental_type<T,U>::type;
