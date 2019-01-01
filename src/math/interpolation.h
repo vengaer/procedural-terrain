@@ -9,8 +9,6 @@
 
 
 namespace interpolation{
-	inline double constexpr PI = 3.14159265359;
-	
 	template <typename T, typename = std::enable_if_t<std::is_arithmetic_v<std::decay_t<T>>>>
 	struct Parameters {
 		std::decay_t<T> x;
