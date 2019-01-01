@@ -29,7 +29,7 @@ GLuint Shader::init(std::string const& shader1, Type type1, std::string const& s
 		shader_ids[static_cast<unsigned>(type2)] = compile(read_source(shader2), type2);
 	}
 	catch(ShaderCompilationException const& err){
-		for(auto shader : shader_ids)
+		for(auto const& shader : shader_ids)
 			glDeleteShader(shader);
 		throw;
 	}
@@ -59,21 +59,20 @@ std::string Shader::read_source(std::string const& source) const{
 				/* Max include depth reached, to prevent infinite recursion */
 				if(streams.size() >= depth_){
 					std::cerr << "Warning, max include depth reached, omitting " 
-							  << line << " in file " << source;
+							  << line << " included in file " << source;
 					continue;
 				}
 				
 				/* Process include directive */
 				std::string incl_path = process_include_directive(line, source, idx);
-				/* Ill formed, omit file */
-
-				/* c/c++ style header guard to prevent redefinition */		
-				std::string header_guard = format_header_guard(incl_path);
 
 				std::ifstream file{incl_path};					
 				
 				if(!file.is_open())
 					throw FileIOException{"Unable to open file " + incl_path + " included from " + source};
+
+				/* c/c++ style header guard to prevent redefinition */		
+				std::string header_guard = format_header_guard(incl_path);
 
 				/* Append header guard */
 				contents << "#ifndef " << header_guard << "\n#define " << header_guard << "\n";
@@ -106,9 +105,7 @@ std::string Shader::format_header_guard(std::string path) const {
 	if(path.find('/') != std::string::npos)
 		path = path.substr(path.find_last_of('/')+1, path.size() -1);
 	
-	/* Upper case */
 	std::transform(std::begin(path), std::end(path), std::begin(path), ::toupper);
-	/* Change . to _ */
 	std::transform(std::begin(path), std::end(path), std::begin(path), [] (char c) {
 		return c == '.' ? '_' : c;
 	});
@@ -124,7 +121,6 @@ std::string Shader::process_include_directive(std::string const& directive, std:
 	/* File name */
 	std::string incl_path  = directive.substr(idx+1, directive.length()-1);
 	
-	/* File to be included must be given in double quotes */
 	if(incl_path[0] != '"' || incl_path[incl_path.size() - 1] != '"')
 		throw ShaderIncludeException{"Include directives must be enclosed in double quotes (\"\")"};
 
