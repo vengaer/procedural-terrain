@@ -1,7 +1,7 @@
 #include "window.h"
 
-Window::Window(std::string const& name, unsigned width, unsigned height) : window_{nullptr}, width_{width}, height_{height} {
-	init(name, width, height);
+Window::Window(std::string const& name, unsigned width, unsigned height, float opengl_version) : window_{nullptr}, width_{width}, height_{height} {
+	init(name, width, height, opengl_version);
 }
 
 Window::~Window(){
@@ -23,18 +23,21 @@ void Window::update() const{
 }
 
 
-void Window::init(std::string const& name, unsigned width, unsigned height){
+void Window::init(std::string const& name, unsigned width, unsigned height, float opengl_version){
+	if(std::signbit(opengl_version))
+		throw InvalidVersionException{"OpenGL version must be positive\n"};
+
 	if(!glfwInit())
 		throw GLException{"Failed to initialize GLFW\n"};
 
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, static_cast<unsigned>(opengl_version));
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, static_cast<unsigned>(10.f*std::fmod(opengl_version, 1.f)));
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	window_ = glfwCreateWindow(width, height, name.c_str(), nullptr, nullptr);
 
 	if(!window_)
-		throw GLException{"Could not create GLFW window\n"};
+		throw GLException{"Could not create GLFW window.\nDoes your graphics driver support OpenGL version " + std::to_string(opengl_version) +"?"};
 
 	glfwMakeContextCurrent(window_);
 
