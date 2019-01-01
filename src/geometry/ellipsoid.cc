@@ -6,8 +6,8 @@ Ellipsoid::Ellipsoid(GLuint vertical_segments, GLuint horizontal_segments, GLflo
 
 void Ellipsoid::init(GLuint vertical_segments, GLuint horizontal_segments, GLfloat x_scale, GLfloat y_scale, GLfloat z_scale) {
 	/* Prevent potential overflow */
-	glm::clamp(vertical_segments, 5u, 30u);
-	glm::clamp(horizontal_segments, 5u, 30u);
+	glm::clamp(vertical_segments, 5u, 60u);
+	glm::clamp(horizontal_segments, 5u, 60u);
 	glm::clamp(x_scale, 0.1f, 2.f);
 	glm::clamp(y_scale, 0.1f, 2.f);
 	glm::clamp(z_scale, 0.1f, 2.f);

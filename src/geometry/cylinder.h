@@ -2,6 +2,7 @@
 #define CYLINDER_H
 
 #pragma once
+#include "constants.h"
 #include "interpolation.h"
 #include "renderer.h"
 #include <array>
@@ -15,7 +16,7 @@
 class Cylinder : public Renderer<Cylinder> {
 	public:
 		enum class Axis { X, Y, Z };
-		Cylinder(GLfloat height = 1.f, GLuint horizontal_segments = 8u, GLuint vertical_segments = 1u, Axis main_axis = Axis::Y, GLfloat off_axis1_scale = 0.5f, GLfloat off_axis2_scale = 0.5f);
+		Cylinder(GLfloat height = 1.f, GLuint horizontal_segments = 30u, GLuint vertical_segments = 1u, Axis main_axis = Axis::Y, GLfloat off_axis1_scale = 0.5f, GLfloat off_axis2_scale = 0.5f);
 
 		void init(GLfloat height, GLuint horizontal_segments, GLuint vertical_segments, Axis main_axis, GLfloat off_axis1_scale, GLfloat off_axis2_scale);
 
@@ -25,8 +26,6 @@ class Cylinder : public Renderer<Cylinder> {
 	private:
 		std::vector<GLfloat> vertices_;
 		std::vector<GLuint> indices_;
-
-		static GLfloat constexpr PI = 3.14159265359;
 
 		static std::pair<Axis, Axis> get_off_axes(Axis main_axis);
 };

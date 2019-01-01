@@ -6,7 +6,7 @@ Cylinder::Cylinder(GLfloat height, GLuint horizontal_segments, GLuint vertical_s
 
 void Cylinder::init(GLfloat height, GLuint horizontal_segments, GLuint vertical_segments, Axis main_axis, GLfloat off_axis1_scale, GLfloat off_axis2_scale) {
 	glm::clamp(height, 0.1f, 4.f);
-	glm::clamp(horizontal_segments, 3u, 40u);
+	glm::clamp(horizontal_segments, 3u, 60u);
 	glm::clamp(vertical_segments, 1u, 20u);
 	glm::clamp(off_axis1_scale, 0.1f, 2.0f);
 	glm::clamp(off_axis2_scale, 0.1f, 2.0f);
