@@ -3,6 +3,7 @@
 
 #pragma once
 #include "meta_utils.h"
+#include "render_assertion.h"
 #include <GL/glew.h>
 #include <iostream>
 #include <type_traits>
@@ -10,74 +11,22 @@
 
 /* Inheriting (through CRTP) from Renderer will enable rendering (through the render() member function) for any type that fulfills the rendering criteria.
  * For a class T, the criteria are as follows:
- * 1. T must name public a function vertices() that returns a container that's stored contiguously in memory (std::vector, std::array or c array)
- * 	  and wraps a numeric type (std::is_arithmetic_v<typename T::value_type> == true or similarily). CV and ref modifiers for the container are accepted, pointers are not.
+ * 1. T must name public a function vertices() that returns a container that's stored contiguously in memory (std::vector, std::array or c-style array)
+ * 	  and wraps a numeric type. CV and ref modifiers for the container are accepted, pointers to stl containers are not. Returning c-style dynamic arrays is valid.
+ *		- If a dynamic c-style array is returned by vertices(), T must also name a public function vertices_size() that returns the size of the array returned by vertices() (an integral value).
  * 	  
- * 2. T must name a public function indices() that returns a container that's, again, stored contiguously but wraps an integral type 
- *    (std::is_integral_v<typename T::value_type> == true, or similarly). Cv and ref modifiers for the container are accepted, pointers are not. 
+ * 2. T must name a public function indices() that returns a container that's, again, stored contiguously but wraps an integral type.
+ *    Cv and ref modifiers for the container are accepted, pointers to stl containers are not. Returning c-style dynamic arrays is valid.
+ *      - If a dynamic c-style array is returned by indices(), T must also name a public function indices_size() that returns the size of the array returned by indices() (integral value).
  *
- * 3. T must name a public function init(Args...), taking any number of arguments. The only requirements for the function is that the object needs to be completely constructed once the function returns.
+ * 3. T must name a public function init(Args...), taking any number of arguments. The only requirements for the function is that the object is completely constructed once the function returns.
  *    T::init should not be called explicitly in the constructor of T. Instead, the constructor of T should call Renderer<T>::init(Args&&...) and pass along all the arguments that T::init(Args...) 
  *    needs. Renderer<T>::init(Args&&...) will then call T::init(Args...) and forward the parameters it receives from the T constructor. This ensures that the objects are contructed in the correct order.
  *
  * Any attempt to inherit from Renderer with a class that does not fulfill these requirements will trigger a static assert in the Renderer contructor */
 
-namespace {	
-	template <typename, typename = void>
-	struct has_arbitrary_init : std::false_type { };
-
-	template <typename T>
-	struct has_arbitrary_init<T, std::void_t<decltype(&T::init)>> : std::true_type { };
-
-	template <typename T>
-	inline bool constexpr has_arbitrary_init_v = has_arbitrary_init<T>::value;
-
-	template <typename, typename = void>
-	struct has_vertices_size : std::false_type { };
-
-	template <typename T>
-	struct has_vertices_size<T, std::void_t<decltype(std::declval<T>().vertices_size())>> : std::true_type { };
-
-	template <typename T, typename U = void>
-	inline bool constexpr has_vertices_size_v = has_vertices_size<T,U>::value;
-		
-	template <typename, typename = void>
-	struct has_indices_size : std::false_type { };
-
-	template <typename T>
-	struct has_indices_size<T, std::void_t<decltype(std::declval<T>().indices_size())>> : std::true_type { };
-
-	template <typename T, typename U = void>
-	inline bool constexpr has_indices_size_v = has_indices_size<T,U>::value;
-
-	template <typename T>
-	struct is_renderable{
-		private:
-			using try_get_vertices_t = decltype(std::declval<T>().vertices());
-			using try_get_indices_t = decltype(std::declval<T>().indices());
-
-			static bool constexpr vertices_is_applicable_stl_container = is_contiguously_stored_v<try_get_vertices_t> && wraps_numeric_type_v<try_get_vertices_t>;
-			static bool constexpr indices_is_applicable_stl_container = is_contiguously_stored_v<try_get_indices_t> && wraps_integral_type_v<try_get_indices_t>;
-
-			static bool constexpr vertices_is_applicable_c_array = std::is_pointer_v<try_get_vertices_t> && std::is_arithmetic_v<get_fundamental_type_t<try_get_vertices_t>> &&
-																   has_vertices_size_v<T> && std::is_integral_v<get_fundamental_type_t<try_get_vertices_t>>;
-			static bool constexpr indices_is_applicable_c_array = std::is_pointer_v<try_get_indices_t> && std::is_integral_v<get_fundamental_type_t<try_get_indices_t>> &&
-																   has_indices_size_v<T> && std::is_integral_v<get_fundamental_type_t<try_get_indices_t>>;	
-			
-		public:
-			static bool constexpr value = (vertices_is_applicable_stl_container || vertices_is_applicable_c_array) &&
-										  (indices_is_applicable_stl_container || indices_is_applicable_c_array);
-	};
-
-	template <typename T>
-	inline bool constexpr is_renderable_v = is_renderable<T>::value;
-
-}
-
-namespace {
-	enum class ContainerContent { VERTICES, INDICES };
-}
-
+struct vertices_tag { };
+struct indices_tag { };
 
 template <typename T>
 class Renderer {
@@ -85,7 +34,6 @@ class Renderer {
 		void render() const;
 		
 		static GLuint constexpr VERTEX_SIZE = 8u;
-
 	protected:
 		Renderer();
 
@@ -96,8 +44,9 @@ class Renderer {
 		GLuint idx_buffer_;
 		GLuint idx_size_;
 	
-		template <ContainerContent C>	
-		constexpr GLuint size();
+		/* Tag dispatch */
+		constexpr GLuint size(vertices_tag) const;
+		constexpr GLuint size(indices_tag) const;
 };
 
 #include "renderer.tcc"

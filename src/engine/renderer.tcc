@@ -1,6 +1,6 @@
 template <typename T>
 Renderer<T>::Renderer() : vao_{0u}, vbo_{0u}, idx_buffer_{0u}, idx_size_{0u} {
-	static_assert(is_renderable_v<T>, "Type is not renderable\n");
+	static_assert(is_renderable_v<T>, "Type does not fulfill the rendering requirements");
 }
 
 template <typename T>
@@ -33,15 +33,15 @@ void Renderer<T>::init(Args&&... args) {
 
 		auto const VALUE_TYPE_SIZE  = sizeof(value_type);
 
-		auto const NUMBER_OF_VERTICES = size<ContainerContent::VERTICES>();
+		auto const NUMBER_OF_VERTICES = size(vertices_tag{});
 	
 		GLuint const TOTAL_SIZE = VALUE_TYPE_SIZE * NUMBER_OF_VERTICES * VERTEX_SIZE;
 
 		/* Upload to gpu */
 		glBufferData(GL_ARRAY_BUFFER, TOTAL_SIZE, &vertices[0], GL_STATIC_DRAW);
 
-		glEnableVertexAttribArray(0); /* Positions */
-		glEnableVertexAttribArray(1); /* Normals */
+		glEnableVertexAttribArray(0); /* Position */
+		glEnableVertexAttribArray(1); /* Normal */
 		glEnableVertexAttribArray(2); /* Texture */
 
 		/* Offsets in data */
@@ -56,7 +56,7 @@ void Renderer<T>::init(Args&&... args) {
 		using value_type = get_fundamental_type_t<decltype(indices)>;
 		auto const VALUE_TYPE_SIZE = sizeof(value_type);
 	
-		idx_size_ = size<ContainerContent::INDICES>();
+		idx_size_ = size(indices_tag{});
 	
 		GLuint const TOTAL_SIZE = VALUE_TYPE_SIZE * idx_size_;
 
@@ -75,23 +75,25 @@ void Renderer<T>::init(Args&&... args) {
 }
 
 template <typename T>
-template <ContainerContent C>
-constexpr GLuint Renderer<T>::size() {
+constexpr GLuint Renderer<T>::size(vertices_tag) const {
 	GLuint container_size;
 
-	if constexpr(C == ContainerContent::VERTICES) {
-		if constexpr(is_contiguously_stored_v<decltype(static_cast<T&>(*this).vertices())>)
-			container_size = std::size(static_cast<T&>(*this).vertices());
-		else
-			container_size = static_cast<T&>(*this).vertices_size();
-	}
-	else {
-		if constexpr(is_contiguously_stored_v<decltype(static_cast<T&>(*this).indices())>)
-			container_size = std::size(static_cast<T&>(*this).indices());
-		else
-			container_size = static_cast<T&>(*this).indices_size();
-	}
+	if constexpr(is_contiguously_stored_v<decltype(static_cast<T const&>(*this).vertices())>)
+		container_size = std::size(static_cast<T const&>(*this).vertices());
+	else
+		container_size = static_cast<T const&>(*this).vertices_size();
 
 	return container_size;
 }
-		
+
+template <typename T>
+constexpr GLuint Renderer<T>::size(indices_tag) const {
+	GLuint container_size;
+
+	if constexpr(is_contiguously_stored_v<decltype(static_cast<T const&>(*this).indices())>)
+		container_size = std::size(static_cast<T const&>(*this).indices());
+	else
+		container_size = static_cast<T const&>(*this).indices_size();
+
+	return container_size;
+}
