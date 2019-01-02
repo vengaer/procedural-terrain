@@ -207,19 +207,23 @@ Shader::AssertionResult Shader::assert_shader_status_ok(GLuint id, StatusQuery s
 }
 
 template <typename... Args>
-void Shader::upload_uniform(Uniform u, std::string const& name, Args&&... args) {
+void Shader::upload_uniform(Uniform uniform, std::string const& name, Args&&... args) {
 	static_assert(all_same_v<Args...>, "All parameters in uniform must be of the same type");
 	
 	using UC = Uniform::Construct;
 	using UT = Uniform::Type;
 	using UD = Uniform::Dimension;
 
-	switch(u.type){
+	switch(uniform.type){
 		case UT::Float:
 		case UT::Int:
 		case UT::Uint:
-			if(enum_value(u.dimension) != sizeof...(args))
-				throw BadUniformParametersException{"Parameter pack does not match specified uniform, size of pack should be " + std::to_string(enum_value(u.dimension)) + "\n"};
+			if(enum_value(uniform.dimension) != sizeof...(args))
+				throw BadUniformParametersException{"Parameter pack does not match specified uniform, size of pack should be " + std::to_string(enum_value(uniform.dimension)) + "\n"};
+			break;
+		default:
+			if(sizeof...(args) != 1u)
+				throw BadUniformParametersException{"Parameter pack should include only one parameter when passing pointer types\n"};
 			break;
 	}
 
@@ -229,7 +233,7 @@ void Shader::upload_uniform(Uniform u, std::string const& name, Args&&... args) 
 	
 	fold_enums<UC, UT, UD> fold;
 
-	switch(fold(u.construct, u.type, u.dimension)){
+	switch(fold(uniform.construct, uniform.type, uniform.dimension)){
 		/* GLfloat uniforms */
 		case fold(UC::Vector, UT::Float, UD::_1):
 			glUniform1f(location, std::forward<Args...>(args...));

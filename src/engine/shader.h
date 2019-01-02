@@ -10,6 +10,8 @@
 #include <cstddef>
 #include <fstream>
 #include <GL/glew.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include <stack>
 #include <sstream>
@@ -39,7 +41,7 @@ class Shader {
 		static void disable();
 		
 		template <typename... Args>
-		void upload_uniform(Uniform u, std::string const& name, Args&&... args);
+		void upload_uniform(Uniform uniform, std::string const& name, Args&&... args);
 
 	private:
 		std::size_t const depth_; /* Max recursive include depth */
