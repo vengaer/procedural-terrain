@@ -2,7 +2,6 @@
 #define PLANE_H
 
 #pragma once
-#include "exception.h"
 #include "interpolation.h"
 #include "renderer.h"
 #include <cmath>
