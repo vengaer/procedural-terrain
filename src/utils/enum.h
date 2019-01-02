@@ -1,4 +1,4 @@
-/* Inspired by an excellent blog post by Jonathan Boccara 
+/* Inspired by an excellent blog post by Jonathan Boccara found at
  * fluentcpp.com/2017/06/27/how-to-collapse-nested-switch-statements/ */
 #ifndef ENUM_H
 #define ENUM_H
