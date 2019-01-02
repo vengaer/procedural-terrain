@@ -13,7 +13,7 @@ int main() {
 
 	try{
 		Window window{"test", width, height};
-		Shader test("/home/vilhelm/repos/c++/procedural_terrain/src/shaders/plane.vert", Shader::Type::VERTEX, "/home/vilhelm/repos/c++/procedural_terrain/src/shaders/plane.frag", Shader::Type::FRAGMENT);
+		Shader test("/home/vilhelm/repos/c++/procedural_terrain/src/shaders/plane.vert", Shader::Type::Vertex, "/home/vilhelm/repos/c++/procedural_terrain/src/shaders/plane.frag", Shader::Type::Fragment);
 		Plane p{1, 1, 1, 1};
 		Ellipsoid e{};
 		Cuboid c{};

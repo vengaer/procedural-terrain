@@ -41,5 +41,8 @@ struct ShaderLinkingException : std::runtime_error {
 	ShaderLinkingException(std::string const& what_msg) : std::runtime_error{what_msg} {}
 };
 
+struct BadUniformParametersException : std::runtime_error {
+	BadUniformParametersException(std::string const& what_msg) : std::runtime_error{what_msg} {}
+};
 
 #endif
