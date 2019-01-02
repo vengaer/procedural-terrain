@@ -3,6 +3,7 @@
 
 #pragma once
 #include "exception.h"
+#include <cstddef>
 #include <cmath>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -10,7 +11,7 @@
 
 class Window{
 	public:
-		Window(std::string const& name, unsigned width, unsigned height, float opengl_version = 4.5f);
+		Window(std::string const& name, std::size_t width, std::size_t height, float opengl_version = 4.5f);
 		~Window();
 		
 		Window(Window const&) = delete;
@@ -22,9 +23,9 @@ class Window{
 
 	private:
 		GLFWwindow* window_;
-		unsigned width_, height_;
+		std::size_t width_, height_;
 		
-		void init(std::string const& name, unsigned width, unsigned height, float opengl_version);
+		void init(std::string const& name, std::size_t width, std::size_t height, float opengl_version);
 		
 		static void resize(GLFWwindow* window, int width, int height);
 };
