@@ -25,6 +25,10 @@ struct InvalidVersionException : std::runtime_error {
 	InvalidVersionException(std::string const& what_msg) : std::runtime_error{what_msg} {}
 };
 
+struct OverflowException : std::overflow_error {
+	OverflowException(std::string const& what_msg) : std::overflow_error{what_msg} {}
+};
+
 struct ShaderCompilationException : std::runtime_error {
 	ShaderCompilationException(std::string const& what_msg) : std::runtime_error{what_msg} {}
 };
