@@ -51,9 +51,9 @@ void Window::init(std::string const& name, std::size_t width, std::size_t height
 }
 
 void Window::resize(GLFWwindow* glfw_window, int width, int height){
-	Window* instance = static_cast<Window*>(glfwGetWindowUserPointer(glfw_window));
-	instance->width_ = width;
-	instance->height_ = height;
+	auto* instance = static_cast<Window*>(glfwGetWindowUserPointer(glfw_window));
+	instance->width_ = static_cast<std::size_t>(width);
+	instance->height_ = static_cast<std::size_t>(height);
 	glViewport(0, 0, width, height);
 }
 	
