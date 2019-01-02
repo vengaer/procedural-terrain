@@ -2,7 +2,9 @@
 #define SHADER_H
 
 #pragma once
+#include "enum.h"
 #include "exception.h"
+#include "extended_traits.h"
 #include <algorithm>
 #include <array>
 #include <cstddef>
@@ -12,24 +14,39 @@
 #include <stack>
 #include <sstream>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 
 
 class Shader {
 	public:
-		enum class Type { VERTEX, FRAGMENT };
+		enum class Type { Vertex, Fragment };
 
-		Shader(std::string const& shader1, Type type1, std::string const& shader2, Type type2, unsigned include_depth = 8);
+		struct Uniform {
+			enum class Type { Float, Int, Uint, FloatPtr, IntPtr, UintPtr, End_};
+			enum class Construct { Vector, Matrix, End_};
+			enum class Dimension { _1 = 1, _2, _3, _4, _2x3, _3x2, _2x4, _4x2, _3x4, _4x3, End_ };
+
+			Type type;
+			Construct construct;
+			Dimension dimension;
+		};
+
+		Shader(std::string const& shader1, Type type1, std::string const& shader2, Type type2, std::size_t include_depth = 8);
 
 		void enable() const;
 		static void disable();
+		
+		template <typename... Args>
+		void upload_uniform(Uniform u, std::string const& name, Args&&... args);
 
 	private:
-		unsigned const depth_; /* Max recursive include depth */
+		std::size_t const depth_; /* Max recursive include depth */
 		GLuint program_; /* Shader program id */
+		std::unordered_map<std::string, GLint> uniforms_;
 
-		enum class StatusQuery { COMPILE, LINK };
+		enum class StatusQuery { Compile, Link };
 		
 		struct AssertionResult{
 			bool succeeded;
@@ -48,4 +65,5 @@ class Shader {
 
 };
 
+#include "shader.tcc"
 #endif
