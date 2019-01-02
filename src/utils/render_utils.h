@@ -1,8 +1,8 @@
-#ifndef RENDER_ASSERTION_H
-#define RENDER_ASSERTION_H
+#ifndef RENDER_UTILS_H
+#define RENDER_UTILS_H
 
 #pragma once
-#include "meta_utils.h"
+#include "extended_traits.h"
 #include <type_traits>
 #include <utility>
 

@@ -1,5 +1,5 @@
-#ifndef META_UTILS_H
-#define META_UTILS_H
+#ifndef EXTENDED_TRAITS_H
+#define EXTENDED_TRAITS_H
 
 #pragma once
 #include <array>
@@ -16,7 +16,6 @@ struct type_is {
 template <typename T>
 using type_is_t = typename type_is<T>::type;
 
-/* Remove cv and ref qualifiers */
 template <typename T>
 struct remove_cvref : std::remove_cv<std::remove_reference_t<T>> { };
 
@@ -24,19 +23,23 @@ template <typename T>
 using remove_cvref_t = typename remove_cvref<T>::type;
 
 
-/* Type T is same as one of types in parameter pack */
 template <typename T, typename... P0toN>
 struct is_one_of : std::bool_constant<(std::is_same_v<T, P0toN> || ...)> { };
 
 template <typename T, typename... P0toN>
 inline bool constexpr is_one_of_v = is_one_of<T, P0toN...>::value;
 
-/* T and all types in pack are the same */
 template <typename T, typename... P0toN>
 struct all_same : std::bool_constant<(std::is_same_v<T, P0toN> && ...)> { };
 
 template <typename T, typename... P0toN>
 inline bool constexpr all_same_v = all_same<T, P0toN...>::value;
+
+template <typename T, typename... P0toN>
+struct all_convertible : std::bool_constant<(std::is_convertible_v<T, P0toN> && ...)> { };
+
+template <typename T, typename... P0toN>
+inline bool constexpr all_convertible_v = all_convertible<T, P0toN...>::value;
 
 /* impls (if applicable) */
 namespace {
@@ -140,7 +143,7 @@ struct wraps_unsigned_type : wraps_unsigned_type_impl<remove_cvref_t<T>, U> { };
 template <typename T, typename U = void>
 inline bool constexpr wraps_unsigned_type_v = wraps_unsigned_type<T,U>::value;
 
-/* Get value_type or equivalent */
+/* Get underlying fundamental type */
 template <typename T, typename U = void>
 struct get_fundamental_type : get_fundamental_type_impl<std::decay_t<T>, void> { };
 
