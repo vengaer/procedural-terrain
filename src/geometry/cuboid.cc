@@ -15,14 +15,14 @@ void Cuboid::init(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale) {
 		std::array<GLfloat, 3> offsets { x_scale / 2.f, y_scale / 2.f, z_scale / 2.f };
 		std::array<std::pair<GLuint, GLuint>, 4> texture_coords { std::make_pair(0u, 0u), std::make_pair(1u, 0u), std::make_pair(1u, 1u), std::make_pair(0u, 1u) };
 
-		enum class Axis { NONE = -1, X, Y, Z };
-		enum class Sign { POS, NEG };
+		enum class Axis { None = -1, X, Y, Z };
+		enum class Sign { Pos, Neg };
 
 		std::array<GLfloat, VERTEX_SIZE> vertex;
 		
 		auto face = 0u;
-		Axis fixed = Axis::NONE;
-		Sign fixed_sign = Sign::POS;
+		Axis fixed = Axis::None;
+		Sign fixed_sign = Sign::Pos;
 		GLfloat sign;
 		for(auto i = 0u; i < 6u; i++, face++) {
 			if((face % 2u) == 0)
@@ -58,7 +58,7 @@ void Cuboid::init(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale) {
 				vertices_.insert(std::end(vertices_), std::begin(vertex), std::end(vertex));
 			}
 			
-			fixed_sign = static_cast<Sign>((static_cast<int>(fixed_sign) + 1) % 2); /* Sign alternates between POS and NEG */
+			fixed_sign = static_cast<Sign>((static_cast<int>(fixed_sign) + 1) % 2); /* Sign alternates between Pos and Neg */
 		}	
 	}
 
