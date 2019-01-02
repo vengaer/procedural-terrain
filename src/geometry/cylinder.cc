@@ -131,7 +131,7 @@ void Cylinder::init(GLfloat height, GLuint horizontal_segments, GLuint vertical_
 			triangle_indices[0] = idx;
 			if(j % 2) {	
 				triangle_indices[1] = idx + horizontal_segments;
-				triangle_indices[2] = idx + horizontal_segments + 1;
+				triangle_indices[2] = idx + horizontal_segments - 1;
 			}
 			else{
 				triangle_indices[1] = idx + 1;
