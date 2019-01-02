@@ -76,24 +76,30 @@ void Renderer<T>::init(Args&&... args) {
 
 template <typename T>
 constexpr GLuint Renderer<T>::size(vertices_tag) const {
-	GLuint container_size;
+	std::size_t container_size;
 
 	if constexpr(is_contiguously_stored_v<decltype(static_cast<T const&>(*this).vertices())>)
 		container_size = std::size(static_cast<T const&>(*this).vertices());
 	else
 		container_size = static_cast<T const&>(*this).vertices_size();
-
-	return container_size;
+	
+	if(std::numeric_limits<GLuint>::max() < container_size)
+		throw OverflowException{"Size of vertices array too large for OpenGL to handle\n"};
+	
+	return static_cast<GLuint>(container_size);
 }
 
 template <typename T>
 constexpr GLuint Renderer<T>::size(indices_tag) const {
-	GLuint container_size;
+	std::size_t container_size;
 
 	if constexpr(is_contiguously_stored_v<decltype(static_cast<T const&>(*this).indices())>)
 		container_size = std::size(static_cast<T const&>(*this).indices());
 	else
 		container_size = static_cast<T const&>(*this).indices_size();
 
-	return container_size;
+	if(std::numeric_limits<GLuint>::max() < container_size)
+		throw OverflowException{"Size of indices array too large for OpenGL to handle\n"};
+
+	return static_cast<GLuint>(container_size);
 }

@@ -2,10 +2,12 @@
 #define RENDERER_H
 
 #pragma once
-#include "meta_utils.h"
-#include "render_assertion.h"
+#include "exception.h"
+#include "extended_traits.h"
+#include "render_utils.h"
 #include <GL/glew.h>
 #include <iostream>
+#include <limits>
 #include <type_traits>
 #include <utility>
 
