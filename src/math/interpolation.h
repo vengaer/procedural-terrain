@@ -2,7 +2,7 @@
 #define INTERPOLATION_H
 
 #pragma once
-#include "meta_utils.h"
+#include "extended_traits.h"
 #include <cmath>
 #include <glm/glm.hpp>
 #include <type_traits>
