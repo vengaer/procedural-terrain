@@ -36,7 +36,7 @@ float frametime::fps() {
 namespace{
 	void display_status_impl(frametime::Status status) {
 		switch(status) {
-			case frametime::Status::FPS:
+			case frametime::Status::Fps:
 				std::cout << std::left << std::setw(8) << frametime::fps() << std::setw(6) << " fps";
 				break;
 			default:
@@ -49,10 +49,10 @@ namespace{
 
 void frametime::display_status(frametime::Status status) {
 	switch(status) {
-		case Status::ALL:
-			display_status_impl(Status::FPS);
+		case Status::All:
+			display_status_impl(Status::Fps);
 			std::cout << " ";
-			display_status_impl(Status::UPTIME);
+			display_status_impl(Status::Uptime);
 			break;
 		default:
 			display_status_impl(status);

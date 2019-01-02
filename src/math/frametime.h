@@ -10,7 +10,7 @@
 #include <numeric>
 
 namespace frametime {
-	enum class Status { ALL, FPS, UPTIME };
+	enum class Status { All, Fps, Uptime };
 
 	void update();
 	float delta();
