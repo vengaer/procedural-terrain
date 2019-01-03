@@ -15,7 +15,7 @@ namespace container {
 	struct supports_preallocation : std::false_type { };
 	
 	template <typename T>
-	struct supports_preallocation<T, std::void_t<decltype(std::declval<T>().reserve(std::declval<typename T::value_type>()))>> : std::true_type {  };
+	struct supports_preallocation<T, std::void_t<decltype(std::declval<T>().reserve(std::declval<std::size_t>()))>> : std::true_type {  };
 
 	template <typename T, typename U = void>
 	inline bool constexpr supports_preallocation_v = supports_preallocation<T,U>::value;
