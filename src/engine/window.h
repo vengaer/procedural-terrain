@@ -10,6 +10,7 @@
 #include <string>
 
 class Window{
+		friend class EventHandler;
 	public:
 		Window(std::string const& name, std::size_t width, std::size_t height, float opengl_version = 4.5f);
 		~Window();
@@ -20,14 +21,17 @@ class Window{
 		bool should_close() const;
 		void clear() const;
 		void update() const;
-
+	
+		std::size_t width() const;
+		std::size_t height() const;
 	private:
 		GLFWwindow* window_;
 		std::size_t width_, height_;
 		
 		void init(std::string const& name, std::size_t width, std::size_t height, float opengl_version);
-		
-		static void resize(GLFWwindow* window, int width, int height);
+
+		void set_dimensions(std::size_t width, std::size_t height);
+		GLFWwindow* glfw_window() const;
 };
 
 #endif

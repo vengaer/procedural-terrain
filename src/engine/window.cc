@@ -25,6 +25,23 @@ void Window::update() const{
 	glfwPollEvents();
 }
 
+void Window::set_dimensions(std::size_t width, std::size_t height) {
+	width_ = width;
+	height_ = height;
+}
+
+std::size_t Window::width() const {
+	return width_;
+}
+
+std::size_t Window::height() const {
+	return height_;
+}
+
+GLFWwindow* Window::glfw_window() const {
+	return window_;
+}
+
 
 void Window::init(std::string const& name, std::size_t width, std::size_t height, float opengl_version){
 	if(!glfwInit())
@@ -46,14 +63,5 @@ void Window::init(std::string const& name, std::size_t width, std::size_t height
 	if(glewInit() != GLEW_OK)
 		throw GLException{"Failed to initialize GLEW\n"};
 
-	glfwSetWindowUserPointer(window_, this);
-	glfwSetWindowSizeCallback(window_, resize);
 }
 
-void Window::resize(GLFWwindow* glfw_window, int width, int height){
-	auto* instance = static_cast<Window*>(glfwGetWindowUserPointer(glfw_window));
-	instance->width_ = static_cast<std::size_t>(width);
-	instance->height_ = static_cast<std::size_t>(height);
-	glViewport(0, 0, width, height);
-}
-	
