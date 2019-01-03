@@ -1,5 +1,3 @@
-
-
 SRC = $(wildcard src/*.cc) \
 	  $(wildcard src/engine/*.cc) \
 	  $(wildcard src/geometry/*.cc) \
