@@ -2,28 +2,41 @@
 #define CAMERA_H
 
 #pragma once
+#include "enum.h"
 #include "frametime.h"
+#include <cmath>
 #include <cstddef>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+struct ClippingPlane{
+	float near;
+	float far;
+};
+
 class Camera {
 	public:
-		Camera(std::size_t window_width, std::size_t window_height, glm::vec3 position = glm::vec3{0.f, 0.f, 1.f}, glm::vec3 target_view = glm::vec3{0.f, 0.f, 0.f}, float fov = 45.f);
+		enum class Direction{ Right, Left, Up, Down, Backward, Forward };
+		enum class Speed { Default = 10, Fast = 15 };
 
-		glm::mat4 get_perspective() const;
+		Camera(glm::vec3 position = glm::vec3{0.f, 0.f, 1.f}, glm::vec3 target_view = glm::vec3{0.f, 0.f, 0.f}, float fov = 45.f, ClippingPlane plane = {0.1f, 100.f});
+
+		void translate(Direction dir, Speed speed = Speed::Default);
+
+		float fov() const;
+
+		ClippingPlane clipping_plane() const;
 
 	private:
-		static float constexpr NEAR{0.1f}, FAR{100.f};
 		glm::vec3 position_;
 		glm::vec3 local_x_;
 		glm::vec3 local_y_;
 		glm::vec3 local_z_;
 		glm::mat4 view_;
-		glm::mat4 perspective_;
 		float fov_;
+		ClippingPlane clipping_plane_;
 
-		void init(std::size_t window_width, std::size_t window_height, glm::vec3 target_view);
+		void init(glm::vec3 target_view);
 };
 
 #endif
