@@ -3,6 +3,7 @@
 
 #pragma once
 #include "constants.h"
+#include "enum.h"
 #include "interpolation.h"
 #include "renderer.h"
 #include <array>

@@ -2,6 +2,7 @@
 #define CUBOID_H
 
 #pragma once
+#include "enum.h"
 #include "renderer.h"
 #include <array>
 #include <cmath>
@@ -19,6 +20,8 @@ class Cuboid : public Renderer<Cuboid> {
 		std::vector<GLfloat> const& vertices() const;
 		std::vector<GLuint> const& indices() const;
 
+		enum class Axis { None = -1, X, Y, Z };
+		enum class Sign { Pos, Neg };
 	private:
 		std::vector<GLfloat> vertices_;
 		std::vector<GLuint> indices_;

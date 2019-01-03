@@ -28,12 +28,12 @@ void Cylinder::init(GLfloat height, GLuint horizontal_segments, GLuint vertical_
 		std::array<GLfloat, VERTEX_SIZE> vertex;
 		
 		/* Bottom center */
-		vertex[static_cast<int>(off_axes.first)] = 0.f;
-		vertex[static_cast<int>(off_axes.second)] = 0.f;
-		vertex[static_cast<int>(main_axis)] = -height_offset;
-		vertex[static_cast<int>(off_axes.first) + 3] = 0.f;
-		vertex[static_cast<int>(off_axes.second) + 3] = 0.f;
-		vertex[static_cast<int>(main_axis) + 3] = -1.f;
+		vertex[enum_value(off_axes.first)] = 0.f;
+		vertex[enum_value(off_axes.second)] = 0.f;
+		vertex[enum_value(main_axis)] = -height_offset;
+		vertex[enum_value(off_axes.first) + 3] = 0.f;
+		vertex[enum_value(off_axes.second) + 3] = 0.f;
+		vertex[enum_value(main_axis) + 3] = -1.f;
 		vertex[6] = 0.5f;
 		vertex[7] = 0.5f;
 	
@@ -46,12 +46,12 @@ void Cylinder::init(GLfloat height, GLuint horizontal_segments, GLuint vertical_
 			phi = 2 * PI * static_cast<GLfloat>(i) / static_cast<GLfloat>(horizontal_segments);
 			interpolation::Parameters texture = interpolation::polar(phi);
 
-			vertex[static_cast<int>(off_axes.first)] = off_axis1_scale * cos(phi);
-			vertex[static_cast<int>(off_axes.second)] = off_axis2_scale * sin(phi);
-			vertex[static_cast<int>(main_axis)] = -height_offset;
-			vertex[static_cast<int>(off_axes.first)+3] = 0.f;
-			vertex[static_cast<int>(off_axes.second)+3] = 0.f;
-			vertex[static_cast<int>(main_axis) + 3] = -1.f;
+			vertex[enum_value(off_axes.first)] = off_axis1_scale * cos(phi);
+			vertex[enum_value(off_axes.second)] = off_axis2_scale * sin(phi);
+			vertex[enum_value(main_axis)] = -height_offset;
+			vertex[enum_value(off_axes.first)+3] = 0.f;
+			vertex[enum_value(off_axes.second)+3] = 0.f;
+			vertex[enum_value(main_axis) + 3] = -1.f;
 			vertex[6] = (texture.x + 1.f) * 0.5f; /* Transform from [-1, 1] to [0, 1] */
 			vertex[7] = (texture.y + 1.f) * 0.5f;
 
@@ -67,12 +67,12 @@ void Cylinder::init(GLfloat height, GLuint horizontal_segments, GLuint vertical_
 				u = cos(phi);
 				v = sin(phi);
 
-				vertex[static_cast<int>(off_axes.first)] = off_axis1_scale * u;
-				vertex[static_cast<int>(off_axes.second)] = off_axis2_scale * v;
-				vertex[static_cast<int>(main_axis)] = current_height;
-				vertex[static_cast<int>(off_axes.first) + 3] = u;
-				vertex[static_cast<int>(off_axes.second) + 3] = v;
-				vertex[static_cast<int>(main_axis) + 3] = 0.f;
+				vertex[enum_value(off_axes.first)] = off_axis1_scale * u;
+				vertex[enum_value(off_axes.second)] = off_axis2_scale * v;
+				vertex[enum_value(main_axis)] = current_height;
+				vertex[enum_value(off_axes.first) + 3] = u;
+				vertex[enum_value(off_axes.second) + 3] = v;
+				vertex[enum_value(main_axis) + 3] = 0.f;
 				vertex[6] = interpolation::linear(static_cast<GLfloat>(j) / static_cast<GLfloat>(horizontal_segments));
 				vertex[7] = interpolation::linear(static_cast<GLfloat>(i) / static_cast<GLfloat>(vertical_segments));
 		
@@ -85,12 +85,12 @@ void Cylinder::init(GLfloat height, GLuint horizontal_segments, GLuint vertical_
 			phi = 2 * PI * static_cast<GLfloat>(i) / static_cast<GLfloat>(horizontal_segments);
 			interpolation::Parameters texture = interpolation::polar(phi);
 			
-			vertex[static_cast<int>(off_axes.first)] = off_axis1_scale * cos(phi);
-			vertex[static_cast<int>(off_axes.second)] = off_axis2_scale * sin(phi);
-			vertex[static_cast<int>(main_axis)] = height_offset;
-			vertex[static_cast<int>(off_axes.first)+3] = 0.f;
-			vertex[static_cast<int>(off_axes.second)+3] = 0.f;
-			vertex[static_cast<int>(main_axis) + 3] = 1.f;
+			vertex[enum_value(off_axes.first)] = off_axis1_scale * cos(phi);
+			vertex[enum_value(off_axes.second)] = off_axis2_scale * sin(phi);
+			vertex[enum_value(main_axis)] = height_offset;
+			vertex[enum_value(off_axes.first)+3] = 0.f;
+			vertex[enum_value(off_axes.second)+3] = 0.f;
+			vertex[enum_value(main_axis) + 3] = 1.f;
 			vertex[6] = (texture.x + 1.f) * 0.5f; /* Transform form [-1, 1] to [0, 1] */
 			vertex[7] = (texture.y + 1.f) * 0.5f;
 
@@ -98,12 +98,12 @@ void Cylinder::init(GLfloat height, GLuint horizontal_segments, GLuint vertical_
 		}
 		
 		/* Top center */
-		vertex[static_cast<int>(off_axes.first)] = 0.f;
-		vertex[static_cast<int>(off_axes.second)] = 0.f;
-		vertex[static_cast<int>(main_axis)] = height_offset;
-		vertex[static_cast<int>(off_axes.first) + 3] = 0.f;
-		vertex[static_cast<int>(off_axes.second) + 3] = 0.f;
-		vertex[static_cast<int>(main_axis) + 3] = 1.f;
+		vertex[enum_value(off_axes.first)] = 0.f;
+		vertex[enum_value(off_axes.second)] = 0.f;
+		vertex[enum_value(main_axis)] = height_offset;
+		vertex[enum_value(off_axes.first) + 3] = 0.f;
+		vertex[enum_value(off_axes.second) + 3] = 0.f;
+		vertex[enum_value(main_axis) + 3] = 1.f;
 		vertex[6] = 0.5f;
 		vertex[7] = 0.5f;
 	
