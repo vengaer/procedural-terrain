@@ -10,6 +10,10 @@ void Shader::disable() {
 	glUseProgram(0);
 }
 
+GLuint Shader::get_program_id() const {
+	return program_;
+}
+
 GLuint Shader::init(std::string const& shader1, Type type1, std::string const& shader2, Type type2){
 	if(type1 == type2)
 		throw ArgumentMismatchException{"Provided shader types must differ\n"};
@@ -204,146 +208,4 @@ Shader::AssertionResult Shader::assert_shader_status_ok(GLuint id, StatusQuery s
 	}
 
 	return res;
-}
-
-template <typename... Args>
-void Shader::upload_uniform(Uniform uniform, std::string const& name, Args&&... args) {
-	static_assert(all_same_v<Args...>, "All parameters in uniform must be of the same type");
-	
-	using UC = Uniform::Construct;
-	using UT = Uniform::Type;
-	using UD = Uniform::Dimension;
-
-	switch(uniform.type){
-		case UT::Float:
-		case UT::Int:
-		case UT::Uint:
-			if(enum_value(uniform.dimension) != sizeof...(args))
-				throw BadUniformParametersException{"Parameter pack does not match specified uniform, size of pack should be " + std::to_string(enum_value(uniform.dimension)) + "\n"};
-			break;
-		default:
-			if(sizeof...(args) != 1u)
-				throw BadUniformParametersException{"Parameter pack should include only one parameter when passing pointer types\n"};
-			break;
-	}
-
-	auto result = uniforms_.insert( { name, glGetUniformLocation(program_, name.c_str()) });
-
-	GLint location = (*result.first).second;	
-	
-	fold_enums<UC, UT, UD> fold;
-
-	switch(fold(uniform.construct, uniform.type, uniform.dimension)){
-		/* GLfloat uniforms */
-		case fold(UC::Vector, UT::Float, UD::_1):
-			glUniform1f(location, std::forward<Args...>(args...));
-			break;
-		case fold(UC::Vector, UT::Float, UD::_2):
-			glUniform2f(location, std::forward<Args...>(args...));
-			break;
-		case fold(UC::Vector, UT::Float, UD::_3):
-			glUniform3f(location, std::forward<Args...>(args...));
-			break;
-		case fold(UC::Vector, UT::Float, UD::_4):
-			glUniform4f(location, std::forward<Args...>(args...));
-			break;
-		/* GLint uniforms */
-		case fold(UC::Vector, UT::Int, UD::_1):
-			glUniform1i(location, std::forward<Args...>(args...));
-			break;
-		case fold(UC::Vector, UT::Int, UD::_2):
-			glUniform2i(location, std::forward<Args...>(args...));
-			break;
-		case fold(UC::Vector, UT::Int, UD::_3):
-			glUniform3i(location, std::forward<Args...>(args...));
-			break;
-		case fold(UC::Vector, UT::Int, UD::_4):
-			glUniform4i(location, std::forward<Args...>(args...));
-			break;
-		/* GLuint uniforms */
-		case fold(UC::Vector, UT::Uint, UD::_1):
-			glUniform1ui(location, std::forward<Args...>(args...));
-			break;
-		case fold(UC::Vector, UT::Uint, UD::_2):
-			glUniform2ui(location, std::forward<Args...>(args...));
-			break;
-		case fold(UC::Vector, UT::Uint, UD::_3):
-			glUniform3ui(location, std::forward<Args...>(args...));
-			break;
-		case fold(UC::Vector, UT::Uint, UD::_4):
-			glUniform4ui(location, std::forward<Args...>(args...));
-			break;
-		/* GLfloat* uniforms */
-		case fold(UC::Vector, UT::FloatPtr, UD::_1):
-			glUniform1fv(location, 1u, std::forward<Args...>(args...));
-			break;
-		case fold(UC::Vector, UT::FloatPtr, UD::_2):
-			glUniform2fv(location, 1u, std::forward<Args...>(args...));
-			break;
-		case fold(UC::Vector, UT::FloatPtr, UD::_3):
-			glUniform3fv(location, 1u, std::forward<Args...>(args...));
-			break;
-		case fold(UC::Vector, UT::FloatPtr, UD::_4):
-			glUniform4fv(location, 1u, std::forward<Args...>(args...));
-			break;
-		/* GLint* uniforms */
-		case fold(UC::Vector, UT::IntPtr, UD::_1):
-			glUniform1iv(location, 1u, std::forward<Args...>(args...));
-			break;
-		case fold(UC::Vector, UT::IntPtr, UD::_2):
-			glUniform2iv(location, 1u, std::forward<Args...>(args...));
-			break;
-		case fold(UC::Vector, UT::IntPtr, UD::_3):
-			glUniform3iv(location, 1u, std::forward<Args...>(args...));
-			break;
-		case fold(UC::Vector, UT::IntPtr, UD::_4):
-			glUniform4iv(location, 1u, std::forward<Args...>(args...));
-			break;
-		/* GLuint* uniforms */
-		case fold(UC::Vector, UT::UintPtr, UD::_1):
-			glUniform1uiv(location, 1u, std::forward<Args...>(args...));
-			break;
-		case fold(UC::Vector, UT::UintPtr, UD::_2):
-			glUniform2uiv(location, 1u, std::forward<Args...>(args...));
-			break;
-		case fold(UC::Vector, UT::UintPtr, UD::_3):
-			glUniform3uiv(location, 1u, std::forward<Args...>(args...));
-			break;
-		case fold(UC::Vector, UT::UintPtr, UD::_4):
-			glUniform4uiv(location, 1u, std::forward<Args...>(args...));
-			break;
-		/* nxn matrix uniforms */ 
-		case fold(UC::Matrix, UT::FloatPtr, UD::_2):
-			glUniformMatrix2fv(location, 1u, GL_FALSE, std::forward<Args...>(args...));
-			break;
-		case fold(UC::Matrix, UT::FloatPtr, UD::_3):
-			glUniformMatrix3fv(location, 1u, GL_FALSE, std::forward<Args...>(args...));
-			break;
-		case fold(UC::Matrix, UT::FloatPtr, UD::_4):
-			glUniformMatrix4fv(location, 1u, GL_FALSE, std::forward<Args...>(args...));
-			break;
-		/* nxm matrix uniforms */
-		case fold(UC::Matrix, UT::FloatPtr, UD::_2x3):
-			glUniformMatrix2x3fv(location, 1u, GL_FALSE, std::forward<Args...>(args...));
-			break;
-		case fold(UC::Matrix, UT::FloatPtr, UD::_3x2):
-			glUniformMatrix3x2fv(location, 1u, GL_FALSE, std::forward<Args...>(args...));
-			break;
-		case fold(UC::Matrix, UT::FloatPtr, UD::_2x4):
-			glUniformMatrix2x4fv(location, 1u, GL_FALSE, std::forward<Args...>(args...));
-			break;
-		case fold(UC::Matrix, UT::FloatPtr, UD::_4x2):
-			glUniformMatrix4x2fv(location, 1u, GL_FALSE, std::forward<Args...>(args...));
-			break;
-		case fold(UC::Matrix, UT::FloatPtr, UD::_3x4):
-			glUniformMatrix3x4fv(location, 1u, GL_FALSE, std::forward<Args...>(args...));
-			break;
-		case fold(UC::Matrix, UT::FloatPtr, UD::_4x3):
-			glUniformMatrix4x3fv(location, 1u, GL_FALSE, std::forward<Args...>(args...));
-			break;
-		default:
-			throw BadUniformParametersException{"Specified uniform type does not match any known to OpenGL\n"};
-			break;
-	}
-	
 }

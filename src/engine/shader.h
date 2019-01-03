@@ -26,26 +26,33 @@ class Shader {
 		enum class Type { Vertex, Fragment };
 
 		struct Uniform {
-			enum class Type { Float, Int, Uint, FloatPtr, IntPtr, UintPtr, End_};
 			enum class Construct { Vector, Matrix, End_};
 			enum class Dimension { _1 = 1, _2, _3, _4, _2x3, _3x2, _2x4, _4x2, _3x4, _4x3, End_ };
-
-			Type type;
-			Construct construct;
-			Dimension dimension;
+			enum class Type { Float, Int, Uint, FloatPtr, IntPtr, UintPtr, End_};
 		};
 
 		Shader(std::string const& shader1, Type type1, std::string const& shader2, Type type2, std::size_t include_depth = 8);
 
 		void enable() const;
 		static void disable();
+
+		GLuint get_program_id() const;
 		
-		template <typename... Args>
-		void upload_uniform(Uniform uniform, std::string const& name, Args&&... args);
+		template <Shader::Uniform::Construct UC,
+				  Shader::Uniform::Dimension UD,
+				  Shader::Uniform::Type UT,
+				  typename... Args>
+		void upload_uniform(std::string const& name, Args&&... args);
+
+		template <Shader::Uniform::Construct UC,
+				  Shader::Uniform::Dimension UD,
+				  Shader::Uniform::Type UT,
+				  typename... Args>
+		static void upload_uniform(GLuint program, std::string const& name, Args&&... args);
 
 	private:
 		std::size_t const depth_; /* Max recursive include depth */
-		GLuint program_; /* Shader program id */
+		GLuint const program_; /* Shader program id */
 		std::unordered_map<std::string, GLint> uniforms_;
 
 		enum class StatusQuery { Compile, Link };
@@ -64,6 +71,12 @@ class Shader {
 		GLuint link(GLuint vertex_id, GLuint fragment_id) const;
 
 		AssertionResult assert_shader_status_ok(GLuint id, StatusQuery sq) const;
+
+		template <Shader::Uniform::Construct UC,
+				  Shader::Uniform::Dimension UD,
+				  Shader::Uniform::Type UT,
+				  typename... Args>
+		static void upload_uniform_impl(GLint location, Args&&... args);
 
 };
 
