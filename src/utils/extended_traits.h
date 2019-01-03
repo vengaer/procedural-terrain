@@ -36,13 +36,29 @@ template <typename T, typename... P0toN>
 inline bool constexpr all_same_v = all_same<T, P0toN...>::value;
 
 template <typename T, typename... P0toN>
-struct all_convertible : std::bool_constant<(std::is_convertible_v<T, P0toN> && ...)> { };
+struct is_convertible_to_all : std::bool_constant<(std::is_convertible_v<T, P0toN> && ...)> { };
+
+template <typename T>
+struct is_convertible_to_all<T> : std::false_type { };
 
 template <typename T, typename... P0toN>
-inline bool constexpr all_convertible_v = all_convertible<T, P0toN...>::value;
+inline bool constexpr is_convertible_to_all_v = is_convertible_to_all<T, P0toN...>::value;
+
+template <typename T, typename... P0toN>
+struct is_convertible_to_one_of : std::bool_constant<(std::is_convertible_v<T, P0toN> || ...)> { };
+
+template <typename T, typename... P0toN>
+inline bool constexpr is_convertible_to_one_of_v = is_convertible_to_one_of<T, P0toN...>::value;
 
 /* impls (if applicable) */
 namespace {
+	template <typename>
+	struct is_std_array_impl : std::false_type { };
+
+	template <typename T, std::size_t N>
+	struct is_std_array_impl<std::array<T,N>> : std::true_type { };
+
+
 	template <typename>
 	struct is_contiguously_stored_impl : std::false_type { };
 	
@@ -114,6 +130,13 @@ namespace {
 	template <typename T>
 	struct get_fundamental_type_impl<T*> : type_is<T> { };
 }
+
+template <typename T>
+struct is_std_array : is_std_array_impl<remove_cvref_t<T>> { };
+
+template <typename T>
+inline bool constexpr is_std_array_v = is_std_array<T>::value;
+
 
 /* Container stored contiguously in memory */
 template <typename T>

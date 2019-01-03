@@ -6,14 +6,22 @@
 #pragma once
 #include <cstddef>
 #include <type_traits>
+#include <utility>
 
 namespace {
 
 	template <typename Enum, 
-			  typename Integral = std::size_t, 
+			  typename Integral = std::underlying_type_t<Enum>, 
 			  typename = std::enable_if_t<std::is_enum_v<Enum> && std::is_integral_v<Integral>>>
 	constexpr Integral enum_value(Enum e) {
 		return static_cast<Integral>(e);
+	}
+
+	template <typename Enum,
+			  typename Integral = std::underlying_type_t<Enum>,
+			  typename = std::enable_if_t<std::is_enum_v<Enum> && std::is_convertible_v<Integral, std::underlying_type_t<Enum>>>>
+	constexpr Enum enum_cast(Integral value) {
+		return static_cast<Enum>(value);
 	}
 
 	template <typename Enum, typename... Rest>
@@ -45,6 +53,14 @@ namespace {
 
 		constexpr std::size_t operator()(Enum e, Rest... rest) {
 			return fold_enums_impl<Enum, Rest...>::fold(e, rest...);
+		}
+	};
+
+	struct folder {
+		template <typename... Args>
+		static constexpr std::size_t deduce(Args&&... args) {
+			fold_enums<Args...> fold;
+			return fold(std::forward<Args>(args)...);
 		}
 	};
 

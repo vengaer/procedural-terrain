@@ -7,7 +7,6 @@
 #include <glm/glm.hpp>
 #include <type_traits>
 
-
 namespace interpolation{
 	template <typename T, typename = std::enable_if_t<std::is_arithmetic_v<std::decay_t<T>>>>
 	struct Parameters {
