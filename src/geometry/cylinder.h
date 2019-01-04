@@ -3,9 +3,10 @@
 
 #pragma once
 #include "constants.h"
-#include "enum.h"
+#include "fold.h"
 #include "interpolation.h"
 #include "renderer.h"
+#include "transform.h"
 #include <array>
 #include <cmath>
 #include <GL/glew.h>
@@ -14,7 +15,7 @@
 #include <vector>
 
 
-class Cylinder : public Renderer<Cylinder> {
+class Cylinder : public Renderer<Cylinder>, public Transform {
 	public:
 		enum class Axis { X, Y, Z };
 		Cylinder(GLfloat height = 1.f, GLuint horizontal_segments = 30u, GLuint vertical_segments = 1u, Axis main_axis = Axis::Y, GLfloat off_axis1_scale = 0.5f, GLfloat off_axis2_scale = 0.5f);

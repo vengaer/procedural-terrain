@@ -1,6 +1,6 @@
 #include "ellipsoid.h"
 
-Ellipsoid::Ellipsoid(GLuint vertical_segments, GLuint horizontal_segments, GLfloat x_scale, GLfloat y_scale, GLfloat z_scale) : Renderer{}, vertices_{}, indices_{} {
+Ellipsoid::Ellipsoid(GLuint vertical_segments, GLuint horizontal_segments, GLfloat x_scale, GLfloat y_scale, GLfloat z_scale) : Renderer{}, Transform{}, vertices_{}, indices_{} {
 	Renderer<Ellipsoid>::init(vertical_segments, horizontal_segments, x_scale, y_scale, z_scale);
 }
 

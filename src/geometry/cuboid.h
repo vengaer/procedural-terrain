@@ -2,8 +2,9 @@
 #define CUBOID_H
 
 #pragma once
-#include "enum.h"
+#include "fold.h"
 #include "renderer.h"
+#include "transform.h"
 #include <array>
 #include <cmath>
 #include <GL/glew.h>
@@ -11,7 +12,7 @@
 #include <utility>
 #include <vector>
 
-class Cuboid : public Renderer<Cuboid> {
+class Cuboid : public Renderer<Cuboid>, public Transform {
 	public:
 		Cuboid(GLfloat x_scale = 1.f, GLfloat y_scale = 1.f, GLfloat z_scale = 1.f);
 

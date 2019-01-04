@@ -1,6 +1,6 @@
 #include "cylinder.h"
 
-Cylinder::Cylinder(GLfloat height, GLuint horizontal_segments, GLuint vertical_segments, Axis main_axis, GLfloat off_axis1_scale, GLfloat off_axis2_scale) : Renderer{}, vertices_{}, indices_{} {
+Cylinder::Cylinder(GLfloat height, GLuint horizontal_segments, GLuint vertical_segments, Axis main_axis, GLfloat off_axis1_scale, GLfloat off_axis2_scale) : Renderer{}, Transform{}, vertices_{}, indices_{} {
 	Renderer<Cylinder>::init(height, horizontal_segments, vertical_segments, main_axis, off_axis1_scale, off_axis2_scale);
 }
 

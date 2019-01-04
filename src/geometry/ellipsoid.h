@@ -5,6 +5,7 @@
 #include "constants.h"
 #include "interpolation.h"
 #include "renderer.h"
+#include "transform.h"
 #include <array>
 #include <cmath>
 #include <GL/glew.h>
@@ -12,7 +13,7 @@
 #include <vector>
 
 
-class Ellipsoid : public Renderer<Ellipsoid> {
+class Ellipsoid : public Renderer<Ellipsoid>, public Transform {
 	public:
 		Ellipsoid(GLuint vertical_segments = 30u, GLuint horizontal_segments = 30u,  GLfloat x_scale = 1.f, GLfloat y_scale = 1.f, GLfloat z_scale = 1.f);
 

@@ -1,6 +1,6 @@
 #include "cuboid.h"
 
-Cuboid::Cuboid(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale) : Renderer{}, vertices_{}, indices_{} {
+Cuboid::Cuboid(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale) : Renderer{}, Transform{}, vertices_{}, indices_{} {
 	Renderer<Cuboid>::init(x_scale, y_scale, z_scale);
 }
 
