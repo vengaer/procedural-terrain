@@ -3,8 +3,8 @@
 
 #pragma once
 #include "exception.h"
-#include "extended_traits.h"
-#include "render_utils.h"
+#include "render_constraints.h"
+#include "traits.h"
 #include <GL/glew.h>
 #include <iostream>
 #include <limits>
@@ -47,8 +47,8 @@ class Renderer {
 		GLuint idx_size_;
 	
 		/* Tag dispatch */
-		constexpr GLuint size(vertices_tag) const;
-		constexpr GLuint size(indices_tag) const;
+		GLuint constexpr size(vertices_tag) const;
+		GLuint constexpr size(indices_tag) const;
 };
 
 #include "renderer.tcc"

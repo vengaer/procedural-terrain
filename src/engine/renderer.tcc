@@ -29,7 +29,7 @@ void Renderer<T>::init(Args&&... args) {
 	{
 		/* Get ref to vertices */
 		auto const& vertices = static_cast<T&>(*this).vertices();
-		using value_type = get_fundamental_type_t<decltype(vertices)>;
+		using value_type = fundamental_type_t<decltype(vertices)>;
 
 		auto const VALUE_TYPE_SIZE  = sizeof(value_type);
 
@@ -53,7 +53,7 @@ void Renderer<T>::init(Args&&... args) {
 		/* Get ref to indices */
 		auto const& indices = static_cast<T&>(*this).indices();
 		
-		using value_type = get_fundamental_type_t<decltype(indices)>;
+		using value_type = fundamental_type_t<decltype(indices)>;
 		auto const VALUE_TYPE_SIZE = sizeof(value_type);
 	
 		idx_size_ = size(indices_tag{});
@@ -75,7 +75,7 @@ void Renderer<T>::init(Args&&... args) {
 }
 
 template <typename T>
-constexpr GLuint Renderer<T>::size(vertices_tag) const {
+GLuint constexpr Renderer<T>::size(vertices_tag) const {
 	std::size_t container_size;
 
 	if constexpr(is_contiguously_stored_v<decltype(static_cast<T const&>(*this).vertices())>)
@@ -90,7 +90,7 @@ constexpr GLuint Renderer<T>::size(vertices_tag) const {
 }
 
 template <typename T>
-constexpr GLuint Renderer<T>::size(indices_tag) const {
+GLuint constexpr Renderer<T>::size(indices_tag) const {
 	std::size_t container_size;
 
 	if constexpr(is_contiguously_stored_v<decltype(static_cast<T const&>(*this).indices())>)
