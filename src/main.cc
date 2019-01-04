@@ -1,6 +1,5 @@
 #include "cuboid.h"
 #include "camera.h"
-#include "container.h"
 #include "cylinder.h"
 #include "event_handler.h"
 #include "ellipsoid.h"
@@ -10,7 +9,7 @@
 #include "shader.h"
 #include "window.h"
 #include <iostream>
-
+#include "inserter.h"
 
 int main() {
 	unsigned constexpr width = 960, height = 540;
@@ -25,12 +24,12 @@ int main() {
 		Cuboid c{};
 		Cylinder cyl{};
 		glm::mat4 view{1.f};
-		view = glm::translate(view, glm::vec3(0.f, 0.f, -3.f));
+		c.translate(glm::vec3(0.f, 0.5f, 0.f));
 
 		using UC = Shader::Uniform::Construct;
 		using UD = Shader::Uniform::Dimension;
 		using UT = Shader::Uniform::Type;
-		test.upload_uniform<UC::Matrix, UD::_4, UT::FloatPtr>("view", glm::value_ptr(view));
+		test.upload_uniform<UC::Matrix, UD::_4, UT::FloatPtr>("ufrm_model", c.model_matrix());
 
 		glClearColor(0.1f, 0.2f, 0.4f, 0.5f);
 		while(!window.should_close()){
