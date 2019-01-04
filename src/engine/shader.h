@@ -2,9 +2,9 @@
 #define SHADER_H
 
 #pragma once
-#include "enum.h"
 #include "exception.h"
-#include "extended_traits.h"
+#include "fold.h"
+#include "traits.h"
 #include <algorithm>
 #include <array>
 #include <cstddef>
@@ -36,7 +36,7 @@ class Shader {
 		void enable() const;
 		static void disable();
 
-		GLuint get_program_id() const;
+		GLuint program_id() const;
 		
 		template <Shader::Uniform::Construct UC,
 				  Shader::Uniform::Dimension UD,

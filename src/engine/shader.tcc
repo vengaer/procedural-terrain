@@ -126,5 +126,4 @@ void Shader::upload_uniform_impl(GLint location, Args&&... args) {
 		glUniformMatrix4x3fv(location, 1u, GL_FALSE, std::forward<Args>(args)...);
 	else
 		throw BadUniformParametersException{"Parameters do not match any known uniform"};
-	
 }

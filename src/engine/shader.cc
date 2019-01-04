@@ -10,7 +10,7 @@ void Shader::disable() {
 	glUseProgram(0);
 }
 
-GLuint Shader::get_program_id() const {
+GLuint Shader::program_id() const {
 	return program_;
 }
 
