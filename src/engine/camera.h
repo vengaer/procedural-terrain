@@ -2,7 +2,7 @@
 #define CAMERA_H
 
 #pragma once
-#include "enum.h"
+#include "fold.h"
 #include "frametime.h"
 #include <cmath>
 #include <cstddef>
@@ -24,6 +24,7 @@ class Camera {
 		void translate(Direction dir, Speed speed = Speed::Default);
 
 		float fov() const;
+		glm::mat4 view() const;
 
 		ClippingPlane clipping_plane() const;
 
@@ -37,6 +38,8 @@ class Camera {
 		ClippingPlane clipping_plane_;
 
 		void init(glm::vec3 target_view);
+
+		void update_view();
 };
 
 #endif

@@ -12,8 +12,7 @@ void Camera::init(glm::vec3 target_view) {
 	
 	local_y_ = glm::cross(local_z_, local_x_);
 
-	view_ = glm::lookAt(position_, position_ - local_z_, world_y);
-
+	update_view();
 }
 
 void Camera::translate(Direction dir, Speed speed) {
@@ -35,12 +34,21 @@ void Camera::translate(Direction dir, Speed speed) {
 	}
 
 	position_ = translation_matrix * glm::vec4{position_, 1.f};
+	update_view();
 }
 
 float Camera::fov() const {
 	return fov_;
 }
 
+glm::mat4 Camera::view() const {
+	return view_;
+}
+
 ClippingPlane Camera::clipping_plane() const {
 	return clipping_plane_;
+}
+
+void Camera::update_view() {
+	view_ = glm::lookAt(position_, position_ - local_z_, glm::vec3{0.f, 1.f, 0.f});
 }
