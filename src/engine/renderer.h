@@ -34,6 +34,8 @@ struct indices_tag { };
 struct automatic_shader_activation_tag { };
 struct manual_shader_activation_tag { };
 
+/* TODO: Fix the design dilemma and add ctors that take shaders in derived classes */
+/* TODO: Activate face culling */
 template <typename T>
 struct render_helper { };
 
