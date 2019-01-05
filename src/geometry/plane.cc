@@ -7,10 +7,10 @@ Plane::Plane(GLfloat x_len, GLfloat dx, GLfloat z_len, GLfloat dz) : Renderer{},
 
 void Plane::init(GLfloat x_len, GLfloat dx, GLfloat z_len, GLfloat dz){
 	/* Prevent potential overflow */
-	glm::clamp(x_len, 0.05f, 1.f);
-	glm::clamp(z_len, 0.05f, 1.f);
-	glm::clamp(dx, .01f, x_len);
-	glm::clamp(dz, .01f, z_len);
+	x_len = glm::clamp(x_len, 0.05f, 1.f);
+	z_len = glm::clamp(z_len, 0.05f, 1.f);
+	dx    = glm::clamp(dx, .01f, x_len);
+	dz    = glm::clamp(dz, .01f, z_len);
 
 	GLuint x_iters = static_cast<GLuint>(x_len / dx) + 1;
 	GLuint z_iters = static_cast<GLuint>(z_len / dz) + 1;

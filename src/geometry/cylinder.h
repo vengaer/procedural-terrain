@@ -3,10 +3,10 @@
 
 #pragma once
 #include "constants.h"
-#include "fold.h"
 #include "interpolation.h"
 #include "renderer.h"
 #include "transform.h"
+#include "type_conversion.h"
 #include <array>
 #include <cmath>
 #include <GL/glew.h>

@@ -5,9 +5,9 @@ Cuboid::Cuboid(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale) : Renderer{}, 
 }
 
 void Cuboid::init(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale) {
-	glm::clamp(x_scale, 0.1f, 2.f);
-	glm::clamp(y_scale, 0.1f, 2.f);
-	glm::clamp(z_scale, 0.1f, 2.f);
+	x_scale = glm::clamp(x_scale, 0.1f, 2.f);
+	y_scale = glm::clamp(y_scale, 0.1f, 2.f);
+	z_scale = glm::clamp(z_scale, 0.1f, 2.f);
 
 	vertices_.reserve(VERTEX_SIZE * 4u * 6u);
 

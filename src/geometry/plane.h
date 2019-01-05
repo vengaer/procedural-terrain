@@ -11,7 +11,6 @@
 #include <glm/glm.hpp>
 #include <vector>
 
-
 class Plane : public Renderer<Plane>, public Transform {
 	public:
 		Plane(GLfloat x_len = 1.f, GLfloat dx = .5f, GLfloat z_len = 1.f, GLfloat dz = .5f);
