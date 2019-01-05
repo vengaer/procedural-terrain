@@ -2,8 +2,8 @@
 #define UNIFORM_IMPL_H
 
 #pragma once
-#include "fold.h"
 #include "traits.h"
+#include "type_conversion.h"
 #include <cstddef>
 #include <glm/glm.hpp>
 #include <type_traits>
@@ -133,15 +133,15 @@ namespace uniform {
 			using first_unqualified_t = remove_cvref_t<remove_cvptr_t<first_t>>;
 		public:
 			static TensorOrder constexpr tensor_order() {
-				/* Muliple components => vector */
+				/* Muliple function parameters  => vector */
 				if constexpr(sizeof...(Args) > 1)
 					return TensorOrder::_1st;
 
-				/* Single components or glm constructs */
+				/* Scalars or glm constructs */
 				return enum_cast<TensorOrder>(order_v<first_unqualified_t>);
 			}
 			static DecayType constexpr decay_type() {
-				/* int, uint or float non-pointer */
+				/* int, uint or float */
 				if constexpr(sizeof...(Args) > 1 || std::is_fundamental_v<first_t>){
 					if constexpr(std::is_integral_v<first_t>){
 						if constexpr(std::is_unsigned_v<first_t>)
@@ -167,7 +167,7 @@ namespace uniform {
 			}
 			static TensorDimensions constexpr tensor_dimensions() {
 
-				/* Mulitple components passed separately */
+				/* Mulitple parameters passed to function => dim is number of parameters */
 				if constexpr(sizeof...(Args) > 1)
 					return enum_cast<TensorDimensions>(sizeof...(Args));
 
