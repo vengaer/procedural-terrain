@@ -26,9 +26,13 @@ template <typename... Args>
 void EventHandler::init(Args&&... args) {
 	inserter<std::vector<GLuint>>{}(shader_ids_, std::forward<decltype(std::declval<Args>().program_id())...>(args.program_id())...);
 
-	glfwSetWindowSizeCallback(window_.glfw_window(), size_callback);
-	glfwSetInputMode(window_.glfw_window(), GLFW_STICKY_KEYS, GL_TRUE);
-	glfwSetKeyCallback(window_.glfw_window(), key_callback);
+	auto* glfw_window = window_.glfw_window();
+
+	glfwSetInputMode(glfw_window, GLFW_STICKY_KEYS, GL_TRUE);
+	glfwSetKeyCallback(glfw_window, key_callback);
+	glfwSetInputMode(glfw_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetCursorPosCallback(glfw_window, mouse_callback);
+	glfwSetWindowSizeCallback(glfw_window, size_callback);
 }
 
 template <typename... Args>

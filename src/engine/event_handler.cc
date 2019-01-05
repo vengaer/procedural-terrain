@@ -5,22 +5,19 @@ void EventHandler::update_perspective(float width, float height) {
 
 	perspective_ = glm::perspective(glm::radians(instance_->camera_.fov()), width/height, near, far);
 	
-	for(auto const& id : shader_ids_)
+	for(auto const& id : shader_ids_){
+		Shader::enable(id);
 		Shader::upload_uniform(id, PROJECTION_UNIFORM_NAME, perspective_);
+	}
 }
 
 void EventHandler::update_view() {
 	glm::mat4 const view = instance_->camera_.view();
 
-	for(auto const& id : shader_ids_)
+	for(auto const& id : shader_ids_) {
+		Shader::enable(id);
 		Shader::upload_uniform(id, VIEW_UNIFORM_NAME, view);
-}
-
-void EventHandler::size_callback(GLFWwindow*, int width, int height) {
-	instance_->window_.set_dimensions(static_cast<std::size_t>(width), static_cast<std::size_t>(height));
-	glViewport(0, 0, width, height);
-
-	update_perspective(static_cast<float>(width), static_cast<float>(height));
+	}
 }
 
 void EventHandler::key_callback(GLFWwindow*, int key, int, int, int mod_bits) {
@@ -117,9 +114,34 @@ EventHandler::KeyModifiers EventHandler::modifier_states(int mod_bits) {
 	return mod;
 }
 
+void EventHandler::mouse_callback(GLFWwindow*, double x, double y) {
+	double delta_x = x - mouse_position_.x;
+	double delta_y = y - mouse_position_.y;
+
+	if(!mouse_active_){
+		mouse_active_ = true;
+	}
+	else
+		instance_->camera_.rotate(safe_cast<float>(delta_x), safe_cast<float>(delta_y));
+
+	mouse_position_ = { x, y };
+	update_view();
+}
+
+void EventHandler::size_callback(GLFWwindow*, int width, int height) {
+	instance_->window_.set_dimensions(static_cast<std::size_t>(width), static_cast<std::size_t>(height));
+	glViewport(0, 0, width, height);
+
+	update_perspective(static_cast<float>(width), static_cast<float>(height));
+}
+
+
+
 std::string const EventHandler::PROJECTION_UNIFORM_NAME = "ufrm_projection";
 std::string const EventHandler::VIEW_UNIFORM_NAME = "ufrm_view";
 std::vector<GLuint> EventHandler::shader_ids_{};
 bool EventHandler::instantiated_ = false;
+bool EventHandler::mouse_active_ = false;
 glm::mat4 EventHandler::perspective_{};
 EventHandler* EventHandler::instance_ = nullptr;
+EventHandler::MousePosition EventHandler::mouse_position_{};
