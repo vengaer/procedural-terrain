@@ -4,13 +4,15 @@ namespace frametime {
 	std::size_t constexpr MEAN_FRAMES = 100u;
 	float const START_TIME = static_cast<float>(glfwGetTime());
 
-	
 	std::deque<float> frame_times(MEAN_FRAMES);
 	
 	float current_frame{0.f}, last_frame{0.f}, delta_time{0.f} ;
 }
 
+
+
 void frametime::update() {
+
 	current_frame = static_cast<float>(glfwGetTime());
 	delta_time = current_frame - last_frame;
 	last_frame = current_frame;
