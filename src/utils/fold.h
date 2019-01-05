@@ -17,7 +17,7 @@ Numeric constexpr enum_value(Enum e) {
 }
 
 template <typename Enum,
-		  typename Integral = std::underlying_type_t<Enum>,
+		  typename Integral,
 		  typename = std::enable_if_t<std::is_enum_v<Enum> && 
 					 std::is_integral_v<remove_cvref_t<Integral>> &&
 					 std::is_convertible_v<Integral, std::underlying_type_t<Enum>>>>
@@ -35,25 +35,25 @@ template <typename Enum, typename... Rest>
 inline std::size_t constexpr enum_size_v = enum_size<Enum, Rest...>::value;
 
 template <typename Enum, typename... Rest>
-struct fold_enums_impl {
+struct enum_fold_impl {
 	static std::size_t constexpr fold(Enum e, Rest... rest) {
-		return enum_value(e) * enum_size_v<Rest...> + fold_enums_impl<Rest...>::fold(rest...);
+		return enum_value(e) * enum_size_v<Rest...> + enum_fold_impl<Rest...>::fold(rest...);
 	}
 };
 
 template <typename Enum>
-struct fold_enums_impl<Enum> {
+struct enum_fold_impl<Enum> {
 	static std::size_t constexpr fold(Enum e) {
 		return enum_value(e);
 	}
 };
 
 template <typename Enum, typename... Rest>
-struct fold_enums {
+struct enum_fold {
 	static_assert(std::is_enum_v<Enum> && (std::is_enum_v<Rest> && ...), "Cannot fold non-enum type");
 
 	constexpr std::size_t operator()(Enum e, Rest... rest) {
-		return fold_enums_impl<Enum, Rest...>::fold(e, rest...);
+		return enum_fold_impl<Enum, Rest...>::fold(e, rest...);
 	}
 };
 

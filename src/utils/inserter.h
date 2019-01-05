@@ -11,52 +11,53 @@
 #include <type_traits>
 #include <utility>
 
-template <typename Container, typename P0, typename... P1toN>
+template <typename Container, typename T, typename P0, typename... P1toN>
 struct inserter_helper {
+	template <typename = void>
 	static void insert(Container& c, P0&& head, P1toN&&... tail) {
 		c.insert(std::end(c), std::forward<P0>(head));
 		if constexpr(sizeof...(tail) > 0)
-			inserter_helper<Container, P1toN...>::insert(c, std::forward<P1toN>(tail)...);
+			inserter_helper<Container, T, P1toN...>::insert(c, std::forward<P1toN>(tail)...);
 	}
 };
 
-template <typename P0, typename... P1toN>
-struct inserter_helper<std::forward_list<P0>, P0, P1toN...> {
+template <typename T, typename P0, typename... P1toN>
+struct inserter_helper<std::forward_list<T>, T, P0, P1toN...> {
 
-	static void insert(std::forward_list<P0>& c, P0&& head, P1toN&&... tail) {
+	static void insert(std::forward_list<T>& c, P0&& head, P1toN&&... tail) {
 		c.push_front(std::forward<P0>(head));
 		if constexpr(sizeof...(tail) > 0)
-			inserter_helper<std::forward_list<P0>, P1toN...>::insert(c, std::forward<P1toN>(tail)...);
+			inserter_helper<std::forward_list<T>, T, P1toN...>::insert(c, std::forward<P1toN>(tail)...);
 	}
 };
 
-template <typename P0, typename... P1toN>
-struct inserter_helper<std::stack<P0>, P0, P1toN...> {
+template <typename T, typename P0, typename... P1toN>
+struct inserter_helper<std::stack<T>, T, P0, P1toN...> {
 	
-	static void insert(std::stack<P0>& c, P0&& head, P1toN&&... tail) {
+	static void insert(std::stack<T>& c, P0&& head, P1toN&&... tail) {
 		c.push(std::forward<P0>(head));
 		if constexpr(sizeof...(tail) > 0)
-			inserter_helper<std::stack<P0>, P1toN...>::insert(c, std::forward<P1toN>(tail)...);
+			inserter_helper<std::stack<T>, T, P1toN...>::insert(c, std::forward<P1toN>(tail)...);
 	}
 };
 
-template <typename P0, typename... P1toN>
-struct inserter_helper<std::queue<P0>, P0, P1toN...> {
+template <typename T, typename P0, typename... P1toN>
+struct inserter_helper<std::queue<T>, T, P0, P1toN...> {
 
-	static void insert(std::queue<P0>& c, P0&& head, P1toN&&... tail) {
+	static void insert(std::queue<T>& c, P0&& head, P1toN&&... tail) {
 		c.push(std::forward<P0>(head));
 		if constexpr(sizeof...(tail) > 0)
-			inserter_helper<std::queue<P0>, P1toN...>::insert(c, std::forward<P1toN>(tail)...);
+			inserter_helper<std::queue<T>, T, P1toN...>::insert(c, std::forward<P1toN>(tail)...);
 	}
 };
 
-template <typename P0, typename... P1toN>
-struct inserter_helper<std::priority_queue<P0>, P0, P1toN...> {
+template <typename T, typename P0, typename... P1toN>
+struct inserter_helper<std::priority_queue<T>, T, P0, P1toN...> {
 
-	static void insert(std::priority_queue<P0>& c, P0&& head, P1toN&&... tail) {
+	static void insert(std::priority_queue<T>& c, P0&& head, P1toN&&... tail) {
 		c.push(std::forward<P0>(head));
 		if constexpr(sizeof...(tail) > 0)
-			inserter_helper<std::queue<P0>, P1toN...>::insert(c, std::forward<P1toN>(tail)...);
+			inserter_helper<std::queue<T>, T, P1toN...>::insert(c, std::forward<P1toN>(tail)...);
 	}
 };
 
@@ -87,7 +88,7 @@ struct inserter {
 	template <typename... Args>
 	void operator()(Container& c, Args&&... args) {
 		static_assert(!std::is_const_v<std::remove_reference_t<Container>>, "Call to inserter with const qualified container not supported");
-		static_assert((all_same_v<typename Container::value_type, Args...>), "Types are non-conformant");
+		static_assert((is_convertible_to_all_v<typename Container::value_type, Args...>), "Types are non-conformant");
 
 		if constexpr(is_std_array_v<Container>){
 			static_assert(sizeof...(args) <= std::tuple_size_v<Container>, "Cannot insert a larger number of values than the array supports");
@@ -96,7 +97,7 @@ struct inserter {
 		else{
 			if constexpr (supports_preallocation_v<Container>)
 				c.reserve(sizeof...(args));
-			inserter_helper<Container, Args...>::insert(c, std::forward<Args>(args)...);
+			inserter_helper<Container, typename Container::value_type, Args...>::insert(c, std::forward<Args>(args)...);
 		}
 	}
 };

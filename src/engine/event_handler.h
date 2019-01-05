@@ -54,8 +54,8 @@ class EventHandler {
 		static void update_perspective(float width, float height);
 		static void update_view();
 
-		static void size_callback(GLFWwindow* window, int widht, int height);
-		static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod_bits);
+		static void size_callback(GLFWwindow*, int widht, int height);
+		static void key_callback(GLFWwindow*, int key, int, int, int mod_bits);
 	
 };
 

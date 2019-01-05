@@ -4,34 +4,26 @@ void EventHandler::update_perspective(float width, float height) {
 	auto const [near, far] = instance_->camera_.clipping_plane();
 
 	perspective_ = glm::perspective(glm::radians(instance_->camera_.fov()), width/height, near, far);
-
-	auto constexpr Matrix = Shader::Uniform::Construct::Matrix;
-	auto constexpr _4 = Shader::Uniform::Dimension::_4;
-	auto constexpr FloatPtr = Shader::Uniform::Type::FloatPtr;
 	
 	for(auto const& id : shader_ids_)
-		Shader::upload_uniform<Matrix, _4, FloatPtr>(id, PROJECTION_UNIFORM_NAME, glm::value_ptr(perspective_));
+		Shader::upload_uniform(id, PROJECTION_UNIFORM_NAME, perspective_);
 }
 
 void EventHandler::update_view() {
 	glm::mat4 const view = instance_->camera_.view();
 
-	auto constexpr Matrix = Shader::Uniform::Construct::Matrix;
-	auto constexpr _4 = Shader::Uniform::Dimension::_4;
-	auto constexpr FloatPtr = Shader::Uniform::Type::FloatPtr;
-
 	for(auto const& id : shader_ids_)
-		Shader::upload_uniform<Matrix, _4, FloatPtr>(id, VIEW_UNIFORM_NAME, glm::value_ptr(view));
+		Shader::upload_uniform(id, VIEW_UNIFORM_NAME, view);
 }
 
-void EventHandler::size_callback(GLFWwindow* window, int width, int height) {
+void EventHandler::size_callback(GLFWwindow*, int width, int height) {
 	instance_->window_.set_dimensions(static_cast<std::size_t>(width), static_cast<std::size_t>(height));
 	glViewport(0, 0, width, height);
 
 	update_perspective(static_cast<float>(width), static_cast<float>(height));
 }
 
-void EventHandler::key_callback(GLFWwindow* window, int key, int scancode, int action, int mod_bits) {
+void EventHandler::key_callback(GLFWwindow*, int key, int, int, int mod_bits) {
 	using Dir = Camera::Direction;
 	using Speed = Camera::Speed;
 	using State = KeyModifiers::State;

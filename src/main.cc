@@ -10,6 +10,7 @@
 #include "window.h"
 #include <iostream>
 #include "inserter.h"
+#include "uniform_impl.h"
 
 int main() {
 	unsigned constexpr width = 960, height = 540;
@@ -25,11 +26,9 @@ int main() {
 		Cylinder cyl{};
 		glm::mat4 view{1.f};
 		c.translate(glm::vec3(0.f, 0.5f, 0.f));
+		test.enable();
 
-		using UC = Shader::Uniform::Construct;
-		using UD = Shader::Uniform::Dimension;
-		using UT = Shader::Uniform::Type;
-		test.upload_uniform<UC::Matrix, UD::_4, UT::FloatPtr>("ufrm_model", c.model_matrix());
+		test.upload_uniform("ufrm_model", c.model_matrix());
 
 		glClearColor(0.1f, 0.2f, 0.4f, 0.5f);
 		while(!window.should_close()){

@@ -16,11 +16,23 @@ struct type_is {
 template <typename T>
 using type_is_t = typename type_is<T>::type;
 
+template <std::size_t N>
+struct size_t_constant : std::integral_constant<std::size_t, N> { };
+
+template <std::size_t N>
+inline std::size_t constexpr size_t_constant_v = size_t_constant<N>::value;
+
 template <typename T>
 struct remove_cvref : std::remove_cv<std::remove_reference_t<T>> { };
 
 template <typename T>
 using remove_cvref_t = typename remove_cvref<T>::type;
+
+template <typename T>
+struct remove_cvptr : std::remove_cv<std::remove_pointer_t<T>> { };
+
+template <typename T>
+using remove_cvptr_t = typename remove_cvptr<T>::type;
 
 namespace {
 	template <typename, typename = void>
@@ -54,6 +66,28 @@ struct has_value_type<T, std::void_t<typename T::value_type>> : std::true_type {
 
 template <typename T>
 inline bool constexpr has_value_type_v = has_value_type<T>::value;
+
+template <std::size_t N, typename P0, typename... P1toM>
+struct nth_type : nth_type<N-1, P1toM...> { };
+
+template <typename P0, typename... P1toM>
+struct nth_type<0, P0, P1toM...> : type_is<P0> { };
+
+template <std::size_t N, typename... P0toM>
+using nth_type_t = typename nth_type<N, P0toM...>::type;
+template <std::size_t N, typename P0, typename... P1toM>
+struct nth_value {
+	decltype(auto) constexpr operator()(P0&&, P1toM&&... tail) {			/* constexpr iff parameters are constexpr */
+		return nth_value<N-1, P1toM...>{}(std::forward<P1toM>(tail)...);
+	}
+};
+
+template <typename P0, typename... P1toM>
+struct nth_value<0, P0, P1toM...>{
+	decltype(auto) constexpr operator()(P0&& head, P1toM&&...) {
+		return head;
+	}
+};
 
 /* Variadic type comparisons */
 /* ------------------------- */

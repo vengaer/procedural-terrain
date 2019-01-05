@@ -5,6 +5,7 @@
 #include "exception.h"
 #include "fold.h"
 #include "traits.h"
+#include "uniform_impl.h"
 #include <algorithm>
 #include <array>
 #include <cstddef>
@@ -16,6 +17,7 @@
 #include <stack>
 #include <sstream>
 #include <string>
+#include <type_traits>
 #include <unordered_map>
 #include <vector>
 
@@ -25,12 +27,6 @@ class Shader {
 	public:
 		enum class Type { Vertex, Fragment };
 
-		struct Uniform {
-			enum class Construct { Vector, Matrix, End_};
-			enum class Dimension { _1 = 1, _2, _3, _4, _2x3, _3x2, _2x4, _4x2, _3x4, _4x3, End_ };
-			enum class Type { Float, Int, Uint, FloatPtr, IntPtr, UintPtr, End_};
-		};
-
 		Shader(std::string const& shader1, Type type1, std::string const& shader2, Type type2, std::size_t include_depth = 8);
 
 		void enable() const;
@@ -38,16 +34,15 @@ class Shader {
 
 		GLuint program_id() const;
 		
-		template <Shader::Uniform::Construct UC,
-				  Shader::Uniform::Dimension UD,
-				  Shader::Uniform::Type UT,
-				  typename... Args>
+		/* (Indirect) Wrappers for glUniform */
+		/* Pass any arithmetic fundamental type, glm::vec (except glm::bvec) or glm::mat and the correct glUniform function will be
+ 		 * deduced. As the deduction relies on the type passed, pointers are not supported.
+ 		 * 	- If passing arithmetic types, any number between 1 and 4 works and calls the correct glUniform.
+ 		 *  - glm types should be passed directly and not by calling glm::value_ptr, using &...[0] or anything smiliar */
+		template <typename... Args>
 		void upload_uniform(std::string const& name, Args&&... args);
 
-		template <Shader::Uniform::Construct UC,
-				  Shader::Uniform::Dimension UD,
-				  Shader::Uniform::Type UT,
-				  typename... Args>
+		template <typename... Args>
 		static void upload_uniform(GLuint program, std::string const& name, Args&&... args);
 
 	private:
@@ -72,11 +67,8 @@ class Shader {
 
 		AssertionResult assert_shader_status_ok(GLuint id, StatusQuery sq) const;
 
-		template <Shader::Uniform::Construct UC,
-				  Shader::Uniform::Dimension UD,
-				  Shader::Uniform::Type UT,
-				  typename... Args>
-		static void upload_uniform_impl(GLint location, Args&&... args);
+		template <typename... Args>
+		static void upload_uniform(GLint location, Args&&... args);
 
 };
 
