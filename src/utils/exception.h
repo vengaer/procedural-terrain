@@ -6,43 +6,47 @@
 #include <string>
 
 struct ArgumentMismatchException : std::runtime_error {
-	ArgumentMismatchException(std::string const& what_msg) : std::runtime_error{what_msg} {}
-};
-
-struct FileIOException : std::runtime_error {
-	FileIOException(std::string const& what_msg) : std::runtime_error{what_msg} {}
-};
-
-struct GLException : std::runtime_error { 
-	GLException(std::string const& what_msg) : std::runtime_error{what_msg} {} 
-};
-
-struct InvalidArgumentException : std::runtime_error {
-	InvalidArgumentException(std::string const& what_msg) : std::runtime_error{what_msg} {}
-};
-
-struct InvalidVersionException : std::runtime_error {
-	InvalidVersionException(std::string const& what_msg) : std::runtime_error{what_msg} {}
-};
-
-struct OverflowException : std::overflow_error {
-	OverflowException(std::string const& what_msg) : std::overflow_error{what_msg} {}
-};
-
-struct ShaderCompilationException : std::runtime_error {
-	ShaderCompilationException(std::string const& what_msg) : std::runtime_error{what_msg} {}
-};
-
-struct ShaderIncludeException : std::runtime_error {
-	ShaderIncludeException(std::string const& what_msg) : std::runtime_error{what_msg} {}
-};
-
-struct ShaderLinkingException : std::runtime_error {
-	ShaderLinkingException(std::string const& what_msg) : std::runtime_error{what_msg} {}
+	using std::runtime_error::runtime_error;
 };
 
 struct BadUniformParametersException : std::runtime_error {
-	BadUniformParametersException(std::string const& what_msg) : std::runtime_error{what_msg} {}
+	using std::runtime_error::runtime_error;
+};
+
+struct FileIOException : std::runtime_error {
+	using std::runtime_error::runtime_error;
+};
+
+struct GLException : std::runtime_error { 
+	using std::runtime_error::runtime_error;
+};
+
+struct InvalidArgumentException : std::runtime_error {
+	using std::runtime_error::runtime_error;
+};
+
+struct InvalidVersionException : std::runtime_error {
+	using std::runtime_error::runtime_error;
+};
+
+struct OverflowException : std::overflow_error {
+	using std::overflow_error::overflow_error;
+};
+
+struct ShaderCompilationException : std::runtime_error {
+	using std::runtime_error::runtime_error;
+};
+
+struct ShaderIncludeException : std::runtime_error {
+	using std::runtime_error::runtime_error;
+};
+
+struct ShaderLinkingException : std::runtime_error {
+	using std::runtime_error::runtime_error;
+};
+
+struct UnderflowException : std::underflow_error {
+	using std::underflow_error::underflow_error;
 };
 
 #endif
