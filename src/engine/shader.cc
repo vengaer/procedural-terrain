@@ -3,7 +3,11 @@
 Shader::Shader(std::string const& shader1, Type type1, std::string const& shader2, Type type2, std::size_t max_depth) : depth_{max_depth}, program_{init(shader1, type1, shader2, type2)}, uniforms_{} {}
 
 void Shader::enable() const {
-	glUseProgram(program_);
+	enable(program_);
+}
+
+void Shader::enable(GLuint program) {
+	glUseProgram(program);
 }
 
 void Shader::disable() {

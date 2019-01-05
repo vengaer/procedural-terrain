@@ -3,8 +3,8 @@
 
 #pragma once
 #include "exception.h"
-#include "fold.h"
 #include "traits.h"
+#include "type_conversion.h"
 #include "uniform_impl.h"
 #include <algorithm>
 #include <array>
@@ -30,6 +30,7 @@ class Shader {
 		Shader(std::string const& shader1, Type type1, std::string const& shader2, Type type2, std::size_t include_depth = 8);
 
 		void enable() const;
+		static void enable(GLuint program);
 		static void disable();
 
 		GLuint program_id() const;
