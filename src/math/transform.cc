@@ -17,7 +17,7 @@ void Transform::scale(glm::vec3 scaling_vector) {
 }
 
 void Transform::scale(float magnitude, Axis axis) {
-	glm::vec3 scaling_vector{0.f};
+	glm::vec3 scaling_vector{1.f};
 	scaling_vector[enum_value(axis)] = magnitude;
 	scale(scaling_vector);
 }
@@ -41,6 +41,6 @@ void Transform::reset_transforms() {
 		transforms_.pop();
 }
 	
-Transform::value_ptr_t Transform::model_matrix() const {
-	return glm::value_ptr(transforms_.top());
+glm::mat4 Transform::model_matrix() const {
+	return transforms_.top();
 }
