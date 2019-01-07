@@ -20,13 +20,12 @@ void Shader::upload_uniform(GLuint program, std::string const& name, Args&&... a
 }
 
 /* The compiler uses this template to generate functions that at runtime perform a call to the correct
- * version of glUniform and absolutely nothing else */
+ * version of glUniform and nothing else */
 template <typename... Args>
 void Shader::upload_uniform(GLint location, Args&&... args) {
 	static_assert(sizeof...(args) <= 4 && sizeof...(args) > 0, "Function must be given 1 to 4 parameters");
 	static_assert(all_same_v<Args...>, "All parameters must be of the same type");
 	static_assert((!std::is_pointer_v<Args> && ...), "Pointers are not supported. If using glm, pass the entire object rather than calling glm::value_ptr");
-
 
 	using order_t = uniform::TensorOrder;
 	using decay_t = uniform::DecayType;	
@@ -72,7 +71,7 @@ void Shader::upload_uniform(GLint location, Args&&... args) {
 		else if constexpr (fold(order, decay, dim) == fold(order_t::_1st, decay_t::Uint, dim_t::_4))
 			glUniform4ui(location, std::forward<Args>(args)...);
 	}
-	/* Args are glm types, safe to call value_ptr */
+	/* Args are glm types, safe to call glm::value_ptr */
 	else {
 		static_assert(sizeof...(args) == 1, "Only a single non-fundamental type may be passed");
 

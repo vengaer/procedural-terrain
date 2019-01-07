@@ -41,10 +41,10 @@ class Shader {
  		 * 	- If passing arithmetic types, any number between 1 and 4 works and calls the correct glUniform.
  		 *  - glm types should be passed directly and not by calling glm::value_ptr, using &...[0] or anything smiliar */
 		template <typename... Args>
-		void upload_uniform(std::string const& name, Args&&... args);
+		void upload_uniform(std::string const& name, Args&&... args);							/* Stores uniform locations in hash map */
 
 		template <typename... Args>
-		static void upload_uniform(GLuint program, std::string const& name, Args&&... args);
+		static void upload_uniform(GLuint program, std::string const& name, Args&&... args);    /* Always calls glGetUniformLocation */
 
 	private:
 		std::size_t const depth_; /* Max recursive include depth */

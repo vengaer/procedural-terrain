@@ -48,7 +48,6 @@ class EventHandler {
 		
 		static std::vector<GLuint> shader_ids_;
 		static bool instantiated_;
-		static bool mouse_active_;
 		static glm::mat4 perspective_;
 		static EventHandler* instance_;
 		static MousePosition mouse_position_;

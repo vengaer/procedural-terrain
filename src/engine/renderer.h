@@ -58,7 +58,7 @@ struct render_helper<automatic_shader_activation_tag> {
 	}
 };
 
-template <typename T, typename ShaderTag = manual_shader_activation_tag>
+template <typename T, typename ShaderPolicy = manual_shader_activation_tag>
 class Renderer {
 	public:
 		void render() const;
@@ -74,7 +74,7 @@ class Renderer {
 		GLuint idx_buffer_;
 		GLuint idx_size_;
 		GLuint shader_id_;
-		render_helper<ShaderTag> helper_;
+		render_helper<ShaderPolicy> helper_;
 	
 		/* Tag dispatch */
 		GLuint constexpr size(vertices_tag) const;

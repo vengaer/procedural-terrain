@@ -26,14 +26,10 @@ Enum constexpr enum_cast(Integral value) {
 
 template <typename T, typename F, typename = std::enable_if_t<std::is_convertible_v<T,F>>>
 T safe_cast(F from) {
-	if(std::numeric_limits<T>::max() < from) {
-		from = std::numeric_limits<T>::max();
-		std::cerr << "Overflow caught, clamping value\n";
-	}
-	if(std::numeric_limits<T>::lowest() > from){
-		from = std::numeric_limits<T>::lowest();
-		std::cerr << "Underflow caught, clamping value\n";
-	}
+	if(std::numeric_limits<T>::max() < from) 
+		throw OverflowException{"Overflow during cast\n"};
+	if(std::numeric_limits<T>::lowest() > from)
+		throw UnderflowException{"Underflow during cast\n"};
 
 	return static_cast<T>(from);
 }
