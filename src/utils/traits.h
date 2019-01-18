@@ -4,6 +4,9 @@
 #pragma once
 #include <array>
 #include <cstddef>
+#include <iostream>
+#include <iterator>
+#include <tuple>
 #include <type_traits>
 #include <utility>
 #include <vector>
@@ -34,29 +37,33 @@ struct remove_cvptr : std::remove_cv<std::remove_pointer_t<T>> { };
 template <typename T>
 using remove_cvptr_t = typename remove_cvptr<T>::type;
 
-namespace {
-	template <typename, typename = void>
-	struct fundamental_type_impl { };
+template <typename, typename = void>
+struct fundamental_type_impl { };
 
-	template <typename T>
-	struct fundamental_type_impl<T, std::enable_if_t<std::is_fundamental_v<T>>> : type_is<T> { };
+template <typename T>
+struct fundamental_type_impl<T, std::enable_if_t<std::is_fundamental_v<T>>> : type_is<T> { };
 
-	template <typename T>
-	struct fundamental_type_impl<T, std::void_t<typename T::value_type>> : std::conditional_t<
-																					std::is_fundamental_v<typename T::value_type>,
-																					type_is<typename T::value_type>,
-																					fundamental_type_impl<typename T::value_type>
-																				> { };
-	
-	template <typename T>
-	struct fundamental_type_impl<T*> : type_is<T> { };
-}
+template <typename T>
+struct fundamental_type_impl<T, std::void_t<typename T::value_type>> : std::conditional_t<
+																				std::is_fundamental_v<typename T::value_type>,
+																				type_is<typename T::value_type>,
+																				fundamental_type_impl<typename T::value_type>
+																			> { };
+
+template <typename T>
+struct fundamental_type_impl<T*> : type_is<T> { };
 
 template <typename T>
 struct fundamental_type : fundamental_type_impl<std::decay_t<T>> { };
 
 template <typename T>
 using fundamental_type_t = typename fundamental_type<T>::type;
+
+template <typename T>
+struct value_type : type_is<typename std::iterator_traits<decltype(std::cbegin(std::declval<T>()))>::value_type> { };
+
+template <typename T>
+using value_type_t = typename value_type<T>::type;
 
 template <typename, typename = void>
 struct has_value_type : std::false_type { };
@@ -75,6 +82,7 @@ struct nth_type<0, P0, P1toM...> : type_is<P0> { };
 
 template <std::size_t N, typename... P0toM>
 using nth_type_t = typename nth_type<N, P0toM...>::type;
+
 template <std::size_t N, typename P0, typename... P1toM>
 struct nth_value {
 	decltype(auto) constexpr operator()(P0&&, P1toM&&... tail) {			/* constexpr iff parameters are constexpr */
@@ -88,6 +96,71 @@ struct nth_value<0, P0, P1toM...>{
 		return head;
 	}
 };
+
+template <std::size_t N, typename... Args>
+decltype(auto) constexpr get(Args&&... args) {
+	return std::get<N>(std::forward_as_tuple(args...));
+}
+
+template <typename T>
+struct get_iterator : std::conditional<std::is_const_v<std::remove_reference_t<T>>,
+									   decltype(std::cbegin(std::declval<T&>())),
+									   decltype(std::begin(std::declval<T&>()))> { };
+
+template <typename T>
+using get_iterator_t = typename get_iterator<T>::type;
+
+template <typename T>
+struct satisfies_input_iterator : std::is_base_of<
+									std::input_iterator_tag,
+									typename std::iterator_traits<T>::iterator_category
+								  > { };
+
+template <typename T>
+inline bool constexpr satisfies_input_iterator_v = satisfies_input_iterator<T>::value;
+
+template <typename T>
+struct satisfies_forward_iterator : std::is_base_of<
+									std::forward_iterator_tag,
+									typename std::iterator_traits<T>::iterator_category
+								  > { };
+
+template <typename T>
+inline bool constexpr satisfies_forward_iterator_v = satisfies_forward_iterator<T>::value;
+
+template <typename T>
+struct satisfies_bidirectional_iterator : std::is_base_of<
+									std::bidirectional_iterator_tag,
+									typename std::iterator_traits<T>::iterator_category
+								  > { };
+template <typename T>
+inline bool constexpr satisfies_bidirectional_iterator_v = satisfies_bidirectional_iterator<T>::value;
+
+template <typename T>
+struct satisfies_random_access_iterator : std::is_base_of<
+									std::random_access_iterator_tag,
+									typename std::iterator_traits<T>::iterator_category
+								  > { };
+template <typename T>
+inline bool constexpr satisfies_random_access_iterator_v = satisfies_random_access_iterator<T>::value;
+
+template <typename, typename = void>
+struct satisfies_stream_extraction : std::false_type { };
+
+template <typename T>
+struct satisfies_stream_extraction<T, std::void_t<decltype(std::declval<std::istream>() >> std::declval<T&>())>> : std::true_type { };
+
+template <typename T>
+inline bool constexpr satisfies_stream_extraction_v = satisfies_stream_extraction<T>::value;
+
+template <typename, typename = void>
+struct satisfies_stream_insertion : std::false_type { };
+
+template <typename T>
+struct satisfies_stream_insertion<T, std::void_t<decltype(std::declval<std::ostream>() << std::declval<T>())>> : std::true_type { };
+
+template <typename T>
+inline bool constexpr satisfies_stream_insertion_v = satisfies_stream_insertion<T>::value;
 
 /* Variadic type comparisons */
 /* ------------------------- */
@@ -119,83 +192,81 @@ template <typename T, typename... P0toN>
 inline bool constexpr is_convertible_to_one_of_v = is_convertible_to_one_of<T, P0toN...>::value;
 
 /* Helpers */
-namespace {
-	template <typename>
-	struct is_std_array_impl : std::false_type { };
+template <typename>
+struct is_std_array_impl : std::false_type { };
 
-	template <typename T, std::size_t N>
-	struct is_std_array_impl<std::array<T,N>> : std::true_type { };
-
-
-	template <typename, typename = void>
-	struct has_subscript_operator_impl : std::false_type { };
-
-	template <typename T>
-	struct has_subscript_operator_impl<T, std::void_t<decltype(std::declval<T>().operator[](std::declval<std::size_t>()))>> : std::true_type { };
-
-	template <typename T, std::size_t N>
-	struct has_subscript_operator_impl<T[N]> : std::true_type { };
-
-	template <typename T>
-	struct has_subscript_operator_impl<T[]> : std::true_type { };
+template <typename T, std::size_t N>
+struct is_std_array_impl<std::array<T,N>> : std::true_type { };
 
 
-	template <typename>
-	struct is_contiguously_stored_impl : std::false_type { };
-	
-	template <typename T, typename... Ts>
-	struct is_contiguously_stored_impl<std::vector<T, Ts...>> : std::true_type { };
+template <typename, typename = void>
+struct has_subscript_operator_impl : std::false_type { };
 
-	template <typename T, std::size_t N>
-	struct is_contiguously_stored_impl<std::array<T, N>> : std::true_type { };
+template <typename T>
+struct has_subscript_operator_impl<T, std::void_t<decltype(std::declval<T>().operator[](std::declval<std::size_t>()))>> : std::true_type { };
 
-	template <typename T, std::size_t N>
-	struct is_contiguously_stored_impl<T[N]> : std::true_type { };
-	
-	template <typename T>
-	struct is_contiguously_stored_impl<T[]> : std::true_type { };
+template <typename T, std::size_t N>
+struct has_subscript_operator_impl<T[N]> : std::true_type { };
+
+template <typename T>
+struct has_subscript_operator_impl<T[]> : std::true_type { };
 
 
-	template <typename, typename = void>
-	struct wraps_numeric_type_impl : std::false_type { };
+template <typename>
+struct is_contiguously_stored_impl : std::false_type { };
 
-	template <typename T>
-	struct wraps_numeric_type_impl<T, std::void_t<typename T::value_type>> : std::is_arithmetic<typename T::value_type> { };
+template <typename T, typename... Ts>
+struct is_contiguously_stored_impl<std::vector<T, Ts...>> : std::true_type { };
 
-	template <typename T, std::size_t N>
-	struct wraps_numeric_type_impl<T[N]> : std::is_arithmetic<T> { };
-	
-	template <typename T>
-	struct wraps_numeric_type_impl<T[]> : std::is_arithmetic<T> { };
+template <typename T, std::size_t N>
+struct is_contiguously_stored_impl<std::array<T, N>> : std::true_type { };
 
+template <typename T, std::size_t N>
+struct is_contiguously_stored_impl<T[N]> : std::true_type { };
 
-	template <typename, typename = void>
-	struct wraps_integral_type_impl : std::false_type { };
-
-	template <typename T>
-	struct wraps_integral_type_impl<T, std::void_t<typename T::value_type>> : std::is_integral<typename T::value_type> { };
-
-	template <typename T, std::size_t N>
-	struct wraps_integral_type_impl<T[N]> : std::is_integral<T> { };
-	
-	template <typename T>
-	struct wraps_integral_type_impl<T[]> : std::is_integral<T> { };
+template <typename T>
+struct is_contiguously_stored_impl<T[]> : std::true_type { };
 
 
-	template <typename, typename = void>
-	struct wraps_unsigned_type_impl : std::false_type { };
+template <typename, typename = void>
+struct wraps_numeric_type_impl : std::false_type { };
 
-	template <typename T>
-	struct wraps_unsigned_type_impl<T, std::void_t<typename T::value_type>> : std::is_unsigned<typename T::value_type> { };
+template <typename T>
+struct wraps_numeric_type_impl<T, std::void_t<typename T::value_type>> : std::is_arithmetic<typename T::value_type> { };
 
-	template <typename T, std::size_t N>
-	struct wraps_unsigned_type_impl<T[N]> : std::is_unsigned<T> { };
+template <typename T, std::size_t N>
+struct wraps_numeric_type_impl<T[N]> : std::is_arithmetic<T> { };
 
-	template <typename T>
-	struct wraps_unsigned_type_impl<T[]> : std::is_unsigned<T> { };
+template <typename T>
+struct wraps_numeric_type_impl<T[]> : std::is_arithmetic<T> { };
 
 
-}
+template <typename, typename = void>
+struct wraps_integral_type_impl : std::false_type { };
+
+template <typename T>
+struct wraps_integral_type_impl<T, std::void_t<typename T::value_type>> : std::is_integral<typename T::value_type> { };
+
+template <typename T, std::size_t N>
+struct wraps_integral_type_impl<T[N]> : std::is_integral<T> { };
+
+template <typename T>
+struct wraps_integral_type_impl<T[]> : std::is_integral<T> { };
+
+
+template <typename, typename = void>
+struct wraps_unsigned_type_impl : std::false_type { };
+
+template <typename T>
+struct wraps_unsigned_type_impl<T, std::void_t<typename T::value_type>> : std::is_unsigned<typename T::value_type> { };
+
+template <typename T, std::size_t N>
+struct wraps_unsigned_type_impl<T[N]> : std::is_unsigned<T> { };
+
+template <typename T>
+struct wraps_unsigned_type_impl<T[]> : std::is_unsigned<T> { };
+
+
 
 /* Container traits */
 /* ---------------- */

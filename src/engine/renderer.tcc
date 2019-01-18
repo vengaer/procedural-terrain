@@ -1,11 +1,13 @@
 template <typename T, typename ShaderPolicy>
-Renderer<T, ShaderPolicy>::Renderer(GLuint shader_id) : vao_{0u}, vbo_{0u}, idx_buffer_{0u}, idx_size_{0u}, shader_id_{shader_id}, helper_{} {
+Renderer<T, ShaderPolicy>::Renderer() : vao_{0u}, vbo_{0u}, idx_buffer_{0u}, idx_size_{0u}  {
 	static_assert(is_renderable_v<T>, "Type does not fulfill the rendering requirements");
 }
 
 template <typename T, typename ShaderPolicy>
 void Renderer<T, ShaderPolicy>::render() const {
-	helper_(vao_, idx_size_, shader_id_);
+	glBindVertexArray(vao_);
+	glDrawElements(GL_TRIANGLES, idx_size_, GL_UNSIGNED_INT, (void*)0);
+	glBindVertexArray(0);
 }
 
 template <typename T, typename ShaderPolicy>

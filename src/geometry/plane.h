@@ -9,6 +9,7 @@
 #include <cstddef>
 #include <GL/glew.h>
 #include <glm/glm.hpp>
+#include <type_traits>
 #include <vector>
 
 class Plane : public Renderer<Plane>, public Transform {

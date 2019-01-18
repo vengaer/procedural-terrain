@@ -2,9 +2,9 @@
 #define SHADER_H
 
 #pragma once
+#include "collections.h"
 #include "exception.h"
 #include "traits.h"
-#include "type_conversion.h"
 #include "uniform_impl.h"
 #include <algorithm>
 #include <array>

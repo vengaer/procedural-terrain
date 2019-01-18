@@ -31,41 +31,37 @@
 struct vertices_tag { };
 struct indices_tag { };
 
-struct automatic_shader_activation_tag { };
-struct manual_shader_activation_tag { };
-
-/* TODO: Fix the design dilemma and add ctors that take shaders in derived classes */
 /* TODO: Activate face culling */
-template <typename T>
-struct render_helper { };
 
-template <>
-struct render_helper<manual_shader_activation_tag> {
-	void operator()(GLuint vao, GLuint idx_size, GLuint) const {
+struct manual_shader_activation {
+	void operator()(GLuint vao, GLuint idx_size) const {
 		glBindVertexArray(vao);
 		glDrawElements(GL_TRIANGLES, idx_size, GL_UNSIGNED_INT, (void*)0);
 		glBindVertexArray(0);
 	}
 };
 
-template <>
-struct render_helper<automatic_shader_activation_tag> {
-	void operator()(GLuint vao, GLuint idx_size, GLuint shader_program) const {
-		Shader::enable(shader_program);
+struct automatic_shader_activation {
+	automatic_shader_activation(Shader const& s) : shader_id_{s.program_id()} { };
+	
+	void operator()(GLuint vao, GLuint idx_size) const {
+		Shader::enable(shader_id_);
 		glBindVertexArray(vao);
 		glDrawElements(GL_TRIANGLES, idx_size, GL_UNSIGNED_INT, (void*)0);
 		glBindVertexArray(0);
 	}
+	private:
+		GLuint shader_id_;
 };
 
-template <typename T, typename ShaderPolicy = manual_shader_activation_tag>
+template <typename T, typename ShaderPolicy = manual_shader_activation>
 class Renderer {
 	public:
 		void render() const;
 	
 		static GLuint constexpr VERTEX_SIZE = 8u;
 	protected:
-		Renderer(GLuint shader_id = 0u);
+		Renderer();
 
 		template <typename... Args>
 		void init(Args&&... args);
@@ -73,8 +69,6 @@ class Renderer {
 		GLuint vao_, vbo_;
 		GLuint idx_buffer_;
 		GLuint idx_size_;
-		GLuint shader_id_;
-		render_helper<ShaderPolicy> helper_;
 	
 		/* Tag dispatch */
 		GLuint constexpr size(vertices_tag) const;

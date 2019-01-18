@@ -33,48 +33,4 @@ T safe_cast(F from) {
 
 	return static_cast<T>(from);
 }
-
-template <typename Enum, typename... Rest>
-struct enum_size : size_t_constant<enum_value(Enum::End_) * enum_size<Rest...>::value> { };
-
-template <typename Enum>
-struct enum_size<Enum> : size_t_constant<enum_value(Enum::End_)> { };
-
-template <typename Enum, typename... Rest>
-inline std::size_t constexpr enum_size_v = enum_size<Enum, Rest...>::value;
-
-template <typename Enum, typename... Rest>
-struct enum_fold_impl {
-	static std::size_t constexpr fold(Enum e, Rest... rest) {
-		return enum_value(e) * enum_size_v<Rest...> + enum_fold_impl<Rest...>::fold(rest...);
-	}
-};
-
-template <typename Enum>
-struct enum_fold_impl<Enum> {
-	static std::size_t constexpr fold(Enum e) {
-		return enum_value(e);
-	}
-};
-
-
-/* Inspired by an excellent blog post by Jonathan Boccara found at
- * fluentcpp.com/2017/06/27/how-to-collapse-nested-switch-statements/ */
-/* Combine any number of enums at compile time */
-/* See Shader::upload_uniform(GLint, Args...) in shader.tcc for example of usage */
-/* Requirements:
- * 	- Underlying values are all positive
- * 	- Underlying values are consecutive
- * 	- Has a dummy enumerator called End_, listed last among the enumerators */
-
-template <typename Enum, typename... Rest>
-struct enum_fold {
-	static_assert(std::is_enum_v<Enum> && (std::is_enum_v<Rest> && ...), "Cannot fold non-enum type");
-
-	constexpr std::size_t operator()(Enum e, Rest... rest) {
-		return enum_fold_impl<Enum, Rest...>::fold(e, rest...);
-	}
-};
-
-
 #endif

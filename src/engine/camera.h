@@ -25,7 +25,7 @@ class Camera {
 			   float yaw = 0.f,			/* Relative to negative local z */
 			   float pitch = 0.f,
 			   bool invert_y = false,
-			   float sensitivity = 0.005f,
+			   float sensitivity = 0.002f,
 			   ClippingPlane plane = {0.1f, 100.f});
 
 		void translate(Direction dir, Speed speed = Speed::Default);
