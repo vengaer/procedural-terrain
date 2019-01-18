@@ -61,7 +61,7 @@ typename zip_iterator<Iters...>::ref_tuple_t zip_iterator<Iters...>::dereference
 template <typename... Iters>
 template <typename Tuple, std::size_t... Is>
 bool zip_iterator<Iters...>::compare(Tuple const& l, Tuple const& r, std::index_sequence<Is...>) {
-	return ((std::get<Is>(l) == std::get<Is>(r)), ...);
+	return ((std::get<Is>(l) == std::get<Is>(r)) || ...);
 }
 
 /* zip_collection */
