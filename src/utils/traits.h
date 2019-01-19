@@ -20,10 +20,7 @@ template <typename T>
 using type_is_t = typename type_is<T>::type;
 
 template <std::size_t N>
-struct size_t_constant : std::integral_constant<std::size_t, N> { };
-
-template <std::size_t N>
-inline std::size_t constexpr size_t_constant_v = size_t_constant<N>::value;
+using size_t_constant = std::integral_constant<std::size_t, N>;
 
 template <typename T>
 struct remove_cvref : std::remove_cv<std::remove_reference_t<T>> { };
@@ -109,6 +106,20 @@ struct get_iterator : std::conditional<std::is_const_v<std::remove_reference_t<T
 
 template <typename T>
 using get_iterator_t = typename get_iterator<T>::type;
+
+template <typename, typename = void>
+struct is_const_iterator : std::false_type { };
+
+template <typename T>
+struct is_const_iterator<T, std::enable_if_t<
+								std::is_const_v<
+									std::remove_reference_t<
+										typename std::iterator_traits<T>::reference
+									>
+								>
+							>> : std::true_type  { };
+template <typename T>
+inline bool constexpr is_const_iterator_v = is_const_iterator<T>::value;
 
 template <typename T>
 struct satisfies_input_iterator : std::is_base_of<

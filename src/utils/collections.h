@@ -107,7 +107,7 @@ class fold_iterator {
 
 template <typename Container, typename Op>
 class fold_collection {
-	using cont_iter_t = decltype(std::begin(std::declval<Container>()));
+	using cont_iter_t = decltype(std::cbegin(std::declval<Container>()));
 	public:
 		using value_type = typename std::iterator_traits<cont_iter_t>::value_type;
 		using iterator = fold_iterator<cont_iter_t, Op>;
@@ -126,8 +126,58 @@ class fold_collection {
 
 
 template <typename Container, typename Op = std::plus<value_type_t<Container>>>
-fold_collection<Container, Op> 
-fold(Container const& c, value_type_t<Container> init = {}, Op op = {});
+fold_collection<Container, Op> fold(Container const& c, value_type_t<Container> init = {}, Op op = {});
+
+template <typename Iter>
+class enumerate_iterator {
+	using cont_value_type_t = typename std::iterator_traits<Iter>::value_type;
+	using opt_c_value_type_t = std::conditional_t<is_const_iterator_v<Iter>, 
+												  cont_value_type_t const, 
+												  cont_value_type_t>;
+	using enum_pair_t = std::pair<std::size_t, std::reference_wrapper<opt_c_value_type_t>>;
+	public:
+		using value_type = enum_pair_t;
+		using reference = value_type;
+		using pointer = void;
+		using difference_type = void;
+		using iterator_category = std::forward_iterator_tag;
+
+		enumerate_iterator& operator++();
+		enumerate_iterator operator++(int);
+		reference operator*();
+
+		bool operator==(enumerate_iterator const& rhs) const;
+		bool operator!=(enumerate_iterator const& rhs) const;
+
+	private:
+		Iter it_;
+		std::size_t idx_;
+
+		enumerate_iterator(Iter it);
+
+		template <typename>
+		friend class enumerate_collection;
+};
+
+template <typename Iter>
+class enumerate_collection {
+	public:
+		using iterator = enumerate_iterator<Iter>;
+
+		iterator begin();
+		iterator end();
+	private:
+		iterator begin_, end_;
+
+		enumerate_collection(Iter begin, Iter end);
+		
+		template <typename Container>
+		friend enumerate_collection<get_iterator_t<Container>> enumerate(Container&&);
+};
+
+template <typename Container>
+enumerate_collection<get_iterator_t<Container>> enumerate(Container&& c);
+
 
 template <typename Enum, typename... Rest>
 struct enum_size : size_t_constant<enum_value(Enum::End_) * enum_size<Rest...>::value> { };

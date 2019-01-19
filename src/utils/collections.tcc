@@ -138,3 +138,60 @@ template <typename Container, typename Op = std::plus<value_type_t<Container>>>
 fold_collection<Container, Op> fold(Container const& c, value_type_t<Container> init, Op op) {
 	return fold_collection{c, std::move(init), op};
 } 
+
+/* enumerate_iterator */
+template <typename Iter>
+enumerate_iterator<Iter>::enumerate_iterator(Iter it) : it_{it}, idx_{0u}  { }
+
+template <typename Iter>
+enumerate_iterator<Iter>& enumerate_iterator<Iter>::operator++() {
+	++idx_;
+	++it_;
+	return *this;
+}
+
+template <typename Iter>
+enumerate_iterator<Iter> enumerate_iterator<Iter>::operator++(int) {
+	auto old = *this;
+	++*this;
+	return old;
+}
+
+template <typename Iter>
+typename enumerate_iterator<Iter>::reference enumerate_iterator<Iter>::operator*() {
+	if constexpr(is_const_iterator_v<Iter>)
+		return std::make_pair(idx_, std::cref(*it_));
+
+	return std::make_pair(idx_, std::ref(*it_));
+}
+
+template <typename Iter>
+bool enumerate_iterator<Iter>::operator==(enumerate_iterator const& rhs) const {
+	return it_ == rhs.it_;
+}
+
+template <typename Iter>
+bool enumerate_iterator<Iter>::operator!=(enumerate_iterator const& rhs) const {
+	return !(*this == rhs);
+}
+
+/* enumerate_collection */
+template <typename Iter>
+enumerate_collection<Iter>::enumerate_collection(Iter begin, Iter end) : begin_{begin}, end_{end} { }
+
+template <typename Iter>
+typename enumerate_collection<Iter>::iterator enumerate_collection<Iter>::begin() {
+	return begin_;
+}
+
+template <typename Iter>
+typename enumerate_collection<Iter>::iterator enumerate_collection<Iter>::end() {
+	return end_;
+}
+
+/* enumerate */
+template <typename Container>
+enumerate_collection<get_iterator_t<Container>> enumerate(Container&& c) {
+	using collection_t = enumerate_collection<get_iterator_t<Container>>;
+	return collection_t{opt_c_begin(c), opt_c_end(c)};
+}
