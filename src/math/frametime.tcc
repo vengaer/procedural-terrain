@@ -5,7 +5,8 @@ namespace frametime {
 
 template <typename P0, typename... P1toN>
 void frametime::update_shader_time(P0&& head, P1toN... tail) {
-	Shader::upload_uniform(head.program_id(), TIME_UNIFORM_NAME, static_cast<float>(glfwGetTime()));
+	static_cast<Shader>(head).upload_uniform(TIME_UNIFORM_NAME, static_cast<float>(glfwGetTime()));
+
 	if constexpr (sizeof...(P1toN) > 0)
 		update_shader_time<P1toN...>(std::forward<P1toN>(tail)...);
 }

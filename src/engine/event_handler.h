@@ -9,6 +9,7 @@
 #include "shader.h"
 #include "window.h"
 #include <cmath>
+#include <functional>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -46,7 +47,7 @@ class EventHandler {
 		Camera& camera_;
 		Window& window_;
 		
-		static std::vector<GLuint> shader_ids_;
+		static std::vector<std::reference_wrapper<Shader>> shaders_;
 		static bool instantiated_;
 		static glm::mat4 perspective_;
 		static EventHandler* instance_;

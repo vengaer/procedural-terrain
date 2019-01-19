@@ -5,15 +5,15 @@ void EventHandler::update_perspective(float width, float height) {
 
 	perspective_ = glm::perspective(glm::radians(instance_->camera_.fov()), width/height, near, far);
 	
-	for(auto const& id : shader_ids_)
-		Shader::upload_uniform(id, PROJECTION_UNIFORM_NAME, perspective_);
+	for(auto const& shader : shaders_)
+		shader.get().upload_uniform(PROJECTION_UNIFORM_NAME, perspective_);
 }
 
 void EventHandler::update_view() {
 	glm::mat4 const view = instance_->camera_.view();
 
-	for(auto const& id : shader_ids_) 
-		Shader::upload_uniform(id, VIEW_UNIFORM_NAME, view);
+	for(auto const& shader : shaders_) 
+		shader.get().upload_uniform(VIEW_UNIFORM_NAME, view);
 }
 
 void EventHandler::key_callback(GLFWwindow*, int key, int, int, int mod_bits) {
@@ -131,7 +131,7 @@ void EventHandler::size_callback(GLFWwindow*, int width, int height) {
 
 std::string const EventHandler::PROJECTION_UNIFORM_NAME = "ufrm_projection";
 std::string const EventHandler::VIEW_UNIFORM_NAME = "ufrm_view";
-std::vector<GLuint> EventHandler::shader_ids_{};
+std::vector<std::reference_wrapper<Shader>> EventHandler::shaders_{};
 bool EventHandler::instantiated_ = false;
 glm::mat4 EventHandler::perspective_{};
 EventHandler* EventHandler::instance_ = nullptr;

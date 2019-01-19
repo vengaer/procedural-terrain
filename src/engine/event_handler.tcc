@@ -24,7 +24,7 @@ void EventHandler::instantiate(Window& window, Camera& camera, Args&&... args) {
 
 template <typename... Args>
 void EventHandler::init(Args&&... args) {
-	inserter<std::vector<GLuint>>{}(shader_ids_, std::forward<decltype(std::declval<Args>().program_id())...>(args.program_id())...);
+	inserter<std::vector<std::reference_wrapper<Shader>>>{}(shaders_, std::forward<std::reference_wrapper<Shader>>(std::ref(args))...);
 
 	auto* glfw_window = window_.glfw_window();
 
@@ -39,7 +39,7 @@ template <typename... Args>
 void EventHandler::append_shaders(Args&&... args) {
 	static_assert(all_same_v<Shader, remove_cvref_t<Args>...>, "Parameter pack may only include Shader instances");
 	
-	shader_ids_.reserve(shader_ids_.capacity() + sizeof...(args));
+	shaders_.reserve(shaders_.capacity() + sizeof...(args));
 
-	inserter<std::vector<GLuint>>{}(shader_ids_, std::forward<decltype(std::declval<Args>().program_id())...>(args.program_id())...);;
+	inserter<std::vector<std::reference_wrapper<Shader>>>{}(shaders_, std::forward<std::reference_wrapper<Shader>>(std::ref(args))...);
 }
