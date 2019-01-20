@@ -1,18 +1,18 @@
-template <typename T, typename ShaderPolicy>
-Renderer<T, ShaderPolicy>::Renderer() : vao_{0u}, vbo_{0u}, idx_buffer_{0u}, idx_size_{0u}  {
+template <typename T>
+Renderer<T>::Renderer() : vao_{0u}, vbo_{0u}, idx_buffer_{0u}, idx_size_{0u}  {
 	static_assert(is_renderable_v<T>, "Type does not fulfill the rendering requirements");
 }
 
-template <typename T, typename ShaderPolicy>
-void Renderer<T, ShaderPolicy>::render() const {
+template <typename T>
+void Renderer<T>::render() const {
 	glBindVertexArray(vao_);
 	glDrawElements(GL_TRIANGLES, idx_size_, GL_UNSIGNED_INT, (void*)0);
 	glBindVertexArray(0);
 }
 
-template <typename T, typename ShaderPolicy>
+template <typename T>
 template <typename... Args>
-void Renderer<T, ShaderPolicy>::init(Args&&... args) {
+void Renderer<T>::init(Args&&... args) {
 	/* Initialize T */
 	static_cast<T&>(*this).init(std::forward<Args>(args)...);
 
@@ -72,8 +72,8 @@ void Renderer<T, ShaderPolicy>::init(Args&&... args) {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-template <typename T, typename ShaderPolicy>
-GLuint constexpr Renderer<T, ShaderPolicy>::size(vertices_tag) const {
+template <typename T>
+GLuint constexpr Renderer<T>::size(vertices_tag) const {
 	std::size_t container_size;
 
 	if constexpr(is_contiguously_stored_v<decltype(static_cast<T const&>(*this).vertices())>)
@@ -87,8 +87,8 @@ GLuint constexpr Renderer<T, ShaderPolicy>::size(vertices_tag) const {
 	return static_cast<GLuint>(container_size);
 }
 
-template <typename T, typename ShaderPolicy>
-GLuint constexpr Renderer<T, ShaderPolicy>::size(indices_tag) const {
+template <typename T>
+GLuint constexpr Renderer<T>::size(indices_tag) const {
 	std::size_t container_size;
 
 	if constexpr(is_contiguously_stored_v<decltype(static_cast<T const&>(*this).indices())>)

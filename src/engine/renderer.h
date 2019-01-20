@@ -33,28 +33,8 @@ struct indices_tag { };
 
 /* TODO: Activate face culling */
 
-struct manual_shader_activation {
-	void operator()(GLuint vao, GLuint idx_size) const {
-		glBindVertexArray(vao);
-		glDrawElements(GL_TRIANGLES, idx_size, GL_UNSIGNED_INT, (void*)0);
-		glBindVertexArray(0);
-	}
-};
 
-struct automatic_shader_activation {
-	automatic_shader_activation(Shader const& s) : shader_id_{s.program_id()} { };
-	
-	void operator()(GLuint vao, GLuint idx_size) const {
-		Shader::enable(shader_id_);
-		glBindVertexArray(vao);
-		glDrawElements(GL_TRIANGLES, idx_size, GL_UNSIGNED_INT, (void*)0);
-		glBindVertexArray(0);
-	}
-	private:
-		GLuint shader_id_;
-};
-
-template <typename T, typename ShaderPolicy = manual_shader_activation>
+template <typename T>
 class Renderer {
 	public:
 		void render() const;

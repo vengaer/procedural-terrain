@@ -1,4 +1,5 @@
 #include "plane.h"
+
 Plane::Plane(GLfloat x_len, GLfloat dx, GLfloat z_len, GLfloat dz) : Renderer{}, Transform{}, vertices_{}, indices_{} {
 	/* Initialize Renderer, pass parameters */
 	Renderer<Plane>::init(x_len, dx, z_len, dz);
