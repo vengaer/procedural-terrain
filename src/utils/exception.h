@@ -13,6 +13,10 @@ struct BadUniformParametersException : std::runtime_error {
 	using std::runtime_error::runtime_error;
 };
 
+struct FileSystemException : std::runtime_error {
+	using std::runtime_error::runtime_error;
+};
+
 struct FileIOException : std::runtime_error {
 	using std::runtime_error::runtime_error;
 };

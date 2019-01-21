@@ -8,7 +8,7 @@ OBJ := $(addsuffix .o,$(basename $(SRC)))
 INC = -I src/ -I src/engine/ -I src/geometry/ -I src/math/ -I src/utils/
 
 CXXFLAGS = -std=c++17 -Wall -Wextra -pedantic -Weffc++ $(INC) 
-LDFLAGS = -lGLEW -lglfw -lGL -lm -lX11 -lpthread -ldl
+LDFLAGS = -lGLEW -lglfw -lGL -lm -lX11 -lpthread -ldl -lstdc++fs
 
 terrain: $(OBJ)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS) 
