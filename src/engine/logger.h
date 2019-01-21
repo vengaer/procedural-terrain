@@ -38,8 +38,8 @@ namespace logging {
 	enum class Detail { Default, Verbose };
 }
 
-template <typename T, typename U>
-using enable_on_match_t = std::enable_if_t<std::is_same_v<T, U>>;
+template <typename T, typename U, typename Ret = void>
+using enable_on_match_t = std::enable_if_t<std::is_same_v<T, U>, Ret>;
 
 class LoggerBase {
 		using Severity = logging::Severity;
