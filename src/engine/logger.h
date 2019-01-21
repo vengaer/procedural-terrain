@@ -1,3 +1,5 @@
+#ifndef LOGGER_H
+#define LOGGER_H
 #ifdef LOG_DISABLE_ALL
 #define LOG(...)
 #define LOG_WARN(...)
@@ -9,8 +11,6 @@
 #define E_LOG_WARN(...)
 #define E_LOG_CRIT(...)
 #else
-#ifndef LOGGER_H
-#define LOGGER_H
 
 #pragma once
 #include "exception.h"
