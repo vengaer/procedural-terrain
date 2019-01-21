@@ -84,8 +84,8 @@ template <typename LoggingPolicy, logging::Detail D>
 template <logging::Severity S>
 void Logger<LoggingPolicy, D>::format(std::ostream& os, std::size_t entry_num, std::mutex& mtx) {
 	mtx.lock();
-	os << std::setfill('0') << std::setw(7) << entry_num << " "
-	   << "<" << get_time() << ">" << " - " << "<" << logging::to_string(S) << "> ";
+	os << std::setfill('0') << std::setw(7) << entry_num
+	   << " <" << get_time() << ">" << " - " << "<" << logging::to_string(S) << "> ";
 	/* TODO: Fix correct macros */
 	if constexpr(D == logging::Detail::Verbose) {
 		os << "In function \'" << __FUNCTION__ << "\' on line " << __LINE__ 
