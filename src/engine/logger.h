@@ -92,7 +92,7 @@ class Logger : public FileLogger<LoggingPolicy> {
 static Logger<FileLoggingTag, logging::Detail::Verbose> logger_instance;
 #elif defined(LOG_FULL_DEFAULT)
 static Logger<FileLoggingTag, logging::Detail::Default> logger_instance;
-#elif defined(LOG_STD_STREAM_VERBOSE)
+#elif defined(LOG_STD_ERROUT_VERBOSE)
 static Logger<StdLoggingTag, logging::Detail::Verbose> logger_instance;
 #else
 static Logger<StdLoggingTag, logging::Detail::Default> logger_instance;
