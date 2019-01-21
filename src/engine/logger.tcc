@@ -9,11 +9,9 @@ void FileLogger<T, enable_on_match_t<T, FileLoggingTag>>::init() {
 	fs::path log_dir = fs::current_path();
 	log_dir += "/logs/";
 
-	if(!fs::is_directory(log_dir)) {
-		std::error_code err;
-		if(!fs::create_directory(log_dir, err))
+	if(!fs::is_directory(log_dir))
+		if(std::error_code err; !fs::create_directory(log_dir, err))
 			throw FileSystemException{err.message()};
-	}
 
 	std::string time = Logger<T>::get_time();
 
