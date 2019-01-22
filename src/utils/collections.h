@@ -189,14 +189,14 @@ template <typename Enum, typename... Rest>
 inline std::size_t constexpr enum_size_v = enum_size<Enum, Rest...>::value;
 
 template <typename Enum, typename... Rest>
-struct enum_fold_impl {
+struct bind_enum_impl {
 	static std::size_t constexpr fold(Enum e, Rest... rest) {
-		return enum_value(e) * enum_size_v<Rest...> + enum_fold_impl<Rest...>::fold(rest...);
+		return enum_value(e) * enum_size_v<Rest...> + bind_enum_impl<Rest...>::fold(rest...);
 	}
 };
 
 template <typename Enum>
-struct enum_fold_impl<Enum> {
+struct bind_enum_impl<Enum> {
 	static std::size_t constexpr fold(Enum e) {
 		return enum_value(e);
 	}
@@ -213,11 +213,11 @@ struct enum_fold_impl<Enum> {
  * 	- Has a dummy enumerator called End_, listed last among the enumerators */
 
 template <typename Enum, typename... Rest>
-struct enum_fold {
+struct bind_enum {
 	static_assert(std::is_enum_v<Enum> && (std::is_enum_v<Rest> && ...), "Cannot fold non-enum type");
 
 	constexpr std::size_t operator()(Enum e, Rest... rest) {
-		return enum_fold_impl<Enum, Rest...>::fold(e, rest...);
+		return bind_enum_impl<Enum, Rest...>::fold(e, rest...);
 	}
 };
 

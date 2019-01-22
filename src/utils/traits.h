@@ -22,6 +22,9 @@ using type_is_t = typename type_is<T>::type;
 template <std::size_t N>
 using size_t_constant = std::integral_constant<std::size_t, N>;
 
+template <typename T, typename U, typename Ret = void>
+using enable_on_match_t = std::enable_if_t<std::is_same_v<T, U>, Ret>;
+
 template <typename T>
 struct remove_cvref : std::remove_cv<std::remove_reference_t<T>> { };
 

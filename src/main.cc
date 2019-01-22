@@ -11,10 +11,12 @@
 #include <iostream>
 #include "inserter.h"
 #include "collections.h"
+#define LOG_ERROUT_VERBOSE
 #include "logger.h"
 
 int main() {
 	unsigned constexpr width = 960, height = 540;
+
 	try{
 		Window window{"test", width, height};
 		Shader test("/home/vilhelm/repos/c++/procedural_terrain/src/shaders/plane.vert", Shader::Type::Vertex, "/home/vilhelm/repos/c++/procedural_terrain/src/shaders/plane.frag", Shader::Type::Fragment);

@@ -1,6 +1,6 @@
 #include "shader.h"
 
-Shader::Shader(std::string const& shader1, Type type1, std::string const& shader2, Type type2, std::size_t max_depth) : depth_{max_depth}, program_{init(shader1, type1, shader2, type2)}, uniforms_{} {}
+Shader::Shader(std::string const& shader1, Type type1, std::string const& shader2, Type type2) : program_{init(shader1, type1, shader2, type2)}, uniforms_{}, source_{} {}
 
 void Shader::enable() const {
 	enable(program_);
@@ -18,35 +18,102 @@ GLuint Shader::program_id() const {
 	return program_;
 }
 
+Shader::Source Shader::generate_source_info(std::string const& shader1, Type type1, std::string const& shader2, Type) {
+	namespace fs = std::filesystem;
+	Source result;
+	result.vertex   = type1 == Type::Vertex ? 
+								shader1 :
+								shader2 ;
+	result.fragment = type1 == Type::Fragment ?
+								shader1 :
+								shader2 ;
+	auto [outcome, tuple] = get_last_write_times(result);
+	auto& [message, vert_time, frag_time] = tuple;
+
+	if(outcome == Outcome::Failure)
+		throw FileSystemException{ message };
+	result.vert_write = vert_time;
+	result.frag_write = frag_time;
+
+	return result;
+}
+
+Shader::Result<std::string,
+			   std::filesystem::file_time_type,
+			   std::filesystem::file_time_type
+> Shader::get_last_write_times(Source const& source) noexcept {
+	using namespace std::string_literals;
+	namespace fs = std::filesystem;
+	std::error_code err;
+
+	auto vert_time = fs::last_write_time(source.vertex, err);
+	if(err)
+		return { Outcome::Failure, std::make_tuple(err.message(), fs::file_time_type{}, fs::file_time_type{}) };
+
+	auto frag_time = fs::last_write_time(source.fragment, err);
+	if(err)
+		return { Outcome::Failure, std::make_tuple(err.message(), fs::file_time_type{}, fs::file_time_type{}) };
+	
+	return { Outcome::Success, std::make_tuple(""s, vert_time, frag_time) };
+}
+
 GLuint Shader::init(std::string const& shader1, Type type1, std::string const& shader2, Type type2){
 	if(type1 == type2)
 		throw ArgumentMismatchException{"Provided shader types must differ\n"};
+	//generate_source_info(shader1, type1, shader2, type2);
 	
-	/* shader_ids[0] holds vertex id, shader_ids[1] fragment id */
 	std::array<GLuint, 2> shader_ids;
+	Result<GLuint, std::string> result;
+	{
+		bind_enum<Outcome, ErrorType> bind;
+		{
+			auto [outcome, tuple] = read_source(shader1);
+			auto& [error_type, data] = tuple;
+
+			if(bind(outcome, error_type) == bind(Outcome::Failure, ErrorType::FileIO))
+				throw FileIOException{data};
+			else if(bind(outcome, error_type) == bind(Outcome::Failure, ErrorType::Include))
+				throw ShaderIncludeException{data};
+
+			result = compile(std::move(data), type1);
+			if(result.outcome == Outcome::Failure) {
+				glDeleteShader(std::get<0>(result.data));
+				throw ShaderCompilationException{std::get<1>(result.data)};
+			}
+
+			shader_ids[enum_value(type1)] = std::get<0>(result.data);
+		}
+		auto [outcome, tuple] = read_source(shader2);
+		auto& [error_type, data] = tuple;
+
+		if(bind(outcome, error_type) == bind(Outcome::Failure, ErrorType::FileIO)) {
+			glDeleteShader(std::get<0>(result.data));
+			throw FileIOException{data};
+		}
+		else if(bind(outcome, error_type) == bind(Outcome::Failure, ErrorType::Include)) {
+			glDeleteShader(std::get<0>(result.data));
+			throw ShaderIncludeException{data};
+		}
+
+		result = compile(std::move(data), type2);
+		if(result.outcome == Outcome::Failure) {
+			glDeleteShader(shader_ids[enum_value(type1)]);
+			glDeleteShader(std::get<0>(result.data));
+			throw ShaderCompilationException{std::get<1>(result.data)};
+		}
+		shader_ids[enum_value(type2)] = std::get<0>(result.data);
+	}
+
+	result = link(shader_ids[enum_value(Type::Vertex)], shader_ids[enum_value(Type::Fragment)]);
+
+	if(result.outcome == Outcome::Failure)
+		throw ShaderLinkingException{std::get<1>(result.data)};
 	
-	/* Clean up shader(s) if compilation fails */
-	try{
-		shader_ids[enum_value(type1)] = compile(read_source(shader1), type1);
-	}
-	catch(ShaderCompilationException const& err){
-		glDeleteShader(shader_ids[enum_value(type1)]);
-		throw;
-	}
-	try{
-		shader_ids[enum_value(type2)] = compile(read_source(shader2), type2);
-	}
-	catch(ShaderCompilationException const& err){
-		for(auto const& shader : shader_ids)
-			glDeleteShader(shader);
-		throw;
-	}
-	
-	return link(shader_ids[enum_value(Type::Vertex)], shader_ids[enum_value(Type::Fragment)]);
+	return std::get<0>(result.data);	
 }
 
 
-std::string Shader::read_source(std::string const& source) const{
+Shader::Result<Shader::ErrorType, std::string> Shader::read_source(std::string const& source){
 	/* Every time an include directive is found, push stream with file to be included onto
  	 * the stack */
 	std::stack<std::ifstream, std::vector<std::ifstream>> streams;
@@ -54,10 +121,11 @@ std::string Shader::read_source(std::string const& source) const{
 	streams.push(std::ifstream{source});
 	
 	if(!streams.top().is_open())
-		throw FileIOException{"Unable to open " + source + " for reading\n"};
+		return { Outcome::Failure, std::make_tuple(ErrorType::FileIO, "Unable to open " + source + " for reading\n") };
 
 	std::string line;	
 	std::ostringstream contents;
+	Result<ErrorType, std::string> result;
 	
 	while(!streams.empty()){
 
@@ -66,21 +134,24 @@ std::string Shader::read_source(std::string const& source) const{
 
 				/* Max include depth reached, to prevent infinite recursion */
 				if(streams.size() >= depth_){
-					std::cerr << "Warning, max include depth reached, omitting " 
-							  << line << " included in file " << source;
+					LOG_WARN("Max include depth reached, omitting ",  line, " included in file ", source);
+					E_LOG_WARN("Max include depth reached, omitting ",  line, " included in file ", source);
 					continue;
 				}
 				
 				/* Process include directive */
-				std::string incl_path = process_include_directive(line, source, idx);
+				result = process_include_directive(line, source, idx);
 
-				std::ifstream file{incl_path};					
+				if(result.outcome == Outcome::Failure)
+					return result;
+
+				std::ifstream file{std::get<1>(result.data)};
 				
 				if(!file.is_open())
-					throw FileIOException{"Unable to open file " + incl_path + " included from " + source};
+					return { Outcome::Failure, std::make_tuple(ErrorType::FileIO, "Unable to open file " + std::get<1>(result.data) + " cincluded (possibly recursively) from file " + source) };
 
 				/* c/c++ style header guard to prevent redefinition */		
-				std::string header_guard = format_header_guard(incl_path);
+				std::string header_guard = format_header_guard(std::get<1>(result.data));
 
 				/* Append header guard */
 				contents << "#ifndef " << header_guard << "\n#define " << header_guard << "\n";
@@ -104,10 +175,10 @@ std::string Shader::read_source(std::string const& source) const{
 			contents << "#endif\n";
 	}
 
-	return contents.str();	
+	return { Outcome::Success, std::make_tuple(ErrorType::None, contents.str()) };	
 }
 
-std::string Shader::format_header_guard(std::string path) const {
+std::string Shader::format_header_guard(std::string path) {
 	
 	/* Get file name */
 	if(path.find('/') != std::string::npos)
@@ -121,16 +192,17 @@ std::string Shader::format_header_guard(std::string path) const {
 	/* Add identifier unique to the class */
 	path += "_SHADER_PROC_INCL";
 	
-	return std::move(path);
+	return path;
 }
 
-std::string Shader::process_include_directive(std::string const& directive, std::string const& source, std::size_t idx) const{
+Shader::Result<Shader::ErrorType, std::string> Shader::process_include_directive(std::string const& directive, std::string const& source, std::size_t idx){
+	using namespace std::string_literals;
 
 	/* File name */
 	std::string incl_path  = directive.substr(idx+1, directive.length()-1);
 	
 	if(incl_path[0] != '"' || incl_path[incl_path.size() - 1] != '"')
-		throw ShaderIncludeException{"Include directives must be enclosed in double quotes (\"\")"};
+		return { Outcome::Failure, std::make_tuple(ErrorType::Include, "Include directives must be enclosed in double qutes (\"\")"s) };
 
 	 /* Remove quotations */ 
 	incl_path = incl_path.substr(1, incl_path.size() - 2);
@@ -140,10 +212,10 @@ std::string Shader::process_include_directive(std::string const& directive, std:
 	if(source.find('/') != std::string::npos)
 		incl_path = source.substr(0, source.find_last_of('/')+1) + incl_path;	
 
-	return incl_path;
+	return {Outcome::Success, std::make_tuple(ErrorType::None, std::move(incl_path)) };
 }
 
-GLuint Shader::compile(std::string const& source, Type type) const{
+Shader::Result<GLuint, std::string> Shader::compile(std::string const& source, Type type){
 	GLenum shader_type = type == Type::Vertex ? GL_VERTEX_SHADER : GL_FRAGMENT_SHADER;
 	
 	GLuint id = glCreateShader(shader_type);
@@ -153,15 +225,12 @@ GLuint Shader::compile(std::string const& source, Type type) const{
 	glShaderSource(id, 1, &c_source, nullptr);
 	glCompileShader(id);
 	
-	AssertionResult result = assert_shader_status_ok(id, StatusQuery::Compile);	
+	Result<std::string> result = assert_shader_status_ok(id, StatusQuery::Compile);	
 
-	if(!result.succeeded)
-		throw ShaderCompilationException{result.msg};
-	
-	return id;
+	return { result.outcome, std::make_tuple(id, std::get<0>(result.data)) };
 }
 
-GLuint Shader::link(GLuint vertex_id, GLuint fragment_id) const {
+Shader::Result<GLuint, std::string> Shader::link(GLuint vertex_id, GLuint fragment_id) {
 	GLuint program_id = glCreateProgram();
 
 	glAttachShader(program_id, vertex_id);
@@ -169,7 +238,7 @@ GLuint Shader::link(GLuint vertex_id, GLuint fragment_id) const {
 
 	glLinkProgram(program_id);
 	
-	AssertionResult result = assert_shader_status_ok(program_id, StatusQuery::Link);
+	Result<std::string> result = assert_shader_status_ok(program_id, StatusQuery::Link);
 
 	/* Clean up regardless of success */
 	glDetachShader(program_id, vertex_id);
@@ -178,14 +247,11 @@ GLuint Shader::link(GLuint vertex_id, GLuint fragment_id) const {
 	glDeleteShader(vertex_id);
 	glDeleteShader(fragment_id);	
 
-	if(!result.succeeded)
-		throw ShaderLinkingException{result.msg};
-
-	return program_id;
+	return { result.outcome, std::make_tuple(program_id, std::get<0>(result.data)) };
 }
 
-Shader::AssertionResult Shader::assert_shader_status_ok(GLuint id, StatusQuery sq) const{
-	AssertionResult res{ true, std::string{} };
+Shader::Result<std::string> Shader::assert_shader_status_ok(GLuint id, StatusQuery sq){
+	using namespace std::string_literals;
 
 	GLint succeeded = 0;
 
@@ -200,16 +266,20 @@ Shader::AssertionResult Shader::assert_shader_status_ok(GLuint id, StatusQuery s
 		glGetShaderiv(id, GL_INFO_LOG_LENGTH, &max_length);
 
 		std::vector<GLchar> error_log(max_length);
-		
 
 		if(sq == StatusQuery::Compile)
 			glGetShaderInfoLog(id, max_length, &max_length, &error_log[0]);
 		else
 			glGetProgramInfoLog(id, max_length, &max_length,  &error_log[0]);
 
-		res.succeeded = false;
-		res.msg = std::string{std::begin(error_log), std::end(error_log)};
+		return { Outcome::Failure, std::make_tuple(std::string{std::begin(error_log), std::end(error_log)}) };
 	}
 
-	return res;
+	return { Outcome::Success, ""s };
 }
+
+std::size_t const Shader::depth_ = 8u;
+std::atomic_bool Shader::halt_execution_ = true;
+std::mutex ics_mutex_{};
+std::thread update_thread_{};
+std::vector<std::reference_wrapper<Shader>> Shader::instances_{};
