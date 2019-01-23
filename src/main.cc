@@ -11,7 +11,6 @@
 #include <iostream>
 #include "inserter.h"
 #include "collections.h"
-#define LOG_ERROUT_VERBOSE
 #include "logger.h"
 
 int main() {
@@ -47,7 +46,7 @@ int main() {
 		}
 	}
 	catch(std::runtime_error const& err){
-		std::cerr << err.what();
+		ERR_LOG_CRIT(err.what());
 	}
 
 	return 0;

@@ -7,15 +7,22 @@ OBJ := $(addsuffix .o,$(basename $(SRC)))
 
 INC = -I src/ -I src/engine/ -I src/geometry/ -I src/math/ -I src/utils/
 
-CXXFLAGS = -std=c++17 -Wall -Wextra -pedantic -Weffc++ $(INC) 
+export DFLAGS
+
+CXXFLAGS = -std=c++17 -Wall -Wextra -pedantic -Weffc++ $(INC) $(DFLAGS)
 LDFLAGS = -lGLEW -lglfw -lGL -lm -lX11 -lpthread -ldl -lstdc++fs
+
 
 terrain: $(OBJ)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS) 
 
-.PHONY: clean run
+.PHONY: clean run debug
 clean:
-	rm -f $(OBJ) terrain
+	rm -f $(OBJ) terrain logs/*
 
 run: terrain
+	./terrain
+
+debug: DFLAGS=-D LOG_FULL_VERBOSE
+debug: terrain
 	./terrain

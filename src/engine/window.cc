@@ -1,19 +1,15 @@
 #include "window.h"
 
-Window::Window(std::string const& name, std::size_t width, std::size_t height, float opengl_version) : window_{nullptr}, width_{width}, height_{height} {
-	if(std::signbit(opengl_version))
-		throw InvalidVersionException{"OpenGL version must be positive\n"};
-
-	init(name, width, height, opengl_version);
+Window::Window(std::string const& name, std::size_t width, std::size_t height, float opengl_version) : Context{main_context_tag{}, name, width, height, Id::None, opengl_version} {
+	init();
 }
 
 Window::~Window(){
-	glfwDestroyWindow(window_),
 	glfwTerminate();
 }
 
 bool Window::should_close() const {
-	return glfwWindowShouldClose(window_);
+	return glfwWindowShouldClose(context_);
 }
 
 void Window::clear() const{
@@ -21,7 +17,7 @@ void Window::clear() const{
 }
 
 void Window::update() const{
-	glfwSwapBuffers(window_);
+	glfwSwapBuffers(context_);
 	glfwPollEvents();
 }
 
@@ -39,25 +35,11 @@ std::size_t Window::height() const {
 }
 
 GLFWwindow* Window::glfw_window() const {
-	return window_;
+	return context_;
 }
 
 
-void Window::init(std::string const& name, std::size_t width, std::size_t height, float opengl_version){
-	if(!glfwInit())
-		throw GLException{"Failed to initialize GLFW\n"};
-
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, static_cast<std::size_t>(opengl_version));
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, static_cast<std::size_t>(10.f*std::fmod(opengl_version, 1.f)));
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-	window_ = glfwCreateWindow(width, height, name.c_str(), nullptr, nullptr);
-
-	if(!window_)
-		throw GLException{"Could not create GLFW window.\nDoes your graphics driver support OpenGL version " + std::to_string(opengl_version) +"?"};
-
-	glfwMakeContextCurrent(window_);
-
+void Window::init(){
 	glewExperimental = GL_TRUE;
 
 	if(glewInit() != GLEW_OK)

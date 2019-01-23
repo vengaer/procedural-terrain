@@ -1,11 +1,11 @@
 namespace frametime {
 	template <typename P0, typename... P1toN>
-	void update_shader_time(P0&& head, P1toN... tail);
+	void update_shader_time(P0&& head, P1toN&&... tail);
 }
 
 template <typename P0, typename... P1toN>
-void frametime::update_shader_time(P0&& head, P1toN... tail) {
-	static_cast<Shader>(head).upload_uniform(TIME_UNIFORM_NAME, static_cast<float>(glfwGetTime()));
+void frametime::update_shader_time(P0&& head, P1toN&&... tail) {
+	static_cast<Shader&>(head).upload_uniform(TIME_UNIFORM_NAME, static_cast<float>(glfwGetTime()));
 
 	if constexpr (sizeof...(P1toN) > 0)
 		update_shader_time<P1toN...>(std::forward<P1toN>(tail)...);
