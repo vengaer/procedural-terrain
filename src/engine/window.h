@@ -14,6 +14,8 @@ class Window : public Context {
 	public:
 		Window(std::string const& name, std::size_t width, std::size_t height, float opengl_version = 4.5f);
 		~Window();
+		Window(Window&&) = default;
+		Window& operator=(Window&&) = default;
 		
 		bool should_close() const;
 		void clear() const;
@@ -25,7 +27,7 @@ class Window : public Context {
 		void init();
 
 		void set_dimensions(std::size_t width, std::size_t height);
-		GLFWwindow* glfw_window() const;
+		GLFWwindow* context() const;
 };
 
 #endif

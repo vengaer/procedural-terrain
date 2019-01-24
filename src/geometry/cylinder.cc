@@ -4,6 +4,10 @@ Cylinder::Cylinder(GLfloat height, GLuint horizontal_segments, GLuint vertical_s
 	Renderer<Cylinder>::init(height, horizontal_segments, vertical_segments, main_axis, off_axis1_scale, off_axis2_scale);
 }
 
+Cylinder::Cylinder(std::shared_ptr<Shader> const& shader, GLfloat height, GLuint horizontal_segments, GLuint vertical_segments, Axis main_axis, GLfloat off_axis1_scale, GLfloat off_axis2_scale) : Renderer{shader}, Transform{shader}, vertices_{}, indices_{} {
+	Renderer<Cylinder>::init(height, horizontal_segments, vertical_segments, main_axis, off_axis1_scale, off_axis2_scale);
+}
+
 void Cylinder::init(GLfloat height, GLuint horizontal_segments, GLuint vertical_segments, Axis main_axis, GLfloat off_axis1_scale, GLfloat off_axis2_scale) {
 	height 				= glm::clamp(height, 0.1f, 4.f);
 	horizontal_segments = glm::clamp(horizontal_segments, 3u, 60u);

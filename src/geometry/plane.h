@@ -4,17 +4,20 @@
 #pragma once
 #include "interpolation.h"
 #include "renderer.h"
+#include "shader.h"
 #include "transform.h"
 #include <cmath>
 #include <cstddef>
 #include <GL/glew.h>
 #include <glm/glm.hpp>
+#include <memory>
 #include <type_traits>
 #include <vector>
 
 class Plane : public Renderer<Plane>, public Transform {
 	public:
 		Plane(GLfloat x_len = 1.f, GLfloat dx = .5f, GLfloat z_len = 1.f, GLfloat dz = .5f);
+		Plane(std::shared_ptr<Shader> const& shader, GLfloat x_len = 1.f, GLfloat dx = .5f, GLfloat z_len = 1.f, GLfloat dz = .5f);
 		
 		std::vector<GLfloat> const& vertices() const;
 		std::vector<GLuint> const& indices() const;

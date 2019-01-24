@@ -9,28 +9,27 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <string>
-#include <utility>
-#include <vector>
-
-struct main_context_tag { };
 
 class Context {
 	public:
-		enum class Id { None = -1, Secondary, Main };
-		Context(std::string const& name, std::size_t width, std::size_t height, bool visible = true, Id share_with = Id::None, float version = 4.5f);
+		Context(std::string const& name, std::size_t widht, std::size_t height, bool visible = true, bool shared = false);
 		~Context();
 		Context(Context const&) = delete;
+		Context(Context&&) = default;
 		Context& operator=(Context const&) = delete;
+		Context& operator=(Context&&) = default;
 
 	protected:
 		GLFWwindow* context_;
 		std::size_t width_, height_;
 
-		Context(main_context_tag, std::string const& name, std::size_t width, std::size_t height, Id share_with = Id::None, float version = 4.5f);
+		enum class Type { Primary, Secondary };
+
+		Context(std::string const& name, std::size_t width, std::size_t height, float version = 4.5f);
 	private:
 		bool is_visible_{true};
-		static std::vector<std::pair<Id, std::reference_wrapper<Context>>> instances_;
+		static Context* primary_;
 		
-		void init(std::string const& name, std::size_t width, std::size_t height, Id share_with, float version, Id context_id = Id::Secondary);
+		void init(Type type, std::string const& name, bool shared, float version = -1.f);
 };
 #endif

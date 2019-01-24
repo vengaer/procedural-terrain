@@ -18,7 +18,7 @@ terrain: $(OBJ)
 
 .PHONY: clean run debug
 clean:
-	rm -f $(OBJ) terrain logs/*
+	rm -f $(OBJ) terrain; rm -rf logs/
 
 run: terrain
 	./terrain

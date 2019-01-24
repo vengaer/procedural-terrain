@@ -3,6 +3,7 @@
 
 #pragma once
 #include "shader.h"
+#include "traits.h"
 #include <cstddef>
 #include <deque>
 #include <GL/glew.h>
@@ -10,6 +11,8 @@
 #include <iostream>
 #include <iomanip>
 #include <numeric>
+#include <memory>
+#include <type_traits>
 
 namespace frametime {
 	enum class Status { All, Fps, Uptime };

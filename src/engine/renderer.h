@@ -9,6 +9,7 @@
 #include <GL/glew.h>
 #include <iostream>
 #include <limits>
+#include <memory>
 #include <type_traits>
 #include <utility>
 
@@ -31,9 +32,6 @@
 struct vertices_tag { };
 struct indices_tag { };
 
-/* TODO: Activate face culling */
-
-
 template <typename T>
 class Renderer {
 	public:
@@ -41,15 +39,17 @@ class Renderer {
 	
 		static GLuint constexpr VERTEX_SIZE = 8u;
 	protected:
-		Renderer();
+		Renderer(std::shared_ptr<Shader> const& shader = nullptr);
 
 		template <typename... Args>
 		void init(Args&&... args);
+	
 	private:
+		std::shared_ptr<Shader> shader_{nullptr};
 		GLuint vao_, vbo_;
 		GLuint idx_buffer_;
 		GLuint idx_size_;
-	
+
 		/* Tag dispatch */
 		GLuint constexpr size(vertices_tag) const;
 		GLuint constexpr size(indices_tag) const;

@@ -5,10 +5,13 @@
 #include "camera.h"
 #include "exception.h"
 #include "inserter.h"
+#include "logger.h"
 #include "traits.h"
+#include "transform.h"
 #include "shader.h"
 #include "window.h"
 #include <cmath>
+#include <cstddef>
 #include <functional>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -22,11 +25,14 @@
 
 class EventHandler {
 	public:
-		template <typename... Args>
-		static void instantiate(Window& window, Camera& camera, Args&&... args);
+		EventHandler(EventHandler const&) = delete;
+		EventHandler& operator=(EventHandler const&) = delete;
 
 		template <typename... Args>
-		static void append_shaders(Args&&... args);
+		static void instantiate(std::shared_ptr<Camera> const& camera, Args const&... args);
+
+		template <typename... Args>
+		static void append_shaders(Args const&... args);
 	
 		static std::string const PROJECTION_UNIFORM_NAME;
 		static std::string const VIEW_UNIFORM_NAME;
@@ -44,10 +50,9 @@ class EventHandler {
 			State alt;
 			State super;
 		};
-		Camera& camera_;
-		Window& window_;
+		std::shared_ptr<Camera> camera_;
 		
-		static std::vector<std::reference_wrapper<Shader>> shaders_;
+		static std::vector<std::shared_ptr<Shader>> shaders_;
 		static bool instantiated_;
 		static glm::mat4 perspective_;
 		static EventHandler* instance_;
@@ -56,10 +61,10 @@ class EventHandler {
 		static KeyModifiers  modifier_states(int mod_bits);
 
 		template <typename... Args>
-		EventHandler(Window& window, Camera& camera, Args&&... args);
+		EventHandler(std::shared_ptr<Camera> const& camera, Args const&... args);
 		
 		template <typename... Args>
-		void init(Args&&... args);
+		void init(Args const&... args);
 
 		static void update_perspective(float width, float height);
 		static void update_view();
@@ -67,6 +72,7 @@ class EventHandler {
 		static void key_callback(GLFWwindow*, int key, int, int, int mod_bits);
 		static void mouse_callback(GLFWwindow*, double x, double y);
 		static void size_callback(GLFWwindow*, int widht, int height);
+		static void shader_reload_callback(Shader& shader);
 	
 };
 

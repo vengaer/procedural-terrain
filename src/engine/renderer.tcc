@@ -1,12 +1,14 @@
 template <typename T>
-Renderer<T>::Renderer() : vao_{0u}, vbo_{0u}, idx_buffer_{0u}, idx_size_{0u}  {
+Renderer<T>::Renderer(std::shared_ptr<Shader> const& shader) : shader_{shader}, vao_{0u}, vbo_{0u}, idx_buffer_{0u}, idx_size_{0u}  {
 	static_assert(is_renderable_v<T>, "Type does not fulfill the rendering requirements");
 }
 
 template <typename T>
 void Renderer<T>::render() const {
+	if(shader_)
+		shader_->enable();
 	glBindVertexArray(vao_);
-	glDrawElements(GL_TRIANGLES, idx_size_, GL_UNSIGNED_INT, (void*)0);
+	glDrawElements(GL_TRIANGLES, idx_size_, GL_UNSIGNED_INT, static_cast<void*>(0));
 	glBindVertexArray(0);
 }
 

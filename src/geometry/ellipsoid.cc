@@ -4,6 +4,10 @@ Ellipsoid::Ellipsoid(GLuint vertical_segments, GLuint horizontal_segments, GLflo
 	Renderer<Ellipsoid>::init(vertical_segments, horizontal_segments, x_scale, y_scale, z_scale);
 }
 
+Ellipsoid::Ellipsoid(std::shared_ptr<Shader> const& shader, GLuint vertical_segments, GLuint horizontal_segments, GLfloat x_scale, GLfloat y_scale, GLfloat z_scale) : Renderer{shader}, Transform{shader}, vertices_{}, indices_{} {
+	Renderer<Ellipsoid>::init(vertical_segments, horizontal_segments, x_scale, y_scale, z_scale);
+}
+
 void Ellipsoid::init(GLuint vertical_segments, GLuint horizontal_segments, GLfloat x_scale, GLfloat y_scale, GLfloat z_scale) {
 	/* Prevent potential overflow */
 	vertical_segments   = glm::clamp(vertical_segments, 5u, 60u);

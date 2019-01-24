@@ -1,9 +1,18 @@
 #include "transform.h"
 
-Transform::Transform() : transforms_{std::vector<glm::mat4>{glm::mat4{1.f}}} { }
+Transform::Transform(std::shared_ptr<Shader> const& shader) : transforms_{std::vector<glm::mat4>{glm::mat4{1.f}}}, shader_{shader} { 
+	instances_.push_back(std::ref(*this));
+	update_model();
+}
+
+Transform::~Transform() {
+	instances_.erase(std::remove_if(std::begin(instances_), std::end(instances_), [this](auto wrapper) {
+		return std::addressof(wrapper.get()) == this;
+	}));
+}
 
 void Transform::translate(glm::vec3 direction) {
-	transforms_.push(glm::translate(transforms_.top(), direction));
+	add_transform(glm::translate(transforms_.top(), direction));
 }
 
 void Transform::translate(float distance, Axis axis, Sign sign) {
@@ -13,7 +22,7 @@ void Transform::translate(float distance, Axis axis, Sign sign) {
 }
 
 void Transform::scale(glm::vec3 scaling_vector) {
-	transforms_.push(glm::scale(transforms_.top(), scaling_vector));
+	add_transform(glm::scale(transforms_.top(), scaling_vector));
 }
 
 void Transform::scale(float magnitude, Axis axis) {
@@ -23,7 +32,7 @@ void Transform::scale(float magnitude, Axis axis) {
 }
 
 void Transform::rotate(float degrees, glm::vec3 axis) {
-	transforms_.push(glm::rotate(transforms_.top(), glm::radians(degrees), axis));
+	add_transform(glm::rotate(transforms_.top(), glm::radians(degrees), axis));
 }
 
 void Transform::rotate(float degrees, Axis axis, Sign sign) {
@@ -44,3 +53,21 @@ void Transform::reset_transforms() {
 glm::mat4 Transform::model_matrix() const {
 	return transforms_.top();
 }
+
+void Transform::add_transform(glm::mat4&& transform) {
+	transforms_.push(std::move(transform));
+	update_model();
+}
+
+void Transform::update_model() const {
+	if(shader_)
+		shader_->upload_uniform(MODEL_UNIFORM_NAME, transforms_.top());
+}
+
+void Transform::force_update() {
+	for(auto const& i : instances_)
+		i.get().update_model();
+}
+
+std::string const Transform::MODEL_UNIFORM_NAME = "ufrm_model";
+std::vector<std::reference_wrapper<Transform>> Transform::instances_;

@@ -4,6 +4,10 @@ Cuboid::Cuboid(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale) : Renderer{}, 
 	Renderer<Cuboid>::init(x_scale, y_scale, z_scale);
 }
 
+Cuboid::Cuboid(std::shared_ptr<Shader> const& shader, GLfloat x_scale, GLfloat y_scale, GLfloat z_scale) : Renderer{shader}, Transform{shader}, vertices_{}, indices_{} {
+	Renderer<Cuboid>::init(x_scale, y_scale, z_scale);
+
+}
 void Cuboid::init(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale) {
 	x_scale = glm::clamp(x_scale, 0.1f, 2.f);
 	y_scale = glm::clamp(y_scale, 0.1f, 2.f);

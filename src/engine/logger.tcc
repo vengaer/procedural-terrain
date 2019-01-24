@@ -13,27 +13,27 @@ void logging::FileLogger<T, enable_on_match_t<T, logging::FileLoggingTag>>::init
 		if(std::error_code err{}; !fs::create_directory(log_dir, err))
 			throw FileSystemException{err.message()};
 
-	std::string time = Logger<T>::get_time();
+	std::string date = Logger<T>::get_date();
 
-	ofs_.open(log_dir.string() + time + ".log");
+	std::string log_file = log_dir.string() + date + ".log";
+
+	ofs_.open(log_file, std::ios::app);
 	if(!ofs_.is_open())
-		throw FileIOException{"Unable to open " + log_dir.string() +  time + ".log for writing"};
+		throw FileIOException{"Unable to open " + log_dir.string() +  date + ".log for writing"};
 
 	Logger<T>::template format<Label::Debug>(ofs_, ofs_entry_++, ofs_mutex_);
 	last_ = Label::Debug;
 
-	ofs_mutex_.lock();
+	std::lock_guard<std::mutex> lock{ofs_mutex_};
 	ofs_ << "Initiating program\n";
-	ofs_mutex_.unlock();
 }
 
 template <typename T>
 logging::FileLogger<T, enable_on_match_t<T, logging::FileLoggingTag>>::~FileLogger() {
 	Logger<T>::template format<Label::Debug>(ofs_, ofs_entry_++, ofs_mutex_);
 
-	ofs_mutex_.lock();
+	std::lock_guard<std::mutex> lock{ofs_mutex_};
 	ofs_ << "Terminating program with last known status <" << to_string(last_) << ">\n";
-	ofs_mutex_.unlock();
 
 	ofs_.close();
 }
@@ -62,28 +62,40 @@ void logging::Logger<LoggingTag>::print(Args&&... args) {
 template <typename LoggingTag>
 template <typename Tuple, std::size_t... Is>
 void logging::Logger<LoggingTag>::print(Tuple const& t, std::index_sequence<Is...>, std::ostream& os, std::mutex& mtx) {
-	mtx.lock();
+	std::lock_guard<std::mutex> lock{mtx};
 	((os << std::get<Is>(t)), ...);
 	os << "\n";
-	mtx.unlock();
 }
 
 template <typename LoggingTag>
 std::string logging::Logger<LoggingTag>::get_time() {
-	auto now = std::chrono::system_clock::now();
-	std::time_t now_c = std::chrono::system_clock::to_time_t(now);
+	std::time_t now = raw_time();
 	std::ostringstream os;
-	os << std::put_time(std::localtime(&now_c), "%T %F");
+	os << std::put_time(std::localtime(&now), "%T %F");
 	return os.str();
 }
 
 template <typename LoggingTag>
+std::string logging::Logger<LoggingTag>::get_date() {
+	std::time_t now = raw_time();
+	std::ostringstream os;
+	os << std::put_time(std::localtime(&now), "%F");
+	return os.str();
+}
+
+template <typename LoggingTag>
+std::time_t logging::Logger<LoggingTag>::raw_time() {
+	auto now = std::chrono::system_clock::now();
+	return std::chrono::system_clock::to_time_t(now);
+}
+
+
+template <typename LoggingTag>
 template <logging::Label S>
 void logging::Logger<LoggingTag>::format(std::ostream& os, std::size_t entry_num, std::mutex& mtx) {
-	mtx.lock();
+	std::lock_guard<std::mutex> lock{mtx};
 	os << std::setfill('0') << std::setw(7) << entry_num
 	   << " <" << get_time() << ">" << " - " << "<" << to_string(S) << "> : ";
-	mtx.unlock();
 }
 
 template <typename LoggingTag>

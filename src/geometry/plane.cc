@@ -5,6 +5,11 @@ Plane::Plane(GLfloat x_len, GLfloat dx, GLfloat z_len, GLfloat dz) : Renderer{},
 	Renderer<Plane>::init(x_len, dx, z_len, dz);
 }
 
+Plane::Plane(std::shared_ptr<Shader> const& shader, GLfloat x_len, GLfloat dx, GLfloat z_len, GLfloat dz) : Renderer{shader}, Transform{shader}, vertices_{}, indices_{} {
+	/* Initialize Renderer, pass parameters */
+	Renderer<Plane>::init(x_len, dx, z_len, dz);
+}
+
 void Plane::init(GLfloat x_len, GLfloat dx, GLfloat z_len, GLfloat dz){
 	/* Prevent potential overflow */
 	x_len = glm::clamp(x_len, 0.05f, 1.f);

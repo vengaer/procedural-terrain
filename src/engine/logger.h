@@ -78,6 +78,7 @@ namespace logging {
 			void print(Args&&... args);
 
 			static std::string get_time();
+			static std::string get_date();
 
 			template <Label S>
 			static void format(std::ostream& os, std::size_t entry_num, std::mutex& mtx);
@@ -85,8 +86,11 @@ namespace logging {
 			static std::mutex cout_mutex_, cerr_mutex_;
 			std::size_t std_entry_{};
 
+			static std::time_t raw_time();
+
 			template <typename Tuple, std::size_t... Is>
 			static void print(Tuple const& t, std::index_sequence<Is...>, std::ostream& os, std::mutex& mtx);
+
 	};
 
 
@@ -103,30 +107,24 @@ namespace logging {
 #define LOG_WARN(...) logging::logger_instance.template print<logging::Ostream::OfStream, logging::Label::Warning>(CALL_TRACE, __VA_ARGS__)
 #define LOG_CRIT(...) logging::logger_instance.template print<logging::Ostream::OfStream, logging::Label::Critical>(CALL_TRACE, __VA_ARGS__)
 
-#define ERR_LOG(...) logging::logger_instance.template print<logging::Ostream::OfStream, logging::Label::Debug>(CALL_TRACE, __VA_ARGS__); \
-					logging::logger_instance.template print<logging::Ostream::StdErr, logging::Label::Debug>(CALL_TRACE, __VA_ARGS__)
-#define ERR_LOG_WARN(...) logging::logger_instance.template print<logging::Ostream::OfStream, logging::Label::Warning>(CALL_TRACE, __VA_ARGS__); \
-						 logging::logger_instance.template print<logging::Ostream::StdErr, logging::Label::Warning>(CALL_TRACE, __VA_ARGS__)
-#define ERR_LOG_CRIT(...) logging::logger_instance.template print<logging::Ostream::OfStream, logging::Label::Critical>(CALL_TRACE, __VA_ARGS__); \
-						 logging::logger_instance.template print<logging::Ostream::StdErr, logging::Label::Critical>(CALL_TRACE, __VA_ARGS__)
+#define ERR_LOG(...) LOG(__VA_ARGS__); E_LOG(__VA_ARGS__)
+#define ERR_LOG_WARN(...) LOG_WARN(__VA_ARGS__); E_LOG_WARN(__VA_ARGS__)
+#define ERR_LOG_CRIT(...) LOG_CRIT(__VA_ARGS__); E_LOG_CRIT(__VA_ARGS__)
 #elif defined(LOG_FULL_DEFAULT)
 #define LOG(...) logging::logger_instance.template print<logging::Ostream::OfStream, logging::Label::Debug>(__VA_ARGS__)
 #define LOG_WARN(...) logging::logger_instance.template print<logging::Ostream::OfStream, logging::Label::Warning>(__VA_ARGS__)
 #define LOG_CRIT(...) logging::logger_instance.template print<logging::Ostream::OfStream, logging::Label::Critical>(__VA_ARGS__)
 
-#define ERR_LOG(...) logging::logger_instance.template print<logging::Ostream::OfStream, logging::Label::Debug>( __VA_ARGS__); \
-					logging::logger_instance.template print<logging::Ostream::StdErr, logging::Label::Debug>( __VA_ARGS__)
-#define ERR_LOG_WARN(...) logging::logger_instance.template print<logging::Ostream::OfStream, logging::Label::Warning>( __VA_ARGS__); \
-						 logging::logger_instance.template print<logging::Ostream::StdErr, logging::Label::Warning>( __VA_ARGS__)
-#define ERR_LOG_CRIT(...) logging::logger_instance.template print<logging::Ostream::OfStream, logging::Label::Critical>( __VA_ARGS__); \
-						 logging::logger_instance.template print<logging::Ostream::StdErr, logging::Label::Critical>( __VA_ARGS__)
+#define ERR_LOG(...) LOG(__VA_ARGS__); E_LOG(__VA_ARGS__)
+#define ERR_LOG_WARN(...) LOG_WARN(__VA_ARGS__); E_LOG_WARN(__VA_ARGS__);
+#define ERR_LOG_CRIT(...) LOG_CRIT(__VA_ARGS__); E_LOG_CRIT(__VA_ARGS__);
 #else
 #define LOG(...)
 #define LOG_WARN(...)
 #define LOG_CRIT(...)
-#define ERR_LOG(...)
-#define ERR_LOG_WARN(...)
-#define ERR_LOG_CRIT(...)
+#define ERR_LOG(...) E_LOG(__VA_ARGS__)
+#define ERR_LOG_WARN(...) E_LOG_WARN(__VA_ARGS__)
+#define ERR_LOG_CRIT(...) E_LOG_CRIT(__VA_ARGS__)
 #endif
 
 #if defined(LOG_FULL_VERBOSE) || defined(LOG_ERROUT_VERBOSE)
