@@ -9,7 +9,7 @@ INC = -I src/ -I src/engine/ -I src/geometry/ -I src/math/ -I src/utils/
 
 export DFLAGS
 
-CXXFLAGS = -std=c++17 -Wall -Wextra -pedantic -Weffc++ $(INC) $(DFLAGS)
+CXXFLAGS = -std=c++17 -Wall -Wextra -pedantic -Weffc++ $(INC) $(DFLAGS) 
 LDFLAGS = -lGLEW -lglfw -lGL -lm -lX11 -lpthread -ldl -lstdc++fs
 
 

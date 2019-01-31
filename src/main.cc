@@ -13,8 +13,45 @@
 #include "collections.h"
 #include "logger.h"
 
+class C {
+	public:
+		C(int i) : i_{i} { };
+		C(C const& c) {
+			std::cout << "copy ctor for c\n";
+			i_ = c.i_;
+		}
+		C(C&& c) {
+			std::cout << "move ctor\n";	
+			i_ = c.i_;
+		}
+		
+		C& operator=(C const& other) {
+			std::cout << "copy assignment\n";
+			i_ = other.i_;
+			return *this;
+		}
+		C& operator=(C&& c) {
+			std::cout << "move assignment\n";
+			i_ = c.i_;
+			return *this;
+		}
+
+		friend std::ostream& operator<<(std::ostream&, C const&);
+	private:
+		int i_;
+};
+
+std::ostream& operator<<(std::ostream& os, C const& c) {
+	os << c.i_;
+}
+
 int main() {
 	unsigned constexpr width = 960, height = 540;
+	std::vector<C> v1{1,2,3,4};
+	std::vector c2{3,4,5,6,7,};
+	std::cout << "zipping\n";
+	for(auto [i,j] : zip(v1,std::vector<C>{1,3,4,5}))
+		std::cout << i << " " << j << "\n";
 
 	try{
 		Window window{"test", width, height};

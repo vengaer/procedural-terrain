@@ -65,26 +65,35 @@ bool zip_iterator<Iters...>::compare(Tuple const& l, Tuple const& r, std::index_
 }
 
 /* zip_collection */
-template <typename... Iters>
-zip_collection<Iters...>::zip_collection(iter_tuple_t&& begins, iter_tuple_t&& ends) : begins_{std::move(begins)}, ends_{std::move(ends)} { }
+template <typename... Conts>
+zip_collection<Conts...>::zip_collection(std::tuple<Conts...>&& t) : collection_{std::move(t)}, begins_{}, ends_{} {
+	init(std::index_sequence_for<Conts...>{});
+}
 
-template <typename... Iters>
-typename zip_collection<Iters...>::iterator zip_collection<Iters...>::begin() {
+template <typename... Conts>
+typename zip_collection<Conts...>::iterator zip_collection<Conts...>::begin() noexcept {
 	return begins_;
 }
 
-template <typename... Iters>
-typename zip_collection<Iters...>::iterator zip_collection<Iters...>::end() {
+template <typename... Conts>
+typename zip_collection<Conts...>::iterator zip_collection<Conts...>::end() noexcept {
 	return ends_;
+}
+
+template <typename... Conts>
+template <std::size_t... Is>
+void zip_collection<Conts...>::init(std::index_sequence<Is...>) {
+	begins_ = iter_tuple_t{opt_c_begin(std::get<Is>(collection_))...};
+	ends_ = iter_tuple_t{opt_c_end(std::get<Is>(collection_))...};
 }
 
 /* zip */
 template <typename... Args>
-zip_collection<get_iterator_t<Args>...> zip(Args&&... args) {
-	using collection_t = zip_collection<get_iterator_t<Args>...>;
-	using iter_tuple_t = typename collection_t::iter_tuple_t;
-	return collection_t{iter_tuple_t{opt_c_begin(args)...}, iter_tuple_t{opt_c_end(args)...}};
+zip_collection<Args...> zip(Args&&... args) {
+	return zip_collection<Args...>{std::forward_as_tuple(std::forward<Args>(args)...)};
 }
+
+
 
 /* fold_iterator */
 template <typename Iter, typename Op>

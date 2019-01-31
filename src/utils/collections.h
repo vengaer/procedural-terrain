@@ -36,8 +36,9 @@ class zip_iterator {
 		bool operator!=(zip_iterator const& rhs) const;
 
 	private:
-		iter_tuple_t iters_;
+		iter_tuple_t iters_{};
 
+		zip_iterator() = default;
 		zip_iterator(iter_tuple_t&& iters);
 
 		template <std::size_t... Is>
@@ -54,28 +55,32 @@ class zip_iterator {
 
 };
 
-
-template <typename... Iters>
-class zip_collection {
+template <typename... Conts>
+class zip_collection{
 	public:
-		using iterator = zip_iterator<Iters...>;
-		
-		iterator begin();
-		iterator end();
+		using iterator = zip_iterator<get_iterator_t<Conts>...>;
+
+		iterator begin() noexcept;
+		iterator end() noexcept;
 
 	private:
+		std::tuple<Conts...> collection_;
 		iterator begins_, ends_;
 
+		zip_collection(std::tuple<Conts...>&& t);
+		
 		using iter_tuple_t = typename iterator::iter_tuple_t;
-		zip_collection(iter_tuple_t&& begins, iter_tuple_t&& ends);
+
+		template <std::size_t... Is>
+		void init(std::index_sequence<Is...>);
 
 		template <typename... Args>
-		friend zip_collection<get_iterator_t<Args>...> zip(Args&&...);
+		friend zip_collection<Args...> zip(Args&&...);
+
 };
 
-
 template <typename... Args>
-zip_collection<get_iterator_t<Args>...> zip(Args&&... args);
+zip_collection<Args...> zip(Args&&... args);
 
 template <typename Iter, typename Op>
 class fold_iterator {
