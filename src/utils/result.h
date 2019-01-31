@@ -14,6 +14,12 @@ struct Result{
 	std::tuple<Args...> data{};
 };
 
+template <typename T>
+struct Result<T> {
+	Outcome outcome{};
+	T data{};
+};
+
 template <typename... Args>
 struct Result<std::variant<Args...>> {
 	Outcome outcome{};

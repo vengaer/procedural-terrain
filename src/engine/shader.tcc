@@ -1,7 +1,5 @@
-
-
 template <typename... Args>
-void Shader::upload_uniform(std::string const& name, Args&&... args) {
+void Shader::upload_uniform(std::string const& name, Args&&... args) const {
 	auto it = uniforms_.find(name);
 	
 	if(it == std::end(uniforms_)) {

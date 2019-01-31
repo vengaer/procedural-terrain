@@ -56,12 +56,12 @@ glm::mat4 Transform::model_matrix() const {
 
 void Transform::add_transform(glm::mat4&& transform) {
 	transforms_.push(std::move(transform));
-	update_model();
+	if(shader_)
+		update_model();
 }
 
 void Transform::update_model() const {
-	if(shader_)
-		shader_->upload_uniform(MODEL_UNIFORM_NAME, transforms_.top());
+	shader_->upload_uniform(MODEL_UNIFORM_NAME, transforms_.top());
 }
 
 void Transform::force_update() {

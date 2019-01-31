@@ -59,6 +59,9 @@ template <typename... Conts>
 class zip_collection{
 	public:
 		using iterator = zip_iterator<get_iterator_t<Conts>...>;
+		
+		zip_collection(zip_collection const&) = delete;
+		zip_collection& operator=(zip_collection const&) = delete;
 
 		iterator begin() noexcept;
 		iterator end() noexcept;

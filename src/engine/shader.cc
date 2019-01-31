@@ -280,9 +280,9 @@ Result<std::optional<std::string>> Shader::assert_shader_status_ok(GLuint id, St
 	return { Outcome::Success, std::nullopt };
 }
 
-Shader::Source Shader::generate_source_info(std::string const& shader1, Type type1, std::string const& shader2, Type) {
+Shader::SourceFile Shader::generate_source_info(std::string const& shader1, Type type1, std::string const& shader2, Type) {
 	namespace fs = std::filesystem;
-	Source source;
+	SourceFile source;
 	source.vertex = type1 == Type::Vertex ?
 								shader1 :
 								shader2 ;
@@ -304,7 +304,7 @@ Shader::Source Shader::generate_source_info(std::string const& shader1, Type typ
 
 void Shader::reload_on_change() {
 	using namespace std::chrono_literals;
-	Context shared_context{"", 1, 1, false, true};
+	Context const shared_context{"", 1, 1, false, true};
 
 	while(!halt_execution_) {
 		{
@@ -398,7 +398,14 @@ void Shader::reload() {
 
 	LOG("Shader successfully linked and assigned new id ", program_);
 	source_.update_write_time();
+
+	update_internal_uniform_locations();
 	
+}
+
+void Shader::update_internal_uniform_locations() const {
+	for(auto& [handle, location] : uniforms_)
+		location = glGetUniformLocation(program_, handle.c_str());
 }
 
 
@@ -409,28 +416,28 @@ std::thread Shader::updater_thread_{};
 std::vector<std::reference_wrapper<Shader>> Shader::instances_{};
 typename Shader::callback_func Shader::reload_callback_{nullptr};
 
-/* Shader::Source */
-Shader::Source::Source(std::string const& vert, std::string const& frag) : vertex{vert}, fragment{frag}, last_vert_write{}, last_frag_write{} { }
+/* Shader::SourceFile */
+Shader::SourceFile::SourceFile(std::string const& vert, std::string const& frag) : vertex{vert}, fragment{frag}, last_vert_write{}, last_frag_write{} { }
 
-Shader::Source::Source(std::filesystem::path const& vert, std::filesystem::path const& frag) : vertex{vert}, fragment{frag}, last_vert_write{}, last_frag_write{} { }
+Shader::SourceFile::SourceFile(std::filesystem::path const& vert, std::filesystem::path const& frag) : vertex{vert}, fragment{frag}, last_vert_write{}, last_frag_write{} { }
 
-Shader::Source::Source(std::string&& vert, std::string&& frag) : vertex{std::move(vert)}, fragment{std::move(frag)}, last_vert_write{}, last_frag_write{} { }
+Shader::SourceFile::SourceFile(std::string&& vert, std::string&& frag) : vertex{std::move(vert)}, fragment{std::move(frag)}, last_vert_write{}, last_frag_write{} { }
 
-Shader::Source::Source(std::filesystem::path&& vert, std::filesystem::path&& frag) : vertex{std::move(vert)}, fragment{std::move(frag)}, last_vert_write{}, last_frag_write{} { }
+Shader::SourceFile::SourceFile(std::filesystem::path&& vert, std::filesystem::path&& frag) : vertex{std::move(vert)}, fragment{std::move(frag)}, last_vert_write{}, last_frag_write{} { }
 
-Shader::Source::Source(Source const& other) : last_vert_write{other.last_vert_write}, last_frag_write{other.last_frag_write} {
+Shader::SourceFile::SourceFile(SourceFile const& other) : last_vert_write{other.last_vert_write}, last_frag_write{other.last_frag_write} {
 	reconstruct();
 	vertex = other.vertex;
 	fragment = other.fragment;
 }
 
-Shader::Source::Source(Source&& other) : last_vert_write{std::move(other.last_vert_write)}, last_frag_write{std::move(other.last_frag_write)} {
+Shader::SourceFile::SourceFile(SourceFile&& other) : last_vert_write{std::move(other.last_vert_write)}, last_frag_write{std::move(other.last_frag_write)} {
 	reconstruct();
 	vertex = std::move(other.vertex);
 	fragment = std::move(other.fragment);
 }
 
-Shader::Source& Shader::Source::operator=(Source const& other) & {
+Shader::SourceFile& Shader::SourceFile::operator=(SourceFile const& other) & {
 	reconstruct();
 	vertex = other.vertex;
 	fragment = other.fragment;
@@ -439,7 +446,7 @@ Shader::Source& Shader::Source::operator=(Source const& other) & {
 	return *this;
 }
 
-Shader::Source& Shader::Source::operator=(Source&& other) & {
+Shader::SourceFile& Shader::SourceFile::operator=(SourceFile&& other) & {
 	reconstruct();
 	vertex = std::move(other.vertex);
 	fragment = std::move(other.fragment);
@@ -448,11 +455,11 @@ Shader::Source& Shader::Source::operator=(Source&& other) & {
 	return *this;
 }
 
-std::pair<std::filesystem::path, std::filesystem::path> Shader::Source::get_stems() const {
+std::pair<std::filesystem::path, std::filesystem::path> Shader::SourceFile::get_stems() const {
 	return { vertex.stem(), fragment.stem() };
 }
 
-Result<std::optional<std::string>> Shader::Source::touch() noexcept {
+Result<std::optional<std::string>> Shader::SourceFile::touch() noexcept {
 	namespace fs = std::filesystem;
 
 	auto now = std::chrono::system_clock::now();
@@ -469,14 +476,14 @@ Result<std::optional<std::string>> Shader::Source::touch() noexcept {
 	return { Outcome::Success, std::nullopt };
 }
 
-void Shader::Source::update_write_time(std::filesystem::file_time_type time) noexcept {
+void Shader::SourceFile::update_write_time(std::filesystem::file_time_type time) noexcept {
 	last_vert_write = last_frag_write = time;
 
 }
 Result<std::variant<std::string,
 						    std::pair<std::filesystem::file_time_type, 
 									  std::filesystem::file_time_type
->>> Shader::Source::get_last_write_time() const noexcept {
+>>> Shader::SourceFile::get_last_write_time() const noexcept {
 	namespace fs = std::filesystem;
 	std::error_code err{};
 
@@ -491,7 +498,7 @@ Result<std::variant<std::string,
 	return { Outcome::Success, std::make_pair(vert_time, frag_time) };
 }
 
-bool Shader::Source::has_changed() {
+bool Shader::SourceFile::has_changed() {
 	namespace fs = std::filesystem;
 	auto [outcome, data] = get_last_write_time();
 	
@@ -508,7 +515,7 @@ bool Shader::Source::has_changed() {
 	return vert_time > last_vert_write || frag_time > last_frag_write;
 }
 
-void Shader::Source::reconstruct() {
+void Shader::SourceFile::reconstruct() {
 	namespace fs = std::filesystem;
 	new (&vertex) fs::path;
 	new (&fragment) fs::path;

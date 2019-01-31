@@ -133,7 +133,7 @@ void EventHandler::size_callback(GLFWwindow*, int width, int height) {
 	update_perspective(static_cast<float>(width), static_cast<float>(height));
 }
 
-void EventHandler::shader_reload_callback(Shader& shader) {
+void EventHandler::shader_reload_callback(Shader const& shader) {
 	LOG("Reload callback triggered, reuploading uniforms...");
 	shader.enable();
 	glm::mat4 const view = instance_->camera_->view();

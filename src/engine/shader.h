@@ -33,12 +33,11 @@
 #include <variant>
 #include <vector>
 
-
 class Shader {
-	using callback_func = void(*)(Shader&);
+	using callback_func = void(*)(Shader const&);
 	public:
 		enum class Type { Vertex, Fragment };
-
+		
 		Shader(std::string const& shader1, Type type1, std::string const& shader2, Type type2);
 		~Shader();
 		
@@ -61,7 +60,7 @@ class Shader {
  		 * 	- If passing arithmetic types, any number between 1 and 4 works and calls the correct glUniform.
  		 *  - glm types should be passed directly and not by calling glm::value_ptr, using &...[0] or anything smiliar */
 		template <typename... Args>
-		void upload_uniform(std::string const& name, Args&&... args);							/* Stores uniform locations in hash map */
+		void upload_uniform(std::string const& name, Args&&... args) const;						/* Stores uniform locations in hash map */
 
 		template <typename... Args>
 		static void upload_uniform(GLuint program, std::string const& name, Args&&... args);    /* Always calls glGetUniformLocation */
@@ -77,25 +76,25 @@ class Shader {
 							   End_ };
 
 
-		struct Source {
-			Source() = default;
-			Source(std::string const& vert, std::string const& frag);
-			Source(std::string&& vert, std::string&& frag);
-			Source(std::filesystem::path const& vert, std::filesystem::path const& frag);
-			Source(std::filesystem::path&& vert, std::filesystem::path&& frag);
+		struct SourceFile {
+			SourceFile() = default;
+			SourceFile(std::string const& vert, std::string const& frag);
+			SourceFile(std::string&& vert, std::string&& frag);
+			SourceFile(std::filesystem::path const& vert, std::filesystem::path const& frag);
+			SourceFile(std::filesystem::path&& vert, std::filesystem::path&& frag);
 
-			Source(Source const& other);
-			Source(Source&& other);
-			Source& operator=(Source const& other) &;
-			Source& operator=(Source&& other) &;
+			SourceFile(SourceFile const& other);
+			SourceFile(SourceFile&& other);
+			SourceFile& operator=(SourceFile const& other) &;
+			SourceFile& operator=(SourceFile&& other) &;
 
 			std::pair<std::filesystem::path, std::filesystem::path> get_stems() const;
 			Result<std::optional<std::string>> touch() noexcept;
 			void update_write_time(std::filesystem::file_time_type time = std::chrono::system_clock::now()) noexcept;
 
 			Result<std::variant<std::string,
-									   std::pair<std::filesystem::file_time_type, 
-												 std::filesystem::file_time_type
+								std::pair<std::filesystem::file_time_type, 
+										  std::filesystem::file_time_type
 			>>> get_last_write_time() const noexcept;
 			bool has_changed();
 
@@ -107,8 +106,8 @@ class Shader {
 		};
 
 		GLuint program_; /* Shader program id */
-		std::unordered_map<std::string, GLint> uniforms_;
-		Source source_;
+		std::unordered_map<std::string, GLint> mutable uniforms_;
+		SourceFile source_;
 		static std::size_t const depth_; /* Max recursive include depth */
 
 		static std::atomic_bool halt_execution_;
@@ -117,7 +116,6 @@ class Shader {
 		static std::vector<std::reference_wrapper<Shader>> instances_;
 		static callback_func reload_callback_;
 
-	
 		void init(std::string const& shader1, Type type1, std::string const& shader2, Type type2);
 		
 		static Result<ErrorType, std::string> read_source(std::string const& source);
@@ -128,13 +126,14 @@ class Shader {
 
 		static Result<std::optional<std::string>> assert_shader_status_ok(GLuint id, StatusQuery sq);
 
-		static Source generate_source_info(std::string const& shader1, Type type1, std::string const& shader2, Type);
+		static SourceFile generate_source_info(std::string const& shader1, Type type1, std::string const& shader2, Type);
 
 		template <typename... Args>
 		static void upload_uniform(GLint location, Args&&... args);
 
 		static void reload_on_change();
 		void reload();
+		void update_internal_uniform_locations() const;
 };
 
 #include "shader.tcc"

@@ -72,7 +72,7 @@ class EventHandler {
 		static void key_callback(GLFWwindow*, int key, int, int, int mod_bits);
 		static void mouse_callback(GLFWwindow*, double x, double y);
 		static void size_callback(GLFWwindow*, int widht, int height);
-		static void shader_reload_callback(Shader& shader);
+		static void shader_reload_callback(Shader const& shader);
 	
 };
 
