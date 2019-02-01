@@ -184,22 +184,21 @@ bool enumerate_iterator<Iter>::operator!=(enumerate_iterator const& rhs) const {
 }
 
 /* enumerate_collection */
-template <typename Iter>
-enumerate_collection<Iter>::enumerate_collection(Iter begin, Iter end) : begin_{begin}, end_{end} { }
+template <typename Container>
+enumerate_collection<Container>::enumerate_collection(Container&& c) : data_{std::forward<Container>(c)}, begin_{opt_c_begin(data_)}, end_{opt_c_end(data_)} { }
 
-template <typename Iter>
-typename enumerate_collection<Iter>::iterator enumerate_collection<Iter>::begin() {
+template <typename Container>
+typename enumerate_collection<Container>::iterator enumerate_collection<Container>::begin() noexcept {
 	return begin_;
 }
 
-template <typename Iter>
-typename enumerate_collection<Iter>::iterator enumerate_collection<Iter>::end() {
+template <typename Container>
+typename enumerate_collection<Container>::iterator enumerate_collection<Container>::end() noexcept {
 	return end_;
 }
 
 /* enumerate */
 template <typename Container>
-enumerate_collection<get_iterator_t<Container>> enumerate(Container&& c) {
-	using collection_t = enumerate_collection<get_iterator_t<Container>>;
-	return collection_t{opt_c_begin(c), opt_c_end(c)};
+enumerate_collection<Container> enumerate(Container&& c) {
+	return enumerate_collection<Container>{std::forward<Container>(c)};
 }

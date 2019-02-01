@@ -140,10 +140,8 @@ fold_collection<Container, Op> fold(Container&& c, value_type_t<Container> init 
 template <typename Iter>
 class enumerate_iterator {
 	using cont_value_type_t = typename std::iterator_traits<Iter>::value_type;
-	using opt_c_value_type_t = std::conditional_t<is_const_iterator_v<Iter>, 
-												  cont_value_type_t const, 
-												  cont_value_type_t>;
-	using enum_pair_t = std::pair<std::size_t, std::reference_wrapper<opt_c_value_type_t>>;
+	using reference_t = typename std::iterator_traits<Iter>::reference;
+	using enum_pair_t = std::pair<std::size_t, reference_t>;
 	public:
 		using value_type = enum_pair_t;
 		using reference = value_type;
@@ -168,24 +166,25 @@ class enumerate_iterator {
 		friend class enumerate_collection;
 };
 
-template <typename Iter>
+template <typename Container>
 class enumerate_collection {
 	public:
-		using iterator = enumerate_iterator<Iter>;
+		using iterator = enumerate_iterator<get_iterator_t<Container>>;
 
-		iterator begin();
-		iterator end();
+		iterator begin() noexcept;
+		iterator end() noexcept;
 	private:
+		Container data_;
 		iterator begin_, end_;
 
-		enumerate_collection(Iter begin, Iter end);
+		enumerate_collection(Container&& c);
 		
-		template <typename Container>
-		friend enumerate_collection<get_iterator_t<Container>> enumerate(Container&&);
+		template <typename Cont>
+		friend enumerate_collection<Cont> enumerate(Cont&&);
 };
 
 template <typename Container>
-enumerate_collection<get_iterator_t<Container>> enumerate(Container&& c);
+enumerate_collection<Container> enumerate(Container&& c);
 
 
 template <typename Enum, typename... Rest>
