@@ -88,9 +88,9 @@ void zip_collection<Conts...>::init(std::index_sequence<Is...>) {
 }
 
 /* zip */
-template <typename... Args>
-zip_collection<Args...> zip(Args&&... args) {
-	return zip_collection<Args...>{std::forward_as_tuple(std::forward<Args>(args)...)};
+template <typename P0, typename... P1toN>
+zip_collection<P0, P1toN...> zip(P0&& first, P1toN&&... rest) {
+	return zip_collection<P0, P1toN...>{std::forward_as_tuple(std::forward<P0>(first), std::forward<P1toN>(rest)...)};
 }
 
 
@@ -129,23 +129,22 @@ bool fold_iterator<Iter, Op>::operator!=(fold_iterator const& rhs) const {
 
 /* fold_collection */
 template <typename Container, typename Op>
-fold_collection<Container, Op>::fold_collection(Container const& c, value_type&& init, Op op) : begin_{std::cbegin(c), std::move(init), op}, end_{std::cend(c), value_type{}, op} { }
+fold_collection<Container, Op>::fold_collection(Container&& c, value_type&& init, Op op) : data_{std::forward<Container>(c)}, begin_{std::cbegin(data_), std::move(init), op}, end_{std::cend(data_), value_type{}, op} { }
 
 template <typename Container, typename Op>
-typename fold_collection<Container, Op>::iterator fold_collection<Container, Op>::begin() {
+typename fold_collection<Container, Op>::iterator fold_collection<Container, Op>::begin() noexcept {
 	return begin_;
 }
 
 template <typename Container, typename Op>
-typename fold_collection<Container, Op>::iterator fold_collection<Container, Op>::end() {
+typename fold_collection<Container, Op>::iterator fold_collection<Container, Op>::end() noexcept {
 	return end_;
 }
 
 /* fold */
-
 template <typename Container, typename Op = std::plus<value_type_t<Container>>>
-fold_collection<Container, Op> fold(Container const& c, value_type_t<Container> init, Op op) {
-	return fold_collection{c, std::move(init), op};
+fold_collection<Container, Op> fold(Container&& c, value_type_t<Container> init, Op op) {
+	return fold_collection{std::forward<Container>(c), std::move(init), op};
 } 
 
 /* enumerate_iterator */

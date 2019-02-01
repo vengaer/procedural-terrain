@@ -15,6 +15,9 @@
 
 int main() {
 	unsigned constexpr width = 960, height = 540;
+	std::vector<int> v{1,2,3};
+	for(auto i : fold(std::vector<int>{1,2,3}))
+		std::cout << i << "\n";
 
 	try{
 		Window window{"test", width, height};

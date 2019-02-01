@@ -77,13 +77,13 @@ class zip_collection{
 		template <std::size_t... Is>
 		void init(std::index_sequence<Is...>);
 
-		template <typename... Args>
-		friend zip_collection<Args...> zip(Args&&...);
+		template <typename P0, typename... P1toN>
+		friend zip_collection<P0, P1toN...> zip(P0&&, P1toN&&...);
 
 };
 
-template <typename... Args>
-zip_collection<Args...> zip(Args&&... args);
+template <typename P0, typename... P1toN>
+zip_collection<P0, P1toN...> zip(P0&& first, P1toN&&... rest);
 
 template <typename Iter, typename Op>
 class fold_iterator {
@@ -120,21 +120,22 @@ class fold_collection {
 		using value_type = typename std::iterator_traits<cont_iter_t>::value_type;
 		using iterator = fold_iterator<cont_iter_t, Op>;
 		
-		iterator begin();
-		iterator end();
+		iterator begin() noexcept;
+		iterator end() noexcept;
 
 	private:
+		Container data_;
 		iterator begin_, end_;
 
-		fold_collection(Container const& c, value_type&& init, Op op);
+		fold_collection(Container&& c, value_type&& init, Op op);
 
 		template <typename T, typename U>
-		friend fold_collection<T, U> fold(T const&, value_type_t<T>, U);
+		friend fold_collection<T, U> fold(T&&, value_type_t<T>, U);
 };
 
 
 template <typename Container, typename Op = std::plus<value_type_t<Container>>>
-fold_collection<Container, Op> fold(Container const& c, value_type_t<Container> init = {}, Op op = {});
+fold_collection<Container, Op> fold(Container&& c, value_type_t<Container> init = {}, Op op = {});
 
 template <typename Iter>
 class enumerate_iterator {
