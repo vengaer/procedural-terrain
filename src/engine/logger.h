@@ -39,7 +39,7 @@
 
 namespace logging {
 	struct FileLoggingTag { };
-	struct ErrOutLoggingTag { };
+	using ErrOutLoggingTag = void;
 
 	enum class Label { Debug, Warning, Critical };
 	std::string to_string(Label S);
@@ -51,7 +51,7 @@ namespace logging {
 			Label last_{Label::Debug};
 	};
 
-	template <typename, typename = void>
+	template <typename, typename = ErrOutLoggingTag>
 	class FileLogger : public LoggerBase { };
 
 	template <typename T>
@@ -95,9 +95,9 @@ namespace logging {
 
 
 	#if defined(LOG_FULL_VERBOSE) || defined(LOG_FULL_DEFAULT)
-	static Logger<FileLoggingTag> logger_instance;
+	inline Logger<FileLoggingTag> logger_instance;		/* inline non-static => same address in all TU */
 	#else
-	static Logger<ErrOutLoggingTag> logger_instance;
+	inline Logger<ErrOutLoggingTag> logger_instance;
 	#endif
 }
 #define CALL_TRACE "<Invoked in function \'", __FUNCTION__, "\' on line ", __LINE__, " in file \'", __FILE__ "\'> : "
