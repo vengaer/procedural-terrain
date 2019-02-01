@@ -1,3 +1,4 @@
+CXX ?= g++
 SRC = $(wildcard src/*.cc) \
 	  $(wildcard src/engine/*.cc) \
 	  $(wildcard src/geometry/*.cc) \
@@ -7,9 +8,9 @@ OBJ := $(addsuffix .o,$(basename $(SRC)))
 
 INC = -I src/ -I src/engine/ -I src/geometry/ -I src/math/ -I src/utils/
 
-export DFLAGS
+export CPPFLAGS
 
-CXXFLAGS = -std=c++17 -Wall -Wextra -pedantic -Weffc++ $(INC) $(DFLAGS) 
+CXXFLAGS := $(CXXFLAGS) -std=c++17 -Wall -Wextra -pedantic -Weffc++ $(INC) $(CPPFLAGS) 
 LDFLAGS = -lGLEW -lglfw -lGL -lm -lX11 -lpthread -ldl -lstdc++fs
 
 
@@ -23,6 +24,6 @@ clean:
 run: terrain
 	./terrain
 
-debug: DFLAGS=-D LOG_FULL_VERBOSE
+debug: CPPFLAGS=-D LOG_FULL_VERBOSE
 debug: terrain
 	./terrain
