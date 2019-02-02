@@ -206,7 +206,7 @@ void Shader::reload_on_change() {
 void Shader::reload() {
 	LOG("Change to shader source detected, reloading...");
 	
-	std::vector<GLuint> shader_ids(sources_.size(), 0u);
+	std::vector<GLuint> shader_ids(sources_.size());
 	Result<GLuint, std::string> result;
 
 	for(auto [idx, id] : enumerate(shader_ids)) {

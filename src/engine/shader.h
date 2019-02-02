@@ -47,6 +47,7 @@ class Shader {
 		
 		template <typename... Sources>
 		Shader(Sources const&... src);
+
 		~Shader();
 		
 		Shader(Shader const&) = delete;
@@ -125,10 +126,10 @@ class Shader {
 		template <std::size_t N>
 		void init();
 
-		template <typename Tuple, std::size_t... Is>
-		static bool constexpr even_parameters_acceptable(Tuple const& t, even_index_sequence<Is...>);
-		template <typename Tuple, std::size_t... Is>
-		static bool constexpr odd_parameters_acceptable(Tuple const& t, odd_index_sequence<Is...>);
+		template <typename... Args, std::size_t... Is>
+		static bool constexpr even_parameters_acceptable(even_index_sequence<Is...>);
+		template <typename... Args, std::size_t... Is>
+		static bool constexpr odd_parameters_acceptable(odd_index_sequence<Is...>);
 		
 		static Result<ErrorType, std::string> read_source(std::string const& source);
 		static std::string format_header_guard(std::string path);
@@ -137,7 +138,6 @@ class Shader {
 
 		template <typename T, typename = std::enable_if_t<is_container_v<T>>>
 		static Result<std::variant<GLuint, std::string>> link(T const& ids);
-		static Result<std::variant<GLuint, std::string>> link(GLuint vertex_id, GLuint fragment_id);
 
 		static Result<std::optional<std::string>> assert_shader_status_ok(GLuint id, StatusQuery sq);
 

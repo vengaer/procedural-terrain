@@ -1,21 +1,21 @@
 template <typename... Sources>
 Shader::Shader(Sources const&... src) : program_{}, uniforms_{}, sources_(sizeof...(Sources)/2) {
 	static_assert(sizeof...(Sources) % 2 == 0, "Arguments must be given in \"pairs\" of std::string (or something convertible to it) and Shader::Type");
-	static_assert(even_parameters_acceptable(std::forward_as_tuple(src...), even_index_sequence_for<Sources...>{}), "Even arguments must be convertible to std::string");
-	static_assert(odd_parameters_acceptable(std::forward_as_tuple(src...), odd_index_sequence_for<Sources...>{}),   "Odd arguments must be of type Shader::Type");
+	static_assert(even_parameters_acceptable<Sources...>(even_index_sequence_for<Sources...>{}), "Even arguments must be convertible to std::string");
+	static_assert(odd_parameters_acceptable<Sources...>(odd_index_sequence_for<Sources...>{}),   "Odd arguments must be of type Shader::Type");
+
 	generate_source<0u>(src...);
 	init<sizeof...(Sources)/2>();
 }
 	
-
-template <typename Tuple, std::size_t... Is>
-bool constexpr Shader::even_parameters_acceptable(Tuple const& t, even_index_sequence<Is...>) {
-	return (std::is_convertible_v<remove_cvref_t<decltype(std::get<Is>(t))>, std::string> && ...);
+template <typename... Args, std::size_t... Is>
+bool constexpr Shader::even_parameters_acceptable(even_index_sequence<Is...>) {
+	return (std::is_convertible_v<remove_cvref_t<nth_type_t<Is, Args...>>, std::string> && ...);
 }
 
-template <typename Tuple, std::size_t... Is>
-bool constexpr Shader::odd_parameters_acceptable(Tuple const& t, odd_index_sequence<Is...>) {
-	return (std::is_same_v<remove_cvref_t<decltype(std::get<Is>(t))>, Type> && ...);
+template <typename... Args, std::size_t... Is>
+bool constexpr Shader::odd_parameters_acceptable(odd_index_sequence<Is...>) {
+	return (std::is_same_v<remove_cvref_t<nth_type_t<Is, Args...>>, Type> && ...);
 }
 
 template <std::size_t N, typename... Sources>
@@ -95,6 +95,7 @@ Result<std::variant<GLuint, std::string>> Shader::link(T const& ids) {
 		glDetachShader(program_id, id);
 		glDeleteShader(id);
 	}
+
 	if(result.outcome == Outcome::Failure)
 		return { result.outcome, result.data.value() };
 
@@ -121,8 +122,6 @@ void Shader::upload_uniform(GLuint program, std::string const& name, Args&&... a
 	upload_uniform(location, std::forward<Args>(args)...);
 }
 
-/* The compiler uses this template to generate functions that at runtime perform a call to the correct
- * version of glUniform and nothing else */
 template <typename... Args>
 void Shader::upload_uniform(GLint location, Args&&... args) {
 	static_assert(sizeof...(args) <= 4 && sizeof...(args) > 0, "Function must be given 1 to 4 parameters");
