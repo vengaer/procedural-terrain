@@ -49,14 +49,11 @@ void Context::init(Type type, std::string const& name, bool shared, float versio
 	}
 	if(!is_visible_)
 		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+		
+	context_ = glfwCreateWindow(width_, height_, name.c_str(), nullptr, shared ? primary_->context_ : nullptr);
 	
-	if(type == Type::Primary) {
-		context_ = glfwCreateWindow(width_, height_, name.c_str(), nullptr, nullptr);
+	if(type == Type::Primary)
 		primary_ = this;
-	}
-	else
-		context_ = glfwCreateWindow(width_, height_, name.c_str(), nullptr, shared ? primary_->context_ : nullptr);
-	
 
 	if(!context_)
 		throw GLException{"Could not create GLFW window.\nDoes your graphics driver support OpenGL version " + std::to_string(version) +"?"};
