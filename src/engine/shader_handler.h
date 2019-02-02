@@ -17,11 +17,11 @@ struct manual_shader_handler {
 struct automatic_shader_handler {
 	void draw(GLuint vao, GLuint idx_size) const noexcept;
 	
-	std::shared_ptr<Shader> shader() const noexcept;
+	std::shared_ptr<Shader> const shader() const noexcept;
 	
 	static bool constexpr is_automatic = true;
 
-	std::shared_ptr<Shader> const shader_;
+	std::shared_ptr<Shader> shader_;
 };
 
 #endif
