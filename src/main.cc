@@ -29,7 +29,6 @@ int main() {
 		glClearColor(0.1f, 0.2f, 0.4f, 0.5f);
 		while(!window.should_close()){
 			frametime::update(plane_shader);
-			//frametime::display_status(frametime::Status::All);
 			window.clear();
 			//p.render();
 			e.render();			//		
