@@ -195,6 +195,7 @@ void Shader::reload_on_change() {
 						shader.get().reload();
 						if(reload_callback_)
 							(*reload_callback_)(shader.get());
+						break;
 					}
 				}
 			}
