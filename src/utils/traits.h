@@ -74,6 +74,15 @@ struct has_value_type<T, std::void_t<typename T::value_type>> : std::true_type {
 template <typename T>
 inline bool constexpr has_value_type_v = has_value_type<T>::value;
 
+template <typename T, typename = void>
+struct is_container : std::false_type { };
+
+template <typename T>
+struct is_container<T, std::void_t<decltype(std::begin(std::declval<T>())), decltype(std::end(std::declval<T>()))>> : std::true_type { };
+
+template <typename T>
+inline bool constexpr is_container_v = is_container<T>::value;
+
 template <std::size_t N, typename P0, typename... P1toM>
 struct nth_type : nth_type<N-1, P1toM...> { };
 

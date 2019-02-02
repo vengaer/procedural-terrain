@@ -1,9 +1,5 @@
 #include "shader.h"
 
-Shader::Shader(std::string const& shader1, Type type1, std::string const& shader2, Type type2) : program_{}, uniforms_{}, source_{} {
-	init(shader1, type1, shader2, type2);
-}
-
 Shader::~Shader() {
 	LOG("Deleting shader");
 	std::lock_guard<std::mutex> lock{ics_mutex_};
@@ -38,80 +34,6 @@ void Shader::set_reload_callback(callback_func func) {
 GLuint Shader::program_id() const {
 	return program_;
 }
-
-void Shader::init(std::string const& shader1, Type type1, std::string const& shader2, Type type2){
-	if(type1 == type2)
-		throw ArgumentMismatchException{"Provided shader types must differ\n"};
-
-	source_ = generate_source_info(shader1, type1, shader2, type2);
-	
-	std::array<GLuint, 2> shader_ids;
-	{
-		Result<GLuint, std::string> result;
-		bind_enum<Outcome, ErrorType> bind;
-		{
-			LOG("Reading source ", shader1);
-			auto [outcome, data] = read_source(shader1);
-			auto& [error_type, content] = data;
-
-			if(bind(outcome, error_type) == bind(Outcome::Failure, ErrorType::FileIO))
-				throw FileIOException{content};
-			else if(bind(outcome, error_type) == bind(Outcome::Failure, ErrorType::Include))
-				throw ShaderIncludeException{content};
-
-			LOG("Compiling ", shader1);
-			result = compile(std::move(content), type1);
-			if(result.outcome == Outcome::Failure) {
-				glDeleteShader(std::get<0>(result.data));
-				throw ShaderCompilationException{std::get<1>(result.data)};
-			}
-			shader_ids[enum_value(type1)] = std::get<0>(result.data);
-		}
-		LOG("Reading source ", shader2);
-		auto [outcome, data] = read_source(shader2);
-		auto& [error_type, content] = data;
-
-		if(bind(outcome, error_type) == bind(Outcome::Failure, ErrorType::FileIO)) {
-			glDeleteShader(std::get<0>(result.data));
-			glDeleteShader(shader_ids[enum_value(type1)]);
-			throw FileIOException{content};
-		}
-		else if(bind(outcome, error_type) == bind(Outcome::Failure, ErrorType::Include)) {
-			glDeleteShader(std::get<0>(result.data));
-			glDeleteShader(shader_ids[enum_value(type1)]);
-			throw ShaderIncludeException{content};
-		}
-
-		LOG("Compiling ", shader2);
-		result = compile(std::move(content), type2);
-		if(result.outcome == Outcome::Failure) {
-			glDeleteShader(shader_ids[enum_value(type1)]);
-			glDeleteShader(std::get<0>(result.data));
-			throw ShaderCompilationException{std::get<1>(result.data)};
-		}
-		shader_ids[enum_value(type2)] = std::get<0>(result.data);
-	}
-	LOG("Linking shader ", program_);
-	auto [outcome, data] = link(shader_ids[enum_value(Type::Vertex)], shader_ids[enum_value(Type::Fragment)]);
-
-	if(outcome == Outcome::Failure)
-		throw ShaderLinkingException{std::get<std::string>(data)};
-
-	std::lock_guard<std::mutex> lock{ics_mutex_};
-	program_ = std::get<GLuint>(data);
-	LOG("Linking successful, assigning new id ", program_);
-
-	LOG("Marking instance for automatic updating");
-	instances_.push_back(std::ref(*this));
-
-	if(halt_execution_){
-		LOG("Creating separate thread for execution");
-		halt_execution_ = false;
-		updater_thread_ = std::thread{reload_on_change};
-		LOG("Thead with id ", updater_thread_.get_id(), " successfully created");
-	}
-}
-
 
 Result<Shader::ErrorType, std::string> Shader::read_source(std::string const& source){
 	/* Every time an include directive is found, push stream with file to be included onto
@@ -216,9 +138,7 @@ Result<Shader::ErrorType, std::string> Shader::process_include_directive(std::st
 }
 
 Result<GLuint, std::string> Shader::compile(std::string const& source, Type type){
-	GLenum shader_type = type == Type::Vertex ? GL_VERTEX_SHADER : GL_FRAGMENT_SHADER;
-	
-	GLuint id = glCreateShader(shader_type);
+	GLuint id = glCreateShader(to_GLenum(type));
 
 	auto c_source = source.c_str();
 
@@ -228,28 +148,6 @@ Result<GLuint, std::string> Shader::compile(std::string const& source, Type type
 	auto result = assert_shader_status_ok(id, StatusQuery::Compile);	
 
 	return { result.outcome, std::make_tuple(id, result.data.value_or(std::string{})) };
-}
-
-Result<std::variant<GLuint, std::string>> Shader::link(GLuint vertex_id, GLuint fragment_id) {
-	GLuint program_id = glCreateProgram();
-
-	glAttachShader(program_id, vertex_id);
-	glAttachShader(program_id, fragment_id);
-
-	glLinkProgram(program_id);
-	
-	auto result = assert_shader_status_ok(program_id, StatusQuery::Link);
-
-	/* Clean up regardless of success */
-	glDetachShader(program_id, vertex_id);
-	glDetachShader(program_id, fragment_id);
-
-	glDeleteShader(vertex_id);
-	glDeleteShader(fragment_id);	
-	if(result.outcome == Outcome::Failure)
-		return { result.outcome, result.data.value() };
-
-	return { result.outcome, program_id };
 }
 
 Result<std::optional<std::string>> Shader::assert_shader_status_ok(GLuint id, StatusQuery sq){
@@ -280,40 +178,24 @@ Result<std::optional<std::string>> Shader::assert_shader_status_ok(GLuint id, St
 	return { Outcome::Success, std::nullopt };
 }
 
-Shader::SourceFile Shader::generate_source_info(std::string const& shader1, Type type1, std::string const& shader2, Type) {
-	namespace fs = std::filesystem;
-	SourceFile source;
-	source.vertex = type1 == Type::Vertex ?
-								shader1 :
-								shader2 ;
-	source.fragment = type1 == Type::Fragment ?
-								shader1 :
-								shader2 ;
-	auto [outcome, data] = source.get_last_write_time();
-
-	if(outcome == Outcome::Failure)
-		throw FileSystemException{std::get<std::string>(data)};
-
-	auto& [vert_time, frag_time] = std::get<std::pair<fs::file_time_type, fs::file_time_type>>(data);
-	
-	source.last_vert_write = vert_time;
-	source.last_frag_write = frag_time;
-	return source;
+GLenum constexpr Shader::to_GLenum(Type type) noexcept {
+	return static_cast<GLenum>(enum_value(type));
 }
-
 
 void Shader::reload_on_change() {
 	using namespace std::chrono_literals;
-	Context const shared_context{"", 1, 1, false, true};
+	Context const shared_context{"", 1u, 1u, false, true};
 
 	while(!halt_execution_) {
 		{
 			std::lock_guard<std::mutex> lock{ics_mutex_};
 			for(auto& shader : instances_){
-				if(shader.get().source_.has_changed()) {
-					shader.get().reload();
-					if(reload_callback_)
-						(*reload_callback_)(shader.get());
+				for(auto& source : shader.get().sources_) {
+					if(source.has_changed()) {
+						shader.get().reload();
+						if(reload_callback_)
+							(*reload_callback_)(shader.get());
+					}
 				}
 			}
 		}
@@ -323,84 +205,61 @@ void Shader::reload_on_change() {
 
 void Shader::reload() {
 	LOG("Change to shader source detected, reloading...");
+	
+	std::vector<GLuint> shader_ids(sources_.size(), 0u);
+	Result<GLuint, std::string> result;
 
-	std::array<GLuint, 2> shader_ids;
-	{
-		Result<GLuint, std::string> result;
-		bind_enum<Outcome, ErrorType> bind;
-		{
-			LOG("Reading source ", source_.vertex.string());
-			auto [outcome, data] = read_source(source_.vertex.string());
-			auto& [error_type, content] = data;
+	for(auto [idx, id] : enumerate(shader_ids)) {
+		auto path = sources_[idx].path.string();
 
-			if(bind(outcome, error_type) == bind(Outcome::Failure, ErrorType::FileIO)) {
-				ERR_LOG_WARN("Error reading source file when updating. Process returned message \'", content, "\'");
-				return;
-			}
-			else if(bind(outcome, error_type) == bind(Outcome::Failure, ErrorType::Include)) {
-				ERR_LOG_WARN("Error inluding source file when updating. Process returned message \'", content, "\'");
-				return;
-			}
-
-
-			LOG("Compiling ", source_.vertex.string());
-			result = compile(std::move(content), Type::Vertex);
-			if(result.outcome == Outcome::Failure) {
-				glDeleteShader(std::get<0>(result.data));
-				ERR_LOG_WARN("Error compiling shader, process returned message \'", std::get<1>(result.data), "\'");
-				return;
-			}
-			shader_ids[enum_value(Type::Vertex)] = std::get<0>(result.data);
-		}
-		LOG("Reading source ", source_.fragment.string());
-		auto [outcome, data] = read_source(source_.fragment.string());
+		LOG("Reading source ", sources_[idx].path.stem().string());
+		auto [outcome, data] = read_source(path);
 		auto& [error_type, content] = data;
 
-		if(bind(outcome, error_type) == bind(Outcome::Failure, ErrorType::FileIO)) {
-			glDeleteShader(std::get<0>(result.data));
-			glDeleteShader(shader_ids[enum_value(Type::Vertex)]);
-			ERR_LOG_WARN("Error reading source file when updating. Process returned message \'", content, "\'");
-			return;
-		}
-		else if(bind(outcome, error_type) == bind(Outcome::Failure, ErrorType::Include)) {
-			glDeleteShader(std::get<0>(result.data));
-			glDeleteShader(shader_ids[enum_value(Type::Vertex)]);
-			ERR_LOG_WARN("Error inluding source file when updating. Process returned message \'", content, "\'");
-			return;
-		}
+		if(outcome == Outcome::Failure) {
+			for(auto i = 0u; i < idx; i++)
+				glDeleteShader(shader_ids[i]);
 
-		LOG("Compiling ", source_.fragment.string());
-		result = compile(std::move(content), Type::Fragment);
-		if(result.outcome == Outcome::Failure) {
-			glDeleteShader(shader_ids[enum_value(Type::Vertex)]);
-			glDeleteShader(std::get<0>(result.data));
-			ERR_LOG_WARN("Error compiling shader, process returned message \'", std::get<1>(result.data), "\'");
+			if(error_type == ErrorType::FileIO){
+				ERR_LOG_WARN("Error reading source file when updating. Process returned message \'", content, "\'");
+			}
+			else if(error_type == ErrorType::Include) {
+				ERR_LOG_WARN("Error including source file when updating. Process returned message \'", content, "\'");
+			}
 			return;
 		}
-		shader_ids[enum_value(Type::Fragment)] = std::get<0>(result.data);
+		LOG("Compiling ", sources_[idx].path.stem().string());
+		result = compile(content, sources_[idx].type);
+		id = std::get<0>(result.data);
+		
+		if(result.outcome == Outcome::Failure) {
+			for(auto i = 0u; i < idx + 1; i++)
+				glDeleteShader(shader_ids[i]);
+			ERR_LOG_WARN("Error compiling shader, process returned messager \'", std::get<1>(result.data), "\'");
+			return;
+		}
 	}
-	LOG("Replacing shader with id ", program_);
-	auto [outcome, data] = link(shader_ids[enum_value(Type::Vertex)], shader_ids[enum_value(Type::Fragment)]);
+	LOG("Relinking shader with id ", program_);
+	auto [outcome, data] = link(shader_ids);
 
 	if(outcome == Outcome::Failure) {
-		ERR_LOG_CRIT("Error linking shader. Process returned message \'", std::get<std::string>(data), "\'. Attempting to schedule relinking for next execution loop...");
-		auto [touch_outcome, opt] = source_.touch();
-		if(touch_outcome == Outcome::Failure) {
-			throw ShaderLinkingException{opt.value()};
+		ERR_LOG_CRIT("Error linking shader. Process returned message \'", std::get<std::string>(data), "\'. Attempting to schedule relinking for next cycle...");
+		for(auto& source : sources_) {
+			auto [touch_outcome, opt] = source.touch();
+			if(touch_outcome == Outcome::Failure)
+				throw ShaderLinkingException{opt.value()};
 		}
-
-		ERR_LOG("Scheduling successful, another linking attempt will be made shortly");
+		ERR_LOG("Scheduling successful, another attempt will be made shortly");
 		return;
 	}
-
 	glDeleteProgram(program_);
 	program_ = std::get<GLuint>(data);
 
-	LOG("Shader successfully linked and assigned new id ", program_);
-	source_.update_write_time();
+	LOG("Shader successfully relinked and assigned new id", program_);
+	for(auto& source : sources_)
+		source.update_write_time();
 
 	update_internal_uniform_locations();
-	
 }
 
 void Shader::update_internal_uniform_locations() const {
@@ -416,107 +275,86 @@ std::thread Shader::updater_thread_{};
 std::vector<std::reference_wrapper<Shader>> Shader::instances_{};
 typename Shader::callback_func Shader::reload_callback_{nullptr};
 
-/* Shader::SourceFile */
-Shader::SourceFile::SourceFile(std::string const& vert, std::string const& frag) : vertex{vert}, fragment{frag}, last_vert_write{}, last_frag_write{} { }
+/* Shader::Source */
+Shader::Source::Source(std::string const& file, Type t) : path{file}, last_write{std::chrono::system_clock::now()}, type{t} { }
 
-Shader::SourceFile::SourceFile(std::filesystem::path const& vert, std::filesystem::path const& frag) : vertex{vert}, fragment{frag}, last_vert_write{}, last_frag_write{} { }
+Shader::Source::Source(std::filesystem::path const& file, Type t) : path{file}, last_write{std::chrono::system_clock::now()}, type{t} { }
 
-Shader::SourceFile::SourceFile(std::string&& vert, std::string&& frag) : vertex{std::move(vert)}, fragment{std::move(frag)}, last_vert_write{}, last_frag_write{} { }
+Shader::Source::Source(std::string&& file, Type t) : path{std::move(file)}, last_write{std::chrono::system_clock::now()}, type{t} { }
 
-Shader::SourceFile::SourceFile(std::filesystem::path&& vert, std::filesystem::path&& frag) : vertex{std::move(vert)}, fragment{std::move(frag)}, last_vert_write{}, last_frag_write{} { }
+Shader::Source::Source(std::filesystem::path&& file, Type t) : path{std::move(file)}, last_write{std::chrono::system_clock::now()}, type{t} { }
 
-Shader::SourceFile::SourceFile(SourceFile const& other) : last_vert_write{other.last_vert_write}, last_frag_write{other.last_frag_write} {
+Shader::Source::Source(Source const& other) : last_write{other.last_write}, type{other.type} {
 	reconstruct();
-	vertex = other.vertex;
-	fragment = other.fragment;
+	path = other.path;
 }
 
-Shader::SourceFile::SourceFile(SourceFile&& other) : last_vert_write{std::move(other.last_vert_write)}, last_frag_write{std::move(other.last_frag_write)} {
+Shader::Source::Source(Source&& other) : last_write{std::move(other.last_write)}, type{other.type} {
 	reconstruct();
-	vertex = std::move(other.vertex);
-	fragment = std::move(other.fragment);
+	path = std::move(other.path);
 }
 
-Shader::SourceFile& Shader::SourceFile::operator=(SourceFile const& other) & {
+Shader::Source& Shader::Source::operator=(Source const& other) & {
 	reconstruct();
-	vertex = other.vertex;
-	fragment = other.fragment;
-	last_vert_write = other.last_vert_write;
-	last_frag_write = other.last_frag_write;
+	path = other.path;
+	last_write = other.last_write;
+	type = other.type;
 	return *this;
 }
 
-Shader::SourceFile& Shader::SourceFile::operator=(SourceFile&& other) & {
+Shader::Source& Shader::Source::operator=(Source&& other) & {
 	reconstruct();
-	vertex = std::move(other.vertex);
-	fragment = std::move(other.fragment);
-	last_vert_write = std::move(other.last_vert_write);
-	last_frag_write = std::move(other.last_frag_write);
+	path = std::move(other.path);
+	last_write = std::move(other.last_write);
+	type = other.type;
 	return *this;
 }
 
-std::pair<std::filesystem::path, std::filesystem::path> Shader::SourceFile::get_stems() const {
-	return { vertex.stem(), fragment.stem() };
-}
 
-Result<std::optional<std::string>> Shader::SourceFile::touch() noexcept {
+Result<std::optional<std::string>> Shader::Source::touch() noexcept {
 	namespace fs = std::filesystem;
 
 	auto now = std::chrono::system_clock::now();
 	std::error_code err;
 	
-	fs::last_write_time(vertex, now, err);
-	if(err)
-		return { Outcome::Failure, std::optional<std::string>{err.message()} };
-
-	fs::last_write_time(fragment, now, err);
+	fs::last_write_time(path, now, err);
 	if(err)
 		return { Outcome::Failure, std::optional<std::string>{err.message()} };
 
 	return { Outcome::Success, std::nullopt };
 }
 
-void Shader::SourceFile::update_write_time(std::filesystem::file_time_type time) noexcept {
-	last_vert_write = last_frag_write = time;
+void Shader::Source::update_write_time(std::filesystem::file_time_type time) noexcept {
+	last_write = time;
 
 }
-Result<std::variant<std::string,
-						    std::pair<std::filesystem::file_time_type, 
-									  std::filesystem::file_time_type
->>> Shader::SourceFile::get_last_write_time() const noexcept {
+Result<std::variant<std::string, std::filesystem::file_time_type>>
+	Shader::Source::get_last_write_time() const noexcept {
 	namespace fs = std::filesystem;
 	std::error_code err{};
 
-	auto vert_time = fs::last_write_time(vertex, err);
+	auto time = fs::last_write_time(path, err);
 	if(err)
 		return { Outcome::Failure, err.message() };
 
-	auto frag_time = fs::last_write_time(fragment, err);
-	if(err)
-		return { Outcome::Failure, err.message() };
-
-	return { Outcome::Success, std::make_pair(vert_time, frag_time) };
+	return { Outcome::Success, time };
 }
 
-bool Shader::SourceFile::has_changed() {
+bool Shader::Source::has_changed() {
 	namespace fs = std::filesystem;
 	auto [outcome, data] = get_last_write_time();
 	
 	if(outcome == Outcome::Failure) {
-		auto [v_stem, f_stem] = get_stems();
-		ERR_LOG_WARN("Failed to update write time for shader created from vertex source ", v_stem, 
-				 	 " and fragment source ", f_stem, ". Process returned error code with message: \'", 
-				 	 std::get<std::string>(data), "\'. No update is possible");
+		ERR_LOG_WARN("Failed to update write time for shader created from source", path.stem(), ". Process returned error code with message: \'", std::get<std::string>(data), "\'. No update is possible");
 
 		return false;
 	}
-	auto& [vert_time, frag_time] = std::get<std::pair<fs::file_time_type, fs::file_time_type>>(data);
+	auto time = std::get<fs::file_time_type>(data);
 	
-	return vert_time > last_vert_write || frag_time > last_frag_write;
+	return time > last_write;
 }
 
-void Shader::SourceFile::reconstruct() {
+void Shader::Source::reconstruct() {
 	namespace fs = std::filesystem;
-	new (&vertex) fs::path;
-	new (&fragment) fs::path;
+	new (&path) fs::path;
 }

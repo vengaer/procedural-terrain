@@ -149,12 +149,12 @@ fold_collection<Container, Op> fold(Container&& c, value_type_t<Container> init,
 
 /* enumerate_iterator */
 template <typename Iter>
-enumerate_iterator<Iter>::enumerate_iterator(Iter it) : it_{it}, idx_{0u}  { }
+enumerate_iterator<Iter>::enumerate_iterator(Iter it) : it_{it}, idx_{0u} { }
 
 template <typename Iter>
 enumerate_iterator<Iter>& enumerate_iterator<Iter>::operator++() {
-	++idx_;
 	++it_;
+	++idx_;
 	return *this;
 }
 
@@ -167,10 +167,7 @@ enumerate_iterator<Iter> enumerate_iterator<Iter>::operator++(int) {
 
 template <typename Iter>
 typename enumerate_iterator<Iter>::reference enumerate_iterator<Iter>::operator*() {
-	if constexpr(is_const_iterator_v<Iter>)
-		return std::make_pair(idx_, std::cref(*it_));
-
-	return std::make_pair(idx_, std::ref(*it_));
+	return enum_pair_t{idx_, *it_};
 }
 
 template <typename Iter>

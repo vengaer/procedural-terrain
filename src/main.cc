@@ -13,6 +13,7 @@
 #include "collections.h"
 #include "logger.h"
 
+
 int main() {
 	unsigned constexpr width = 960, height = 540;
 
