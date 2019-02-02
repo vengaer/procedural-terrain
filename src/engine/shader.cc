@@ -202,6 +202,7 @@ void Shader::monitor_source_files() {
 						shader.get().reload();
 						if(reload_callback_)
 							(*reload_callback_)(shader.get());
+						break;
 					}
 				}
 			}
