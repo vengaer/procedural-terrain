@@ -1,4 +1,6 @@
+#include "exception.h"
 #include "window.h"
+#include <cmath>
 
 Window::Window(std::string const& name, std::size_t width, std::size_t height, float opengl_version) : Context{name, width, height, opengl_version} {
 	if(std::signbit(opengl_version))

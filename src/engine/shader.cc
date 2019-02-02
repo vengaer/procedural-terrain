@@ -1,4 +1,11 @@
+#include "context.h"
 #include "shader.h"
+#include "type_conversion.h"
+#include <algorithm>
+#include <fstream>
+#include <memory>
+#include <stack>
+#include <sstream>
 
 Shader::~Shader() {
 	LOG("Deleting shader");
@@ -182,7 +189,7 @@ GLenum constexpr Shader::to_GLenum(Type type) noexcept {
 	return static_cast<GLenum>(enum_value(type));
 }
 
-void Shader::reload_on_change() {
+void Shader::monitor_source_files() {
 	using namespace std::chrono_literals;
 	Context const shared_context{"", 1u, 1u, false, true};
 

@@ -1,4 +1,7 @@
 #include "context.h"
+#include "exception.h"
+#include <cmath>
+#include <functional>
 
 
 Context::Context(std::string const& name, std::size_t width, std::size_t height, bool visible, bool shared) : context_{nullptr}, width_{width}, height_{height}, is_visible_{visible} {

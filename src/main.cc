@@ -5,13 +5,8 @@
 #include "ellipsoid.h"
 #include "frametime.h"
 #include "plane.h"
-#include "renderer.h"
 #include "shader.h"
 #include "window.h"
-#include <iostream>
-#include "inserter.h"
-#include "collections.h"
-#include "logger.h"
 
 
 int main() {
@@ -19,14 +14,15 @@ int main() {
 
 	try{
 		Window window{"test", width, height};
-		std::shared_ptr<Shader> plane_shader = std::make_shared<Shader>( "/home/vilhelm/repos/c++/procedural_terrain/src/shaders/plane.vert", Shader::Type::Vertex, "/home/vilhelm/repos/c++/procedural_terrain/src/shaders/plane.frag", Shader::Type::Fragment );
+		std::shared_ptr<Shader> plane_shader = std::make_shared<Shader>( "/home/vilhelm/repos/c++/procedural_terrain/src/shaders/plane.vert", Shader::Type::Vertex, 
+																		 "/home/vilhelm/repos/c++/procedural_terrain/src/shaders/plane.frag", Shader::Type::Fragment );
 
 		std::shared_ptr<Camera> cam = std::make_shared<Camera>();
 		EventHandler::instantiate(cam, plane_shader);
-		Plane p{plane_shader};
-		Ellipsoid e{plane_shader};
+		//Plane p{plane_shader};
+		//Ellipsoid e{plane_shader};
 		Cuboid c{plane_shader};
-		Cylinder cyl{plane_shader};
+		//Cylinder cyl{plane_shader};
 
 
 		glClearColor(0.1f, 0.2f, 0.4f, 0.5f);

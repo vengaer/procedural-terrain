@@ -2,10 +2,7 @@
 #define CONTEXT_H
 
 #pragma once
-#include "exception.h"
-#include <cmath>
 #include <cstddef>
-#include <functional>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <string>

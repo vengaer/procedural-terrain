@@ -1,4 +1,7 @@
+#include "transform.h"
 #include "event_handler.h"
+#include <cstddef>
+#include <glm/gtc/type_ptr.hpp>
 
 void EventHandler::update_perspective(float width, float height) {
 	auto const [near, far] = instance_->camera_->clipping_plane();

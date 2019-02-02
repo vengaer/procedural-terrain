@@ -3,24 +3,15 @@
 
 #pragma once
 #include "camera.h"
-#include "exception.h"
 #include "inserter.h"
 #include "logger.h"
 #include "traits.h"
-#include "transform.h"
 #include "shader.h"
 #include "window.h"
-#include <cmath>
-#include <cstddef>
-#include <functional>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <iostream>
-#include <limits>
 #include <string>
-#include <utility>
 #include <vector>
 
 class EventHandler {

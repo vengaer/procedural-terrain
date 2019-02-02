@@ -3,7 +3,6 @@
 
 #pragma once
 #include "context.h"
-#include "exception.h"
 #include <cstddef>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>

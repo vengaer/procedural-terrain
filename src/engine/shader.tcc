@@ -74,10 +74,9 @@ void Shader::init() {
 	if(halt_execution_) {
 		LOG("Creating separate thread for execution");
 		halt_execution_ = false;
-		updater_thread_ = std::thread(reload_on_change);
+		updater_thread_ = std::thread(monitor_source_files);
 		LOG("Thread with id", updater_thread_.get_id(), " successfully created");
 	}
-
 }
 
 template <typename T, typename = std::enable_if_t<is_container_v<T>>>

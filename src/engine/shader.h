@@ -3,33 +3,25 @@
 
 #pragma once
 #include "collections.h"
-#include "context.h"
 #include "ct_sequence.h"
 #include "exception.h"
 #include "logger.h"
 #include "result.h"
 #include "traits.h"
-#include "type_conversion.h"
 #include "uniform_impl.h"
-#include <algorithm>
 #include <array>
 #include <atomic>
 #include <chrono>
 #include <cstddef>
 #include <filesystem>
-#include <fstream>
 #include <functional>
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <memory>
 #include <mutex>
 #include <optional>
-#include <stack>
-#include <sstream>
 #include <string>
 #include <thread>
-#include <tuple>
 #include <type_traits>
 #include <unordered_map>
 #include <variant>
@@ -149,7 +141,7 @@ class Shader {
 		template <typename... Args>
 		static void upload_uniform(GLint location, Args&&... args);
 
-		static void reload_on_change();
+		static void monitor_source_files();
 		void reload();
 		void update_internal_uniform_locations() const;
 };

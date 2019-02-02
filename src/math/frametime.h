@@ -4,13 +4,8 @@
 #pragma once
 #include "shader.h"
 #include "traits.h"
-#include <cstddef>
-#include <deque>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include <iostream>
-#include <iomanip>
-#include <numeric>
 #include <memory>
 #include <type_traits>
 
@@ -27,7 +22,6 @@ namespace frametime {
 	float delta();
 	float uptime();
 	float fps();
-	void display_status(Status status);
 }
 
 #include "frametime.tcc"

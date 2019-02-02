@@ -2,21 +2,12 @@
 #define TRANSFORM_H
 
 #pragma once
-#include "inserter.h"
 #include "shader.h"
-#include "traits.h"
 #include "type_conversion.h"
-#include <algorithm>
-#include <cmath>
-#include <functional>
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 #include <memory>
 #include <stack>
 #include <string>
-#include <type_traits>
-#include <utility>
 #include <vector>
 
 class Transform {

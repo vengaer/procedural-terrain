@@ -1,4 +1,13 @@
+#include "inserter.h"
+#include "traits.h"
 #include "transform.h"
+#include <algorithm>
+#include <cmath>
+#include <functional>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <type_traits>
+#include <utility>
 
 Transform::Transform(std::shared_ptr<Shader> const& shader) : transforms_{std::vector<glm::mat4>{glm::mat4{1.f}}}, shader_{shader} { 
 	instances_.push_back(std::ref(*this));
