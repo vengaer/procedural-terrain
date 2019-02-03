@@ -46,7 +46,6 @@ class Renderer {
 		void init(Args&&... args);
 	
 	private:
-		std::shared_ptr<Shader> shader_{nullptr};
 		GLuint vao_, vbo_;
 		GLuint idx_buffer_;
 		GLuint idx_size_;
