@@ -29,14 +29,12 @@ void EventHandler::update_view() {
 }
 
 void EventHandler::upload_model(std::shared_ptr<Shader> const& shader, glm::mat4 model) {
-
 	auto it = shader_model_pairs_.find(shader);
 	
 	if(it == std::end(shader_model_pairs_)) {
 		it = shader_model_pairs_.insert(std::end(shader_model_pairs_), {shader, model});
 		update_view();
 		update_perspective();
-		
 	}
 	(*it).second = model;
 
@@ -163,7 +161,7 @@ void EventHandler::shader_reload_callback(Shader const& shader) {
 	shader.upload_uniform(PROJECTION_UNIFORM_NAME, perspective_);
 	shader.upload_uniform(VIEW_UNIFORM_NAME, view);
 
-	auto it = std::find_if(std::begin(shader_model_pairs_), std::end(shader_model_pairs_), [&shader](auto& pair) {
+	auto it = std::find_if(std::begin(shader_model_pairs_), std::end(shader_model_pairs_), [&shader](auto const& pair) {
 		return *pair.first == shader;
 	});
 
