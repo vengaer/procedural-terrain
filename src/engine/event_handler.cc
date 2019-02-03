@@ -32,7 +32,7 @@ void EventHandler::upload_model(std::shared_ptr<Shader> const& shader, glm::mat4
 	auto it = shader_model_pairs_.find(shader);
 	
 	if(it == std::end(shader_model_pairs_)) {
-		it = shader_model_pairs_.insert(std::end(shader_model_pairs_), {shader, model});
+		it = shader_model_pairs_.emplace_hint(std::end(shader_model_pairs_), shader, model);
 		update_view();
 		update_perspective();
 	}
