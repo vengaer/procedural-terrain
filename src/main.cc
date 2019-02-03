@@ -8,6 +8,7 @@
 #include "shader.h"
 #include "window.h"
 
+#include "logger.h"
 
 int main() {
 	unsigned constexpr width = 960, height = 540;
@@ -18,11 +19,11 @@ int main() {
 																		 "/home/vilhelm/repos/c++/procedural_terrain/src/shaders/plane.frag", Shader::Type::Fragment );
 
 		std::shared_ptr<Camera> cam = std::make_shared<Camera>();
-		EventHandler::instantiate(cam, plane_shader);
-		//Plane p{plane_shader};
-		//Ellipsoid e{plane_shader};
-		Cuboid c{plane_shader};
-		//Cylinder cyl{plane_shader};
+		EventHandler::instantiate(cam);
+		Plane p{automatic_shader_handler{plane_shader}};
+		Ellipsoid e{automatic_shader_handler{plane_shader}};
+		Cuboid c{automatic_shader_handler{plane_shader}};
+		Cylinder cyl{automatic_shader_handler{plane_shader}};
 
 
 		glClearColor(0.1f, 0.2f, 0.4f, 0.5f);
@@ -31,9 +32,9 @@ int main() {
 			//frametime::display_status(frametime::Status::All);
 			window.clear();
 			//p.render();
-			//e.render();			//		
+			e.render();			//		
 			//plane_shader->upload_uniform("ufrm_model", c.model_matrix());
-			c.render();
+			//c.render();
 			//cyl.render();
 
 			window.update();

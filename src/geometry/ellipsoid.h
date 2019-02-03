@@ -5,7 +5,7 @@
 #include "constants.h"
 #include "interpolation.h"
 #include "renderer.h"
-#include "shader.h"
+#include "shader_handler.h"
 #include "transform.h"
 #include <array>
 #include <cmath>
@@ -15,10 +15,10 @@
 #include <vector>
 
 
-class Ellipsoid : public Renderer<Ellipsoid>, public Transform {
+template <typename ShaderPolicy = manual_shader_handler>
+class Ellipsoid : public Renderer<Ellipsoid<ShaderPolicy>, ShaderPolicy>, public Transform<ShaderPolicy> {
 	public:
-		Ellipsoid(GLuint vertical_segments = 30u, GLuint horizontal_segments = 30u,  GLfloat x_scale = 1.f, GLfloat y_scale = 1.f, GLfloat z_scale = 1.f);
-		Ellipsoid(std::shared_ptr<Shader> const& shader, GLuint vertical_segments = 30u, GLuint horizontal_segments = 30u,  GLfloat x_scale = 1.f, GLfloat y_scale = 1.f, GLfloat z_scale = 1.f);
+		Ellipsoid(ShaderPolicy policy = {}, GLuint vertical_segments = 30u, GLuint horizontal_segments = 30u,  GLfloat x_scale = 1.f, GLfloat y_scale = 1.f, GLfloat z_scale = 1.f);
 
 		void init(GLuint vertical_segments, GLuint horizontal_segments, GLfloat x_scale, GLfloat y_scale, GLfloat z_scale);
 
@@ -29,4 +29,5 @@ class Ellipsoid : public Renderer<Ellipsoid>, public Transform {
 		std::vector<GLuint> indices_;
 };
 
+#include "ellipsoid.tcc"
 #endif

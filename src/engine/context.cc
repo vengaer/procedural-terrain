@@ -17,6 +17,23 @@ Context::~Context() {
 	context_ = nullptr;
 }
 
+Context const* Context::primary() {
+	return primary_;
+}
+
+std::size_t Context::width() const {
+	return width_;
+}
+
+std::size_t Context::height() const {
+	return height_;
+}
+
+void Context::set_dimensions(std::size_t width, std::size_t height) {
+	width_ = width;
+	height_ = height;
+}
+
 void Context::init(Type type, std::string const& name, bool shared, float version) {
 	if(!primary_) {
 		if(type != Type::Primary)
@@ -45,7 +62,7 @@ void Context::init(Type type, std::string const& name, bool shared, float versio
 		throw GLException{"Could not create GLFW window.\nDoes your graphics driver support OpenGL version " + std::to_string(version) +"?"};
 
 	glfwMakeContextCurrent(context_);
-
+	glfwSetWindowUserPointer(context_, this);
 }
 
 Context* Context::primary_ = nullptr;

@@ -34,6 +34,14 @@ void Shader::disable() {
 	glUseProgram(0);
 }
 
+bool Shader::operator==(Shader const& other) const noexcept {
+	return program_ == other.program_;
+}
+
+bool Shader::operator!=(Shader const& other) const noexcept {
+	return !(*this == other);
+}
+
 void Shader::set_reload_callback(callback_func func) {
 	reload_callback_ = func;
 }

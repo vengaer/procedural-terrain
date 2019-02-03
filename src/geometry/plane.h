@@ -4,7 +4,7 @@
 #pragma once
 #include "interpolation.h"
 #include "renderer.h"
-#include "shader.h"
+#include "shader_handler.h"
 #include "transform.h"
 #include <cmath>
 #include <cstddef>
@@ -14,10 +14,10 @@
 #include <type_traits>
 #include <vector>
 
-class Plane : public Renderer<Plane>, public Transform {
+template <typename ShaderPolicy = manual_shader_handler>
+class Plane : public Renderer<Plane<ShaderPolicy>, ShaderPolicy>, public Transform<ShaderPolicy> {
 	public:
-		Plane(GLfloat x_len = 1.f, GLfloat dx = .5f, GLfloat z_len = 1.f, GLfloat dz = .5f);
-		Plane(std::shared_ptr<Shader> const& shader, GLfloat x_len = 1.f, GLfloat dx = .5f, GLfloat z_len = 1.f, GLfloat dz = .5f);
+		Plane(ShaderPolicy policy = {}, GLfloat x_len = 1.f, GLfloat dx = .5f, GLfloat z_len = 1.f, GLfloat dz = .5f);
 		
 		std::vector<GLfloat> const& vertices() const;
 		std::vector<GLuint> const& indices() const;
@@ -29,4 +29,5 @@ class Plane : public Renderer<Plane>, public Transform {
 		
 };
 
+#include "plane.tcc"
 #endif

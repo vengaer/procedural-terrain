@@ -5,7 +5,7 @@
 #include "constants.h"
 #include "interpolation.h"
 #include "renderer.h"
-#include "shader.h"
+#include "shader_handler.h"
 #include "transform.h"
 #include "type_conversion.h"
 #include <array>
@@ -17,11 +17,11 @@
 #include <vector>
 
 
-class Cylinder : public Renderer<Cylinder>, public Transform {
+template <typename ShaderPolicy = manual_shader_handler>
+class Cylinder : public Renderer<Cylinder<ShaderPolicy>, ShaderPolicy>, public Transform<ShaderPolicy> {
 	public:
 		enum class Axis { X, Y, Z };
-		Cylinder(GLfloat height = 1.f, GLuint horizontal_segments = 30u, GLuint vertical_segments = 1u, Axis main_axis = Axis::Y, GLfloat off_axis1_scale = 0.5f, GLfloat off_axis2_scale = 0.5f);
-		Cylinder(std::shared_ptr<Shader> const& shader, GLfloat height = 1.f, GLuint horizontal_segments = 30u, GLuint vertical_segments = 1u, Axis main_axis = Axis::Y, GLfloat off_axis1_scale = 0.5f, GLfloat off_axis2_scale = 0.5f);
+		Cylinder(ShaderPolicy policy = {}, GLfloat height = 1.f, GLuint horizontal_segments = 30u, GLuint vertical_segments = 1u, Axis main_axis = Axis::Y, GLfloat off_axis1_scale = 0.5f, GLfloat off_axis2_scale = 0.5f);
 
 		void init(GLfloat height, GLuint horizontal_segments, GLuint vertical_segments, Axis main_axis, GLfloat off_axis1_scale, GLfloat off_axis2_scale);
 
@@ -35,5 +35,5 @@ class Cylinder : public Renderer<Cylinder>, public Transform {
 		static std::pair<Axis, Axis> get_off_axes(Axis main_axis);
 };
 
-
+#include "cylinder.tcc"
 #endif

@@ -65,6 +65,9 @@ class Shader {
 
 		template <typename... Args>
 		static void upload_uniform(GLuint program, std::string const& name, Args&&... args);    /* Always calls glGetUniformLocation */
+	
+		bool operator==(Shader const& other) const noexcept;
+		bool operator!=(Shader const& other) const noexcept;
 
 	private:
 		enum class StatusQuery { Compile, Link };

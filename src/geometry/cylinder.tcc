@@ -1,14 +1,10 @@
-#include "cylinder.h"
-
-Cylinder::Cylinder(GLfloat height, GLuint horizontal_segments, GLuint vertical_segments, Axis main_axis, GLfloat off_axis1_scale, GLfloat off_axis2_scale) : Renderer{}, Transform{}, vertices_{}, indices_{} {
-	Renderer<Cylinder>::init(height, horizontal_segments, vertical_segments, main_axis, off_axis1_scale, off_axis2_scale);
+template <typename ShaderPolicy>
+Cylinder<ShaderPolicy>::Cylinder(ShaderPolicy policy, GLfloat height, GLuint horizontal_segments, GLuint vertical_segments, Axis main_axis, GLfloat off_axis1_scale, GLfloat off_axis2_scale) : Renderer<Cylinder<ShaderPolicy>, ShaderPolicy>{policy}, Transform<ShaderPolicy>{policy}, vertices_{}, indices_{} {
+	Renderer<Cylinder<ShaderPolicy>, ShaderPolicy>::init(height, horizontal_segments, vertical_segments, main_axis, off_axis1_scale, off_axis2_scale);
 }
 
-Cylinder::Cylinder(std::shared_ptr<Shader> const& shader, GLfloat height, GLuint horizontal_segments, GLuint vertical_segments, Axis main_axis, GLfloat off_axis1_scale, GLfloat off_axis2_scale) : Renderer{shader}, Transform{shader}, vertices_{}, indices_{} {
-	Renderer<Cylinder>::init(height, horizontal_segments, vertical_segments, main_axis, off_axis1_scale, off_axis2_scale);
-}
-
-void Cylinder::init(GLfloat height, GLuint horizontal_segments, GLuint vertical_segments, Axis main_axis, GLfloat off_axis1_scale, GLfloat off_axis2_scale) {
+template <typename ShaderPolicy>
+void Cylinder<ShaderPolicy>::init(GLfloat height, GLuint horizontal_segments, GLuint vertical_segments, Axis main_axis, GLfloat off_axis1_scale, GLfloat off_axis2_scale) {
 	height 				= glm::clamp(height, 0.1f, 4.f);
 	horizontal_segments = glm::clamp(horizontal_segments, 3u, 60u);
 	vertical_segments   = glm::clamp(vertical_segments, 1u, 20u);
@@ -21,7 +17,7 @@ void Cylinder::init(GLfloat height, GLuint horizontal_segments, GLuint vertical_
 	/* 2 additional rings for 2 sets of normals for top / bottom faces */
 
 	auto const NUMBER_OF_VERTICES = 2 + (1 + 2 + vertical_segments) * horizontal_segments;
-	vertices_.reserve(VERTEX_SIZE * NUMBER_OF_VERTICES);
+	vertices_.reserve(this->VERTEX_SIZE * NUMBER_OF_VERTICES);
 
 	{
 		/* off_axes.first == x and off_axes.second == y when viewed in xy coord system */
@@ -29,7 +25,7 @@ void Cylinder::init(GLfloat height, GLuint horizontal_segments, GLuint vertical_
 		using std::sin;
 		using std::cos;
 
-		std::array<GLfloat, VERTEX_SIZE> vertex;
+		std::array<GLfloat, this->VERTEX_SIZE> vertex;
 		
 		/* Bottom center */
 		vertex[enum_value(off_axes.first)] = 0.f;
@@ -166,15 +162,18 @@ void Cylinder::init(GLfloat height, GLuint horizontal_segments, GLuint vertical_
 	}
 }
 
-std::vector<GLfloat> const& Cylinder::vertices() const {
+template <typename ShaderPolicy>
+std::vector<GLfloat> const& Cylinder<ShaderPolicy>::vertices() const {
 	return vertices_;
 }
 
-std::vector<GLuint> const& Cylinder::indices() const {
+template <typename ShaderPolicy>
+std::vector<GLuint> const& Cylinder<ShaderPolicy>::indices() const {
 	return indices_;
 }
 
-std::pair<Cylinder::Axis, Cylinder::Axis> Cylinder::get_off_axes(Axis main_axis) {
+template <typename ShaderPolicy>
+std::pair<typename Cylinder<ShaderPolicy>::Axis, typename Cylinder<ShaderPolicy>::Axis> Cylinder<ShaderPolicy>::get_off_axes(Axis main_axis) {
 	std::pair<Axis, Axis> axes;
 	switch(main_axis) {
 		case Axis::X:

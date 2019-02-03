@@ -3,7 +3,7 @@
 
 #pragma once
 #include "renderer.h"
-#include "shader.h"
+#include "shader_handler.h"
 #include "transform.h"
 #include "type_conversion.h"
 #include <array>
@@ -14,10 +14,10 @@
 #include <utility>
 #include <vector>
 
-class Cuboid : public Renderer<Cuboid>, public Transform {
+template <typename ShaderPolicy = manual_shader_handler>
+class Cuboid : public Renderer<Cuboid<ShaderPolicy>, ShaderPolicy>, public Transform<ShaderPolicy> {
 	public:
-		Cuboid(GLfloat x_scale = 1.f, GLfloat y_scale = 1.f, GLfloat z_scale = 1.f);
-		Cuboid(std::shared_ptr<Shader> const& shader, GLfloat x_scale = 1.f, GLfloat y_scale = 1.f, GLfloat z_scale = 1.f);
+		Cuboid(ShaderPolicy policy = {}, GLfloat x_scale = 1.f, GLfloat y_scale = 1.f, GLfloat z_scale = 1.f);
 
 		void init(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale);
 		
@@ -31,4 +31,5 @@ class Cuboid : public Renderer<Cuboid>, public Transform {
 		std::vector<GLuint> indices_;
 };
 
+#include "cuboid.tcc"
 #endif

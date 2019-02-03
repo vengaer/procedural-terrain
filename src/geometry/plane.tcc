@@ -1,16 +1,11 @@
-#include "plane.h"
-
-Plane::Plane(GLfloat x_len, GLfloat dx, GLfloat z_len, GLfloat dz) : Renderer{}, Transform{}, vertices_{}, indices_{} {
+template <typename ShaderPolicy>
+Plane<ShaderPolicy>::Plane(ShaderPolicy policy, GLfloat x_len, GLfloat dx, GLfloat z_len, GLfloat dz) : Renderer<Plane<ShaderPolicy>, ShaderPolicy>{policy}, Transform<ShaderPolicy>{policy}, vertices_{}, indices_{} {
 	/* Initialize Renderer, pass parameters */
-	Renderer<Plane>::init(x_len, dx, z_len, dz);
+	Renderer<Plane<ShaderPolicy>, ShaderPolicy>::init(x_len, dx, z_len, dz);
 }
 
-Plane::Plane(std::shared_ptr<Shader> const& shader, GLfloat x_len, GLfloat dx, GLfloat z_len, GLfloat dz) : Renderer{shader}, Transform{shader}, vertices_{}, indices_{} {
-	/* Initialize Renderer, pass parameters */
-	Renderer<Plane>::init(x_len, dx, z_len, dz);
-}
-
-void Plane::init(GLfloat x_len, GLfloat dx, GLfloat z_len, GLfloat dz){
+template <typename ShaderPolicy>
+void Plane<ShaderPolicy>::init(GLfloat x_len, GLfloat dx, GLfloat z_len, GLfloat dz){
 	/* Prevent potential overflow */
 	x_len = glm::clamp(x_len, 0.05f, 1.f);
 	z_len = glm::clamp(z_len, 0.05f, 1.f);
@@ -20,14 +15,14 @@ void Plane::init(GLfloat x_len, GLfloat dx, GLfloat z_len, GLfloat dz){
 	GLuint x_iters = static_cast<GLuint>(x_len / dx) + 1;
 	GLuint z_iters = static_cast<GLuint>(z_len / dz) + 1;
 
-	vertices_.reserve(VERTEX_SIZE*x_iters*z_iters);
+	vertices_.reserve(this->VERTEX_SIZE*x_iters*z_iters);
 	
 	{
 		GLfloat x_start = -static_cast<GLfloat>(x_len/2);
 		GLfloat x = x_start;
 		GLfloat z = -static_cast<GLfloat>(z_len/2);
 		GLfloat s ,t;
-		std::array<GLfloat, VERTEX_SIZE> vertex;
+		std::array<GLfloat, this->VERTEX_SIZE> vertex;
 		for(auto i = 0u; i < z_iters; i++, z += dz, x = x_start){
 			t = interpolation::linear(static_cast<GLfloat>(i)/static_cast<GLfloat>(z_iters-1));
 
@@ -69,10 +64,12 @@ void Plane::init(GLfloat x_len, GLfloat dx, GLfloat z_len, GLfloat dz){
 
 }
 
-std::vector<GLfloat> const& Plane::vertices() const{
+template <typename ShaderPolicy>
+std::vector<GLfloat> const& Plane<ShaderPolicy>::vertices() const{
 	return vertices_;
 }
 
-std::vector<GLuint> const& Plane::indices() const {
+template <typename ShaderPolicy>
+std::vector<GLuint> const& Plane<ShaderPolicy>::indices() const {
 	return indices_;
 }

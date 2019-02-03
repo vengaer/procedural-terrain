@@ -4,7 +4,7 @@
 #pragma once
 #include "exception.h"
 #include "render_constraints.h"
-#include "shader.h"
+#include "shader_handler.h"
 #include "traits.h"
 #include <GL/glew.h>
 #include <iostream>
@@ -32,14 +32,15 @@
 struct vertices_tag { };
 struct indices_tag { };
 
-template <typename T>
+
+template <typename T, typename ShaderPolicy = manual_shader_handler>
 class Renderer {
 	public:
 		void render() const;
 	
 		static GLuint constexpr VERTEX_SIZE = 8u;
 	protected:
-		Renderer(std::shared_ptr<Shader> const& shader = nullptr);
+		Renderer(ShaderPolicy policy = {});
 
 		template <typename... Args>
 		void init(Args&&... args);
@@ -49,6 +50,7 @@ class Renderer {
 		GLuint vao_, vbo_;
 		GLuint idx_buffer_;
 		GLuint idx_size_;
+		ShaderPolicy const policy_;
 
 		/* Tag dispatch */
 		GLuint constexpr size(vertices_tag) const;

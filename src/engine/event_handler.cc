@@ -1,14 +1,19 @@
-#include "transform.h"
 #include "event_handler.h"
+#include "exception.h"
+#include <algorithm>
 #include <cstddef>
 #include <glm/gtc/type_ptr.hpp>
 
-void EventHandler::update_perspective(float width, float height) {
+void EventHandler::update_perspective() {
 	auto const [near, far] = instance_->camera_->clipping_plane();
+	auto* context = static_cast<Context*>(glfwGetWindowUserPointer(glfwGetCurrentContext()))->primary();
 
-	perspective_ = glm::perspective(glm::radians(instance_->camera_->fov()), width/height, near, far);
+	perspective_ = glm::perspective(glm::radians(instance_->camera_->fov()), 
+									static_cast<float>(context->width())/static_cast<float>(context->height()), 
+									near, 
+									far);
 	
-	for(auto const& shader : shaders_) {
+	for(auto const& [shader, model] : shader_model_pairs_) {
 		shader->enable();
 		shader->upload_uniform(PROJECTION_UNIFORM_NAME, perspective_);
 	}
@@ -17,12 +22,27 @@ void EventHandler::update_perspective(float width, float height) {
 void EventHandler::update_view() {
 	glm::mat4 const view = instance_->camera_->view();
 
-	for(auto const& shader : shaders_) {
+	for(auto const& [shader, model] : shader_model_pairs_) {
 		shader->enable();
 		shader->upload_uniform(VIEW_UNIFORM_NAME, view);
 	}
 }
 
+void EventHandler::upload_model(std::shared_ptr<Shader> const& shader, glm::mat4 model) {
+
+	auto it = shader_model_pairs_.find(shader);
+	
+	if(it == std::end(shader_model_pairs_)) {
+		it = shader_model_pairs_.insert(std::end(shader_model_pairs_), {shader, model});
+		update_view();
+		update_perspective();
+		
+	}
+	(*it).second = model;
+
+	shader->enable();
+	shader->upload_uniform(MODEL_UNIFORM_NAME, model);
+}
 
 void EventHandler::key_callback(GLFWwindow*, int key, int, int, int mod_bits) {
 	using Dir = Camera::Direction;
@@ -129,11 +149,11 @@ void EventHandler::mouse_callback(GLFWwindow*, double x, double y) {
 }
 
 void EventHandler::size_callback(GLFWwindow*, int width, int height) {
-	auto* window = static_cast<Window*>(glfwGetWindowUserPointer(glfwGetCurrentContext()));
-	window->set_dimensions(static_cast<std::size_t>(width), static_cast<std::size_t>(height));
+	auto* context = static_cast<Context*>(glfwGetWindowUserPointer(glfwGetCurrentContext()));
+	context->set_dimensions(static_cast<std::size_t>(width), static_cast<std::size_t>(height));
 	glViewport(0, 0, width, height);
 
-	update_perspective(static_cast<float>(width), static_cast<float>(height));
+	update_perspective();
 }
 
 void EventHandler::shader_reload_callback(Shader const& shader) {
@@ -142,14 +162,23 @@ void EventHandler::shader_reload_callback(Shader const& shader) {
 	glm::mat4 const view = instance_->camera_->view();
 	shader.upload_uniform(PROJECTION_UNIFORM_NAME, perspective_);
 	shader.upload_uniform(VIEW_UNIFORM_NAME, view);
-	Transform::force_update();
+
+	auto it = std::find_if(std::begin(shader_model_pairs_), std::end(shader_model_pairs_), [&shader](auto& pair) {
+		return *pair.first == shader;
+	});
+
+	if(it == std::end(shader_model_pairs_))
+		throw ShaderReloadException{"Could not find model matrix to upload to new shader"};
+
+	shader.upload_uniform(MODEL_UNIFORM_NAME, (*it).second);
 }
 
 
 
 std::string const EventHandler::PROJECTION_UNIFORM_NAME = "ufrm_projection";
 std::string const EventHandler::VIEW_UNIFORM_NAME = "ufrm_view";
-std::vector<std::shared_ptr<Shader>> EventHandler::shaders_{};
+std::string const EventHandler::MODEL_UNIFORM_NAME = "ufrm_model";
+std::unordered_map<std::shared_ptr<Shader>, glm::mat4> EventHandler::shader_model_pairs_{};
 bool EventHandler::instantiated_ = false;
 glm::mat4 EventHandler::perspective_{};
 EventHandler* EventHandler::instance_ = nullptr;
