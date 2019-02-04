@@ -95,7 +95,7 @@ namespace logging {
 
 
 	#if defined(LOG_FULL_VERBOSE) || defined(LOG_FULL_DEFAULT)
-	inline Logger<FileLoggingTag> logger_instance;		/* inline non-static => same address in all TU */
+	inline Logger<FileLoggingTag> logger_instance;		/* inline non-static => same address in all TUs */
 	#else
 	inline Logger<ErrOutLoggingTag> logger_instance;
 	#endif
