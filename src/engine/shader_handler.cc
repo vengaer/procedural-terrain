@@ -6,7 +6,7 @@ void manual_shader_handler::draw(GLuint vao, GLuint idx_size) const noexcept {
 	glBindVertexArray(0);
 }
 
-std::shared_ptr<Shader> manual_shader_handler::shader() const noexcept {
+std::shared_ptr<Shader> const manual_shader_handler::shader() const noexcept {
 	return nullptr;
 }
 
@@ -17,6 +17,6 @@ void automatic_shader_handler::draw(GLuint vao, GLuint idx_size) const noexcept 
 	glBindVertexArray(0);
 }
 
-std::shared_ptr<Shader> automatic_shader_handler::shader() const noexcept {
+std::shared_ptr<Shader> const automatic_shader_handler::shader() const noexcept {
 	return shader_;
 }
