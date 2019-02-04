@@ -1,4 +1,7 @@
 #include "frametime.h"
+#include <cstddef>
+#include <deque>
+#include <numeric>
 
 namespace frametime {
 	std::size_t constexpr MEAN_FRAMES = 100u;
@@ -35,31 +38,4 @@ float frametime::fps() {
 	return rate;
 }
 
-namespace{
-	void display_status_impl(frametime::Status status) {
-		switch(status) {
-			case frametime::Status::Fps:
-				std::cout << std::left << std::setw(8) << frametime::fps() << std::setw(6) << " fps";
-				break;
-			default:
-				std::cout << std::left << std::setw(10) << frametime::uptime() << std::setw(6) << " s";
-				break;
-		}
-	}
-}
-
-
-void frametime::display_status(frametime::Status status) {
-	switch(status) {
-		case Status::All:
-			display_status_impl(Status::Fps);
-			std::cout << " ";
-			display_status_impl(Status::Uptime);
-			break;
-		default:
-			display_status_impl(status);
-			break;
-	}
-	std::cout << '\r' << std::flush;
-}
 

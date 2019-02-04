@@ -1,4 +1,6 @@
+#include "exception.h"
 #include "window.h"
+#include <cmath>
 
 Window::Window(std::string const& name, std::size_t width, std::size_t height, float opengl_version) : Context{name, width, height, opengl_version} {
 	if(std::signbit(opengl_version))
@@ -23,26 +25,12 @@ void Window::update() const{
 	glfwPollEvents();
 }
 
-void Window::set_dimensions(std::size_t width, std::size_t height) {
-	width_ = width;
-	height_ = height;
-}
-
-std::size_t Window::width() const {
-	return width_;
-}
-
-std::size_t Window::height() const {
-	return height_;
-}
-
 GLFWwindow* Window::context() const {
 	return context_;
 }
 
 
 void Window::init(){
-	glfwSetWindowUserPointer(context_, this);
 	glewExperimental = GL_TRUE;
 
 	if(glewInit() != GLEW_OK)

@@ -74,7 +74,7 @@ namespace logging {
 		public:
 			Logger();
 
-			template <logging::Ostream OS, logging::Label S, typename... Args>
+			template <Ostream OS, Label S, typename... Args>
 			void print(Args&&... args);
 
 			static std::string get_time();

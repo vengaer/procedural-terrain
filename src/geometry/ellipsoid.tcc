@@ -1,14 +1,10 @@
-#include "ellipsoid.h"
-
-Ellipsoid::Ellipsoid(GLuint vertical_segments, GLuint horizontal_segments, GLfloat x_scale, GLfloat y_scale, GLfloat z_scale) : Renderer{}, Transform{}, vertices_{}, indices_{} {
-	Renderer<Ellipsoid>::init(vertical_segments, horizontal_segments, x_scale, y_scale, z_scale);
+template <typename ShaderPolicy>
+Ellipsoid<ShaderPolicy>::Ellipsoid(ShaderPolicy policy, GLuint vertical_segments, GLuint horizontal_segments, GLfloat x_scale, GLfloat y_scale, GLfloat z_scale) : Renderer<Ellipsoid<ShaderPolicy>, ShaderPolicy>{policy}, Transform<ShaderPolicy>{policy}, vertices_{}, indices_{} {
+	Renderer<Ellipsoid<ShaderPolicy>, ShaderPolicy>::init(vertical_segments, horizontal_segments, x_scale, y_scale, z_scale);
 }
 
-Ellipsoid::Ellipsoid(std::shared_ptr<Shader> const& shader, GLuint vertical_segments, GLuint horizontal_segments, GLfloat x_scale, GLfloat y_scale, GLfloat z_scale) : Renderer{shader}, Transform{shader}, vertices_{}, indices_{} {
-	Renderer<Ellipsoid>::init(vertical_segments, horizontal_segments, x_scale, y_scale, z_scale);
-}
-
-void Ellipsoid::init(GLuint vertical_segments, GLuint horizontal_segments, GLfloat x_scale, GLfloat y_scale, GLfloat z_scale) {
+template <typename ShaderPolicy>
+void Ellipsoid<ShaderPolicy>::init(GLuint vertical_segments, GLuint horizontal_segments, GLfloat x_scale, GLfloat y_scale, GLfloat z_scale) {
 	/* Prevent potential overflow */
 	vertical_segments   = glm::clamp(vertical_segments, 5u, 60u);
 	horizontal_segments = glm::clamp(horizontal_segments, 5u, 60u);
@@ -20,13 +16,13 @@ void Ellipsoid::init(GLuint vertical_segments, GLuint horizontal_segments, GLflo
  	 * horizontal_segments + 1 for horizontal vertices*/
 	auto const NUMBER_OF_VERTICES = 2 + (vertical_segments - 1) * horizontal_segments;
 
-	vertices_.reserve(VERTEX_SIZE * NUMBER_OF_VERTICES);
+	vertices_.reserve(this->VERTEX_SIZE * NUMBER_OF_VERTICES);
 	
 	{
 		using std::sin;
 		using std::cos;
 
-		std::array<GLfloat, VERTEX_SIZE> vertex;
+		std::array<GLfloat, this->VERTEX_SIZE> vertex;
 		GLfloat x,y,z;
 		GLfloat s,t;
 		GLfloat theta, phi;
@@ -142,10 +138,12 @@ void Ellipsoid::init(GLuint vertical_segments, GLuint horizontal_segments, GLflo
 	}
 }
 
-std::vector<GLfloat> const& Ellipsoid::vertices() const {
+template <typename ShaderPolicy>
+std::vector<GLfloat> const& Ellipsoid<ShaderPolicy>::vertices() const {
 	return vertices_;
 }
 
-std::vector<GLuint> const& Ellipsoid::indices() const {
+template <typename ShaderPolicy>
+std::vector<GLuint> const& Ellipsoid<ShaderPolicy>::indices() const {
 	return indices_;
 }

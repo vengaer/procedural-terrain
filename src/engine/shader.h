@@ -3,31 +3,25 @@
 
 #pragma once
 #include "collections.h"
-#include "context.h"
+#include "ct_sequence.h"
 #include "exception.h"
 #include "logger.h"
 #include "result.h"
 #include "traits.h"
 #include "uniform_impl.h"
-#include <algorithm>
 #include <array>
 #include <atomic>
 #include <chrono>
 #include <cstddef>
 #include <filesystem>
-#include <fstream>
 #include <functional>
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <memory>
 #include <mutex>
 #include <optional>
-#include <stack>
-#include <sstream>
 #include <string>
 #include <thread>
-#include <tuple>
 #include <type_traits>
 #include <unordered_map>
 #include <variant>
@@ -36,9 +30,16 @@
 class Shader {
 	using callback_func = void(*)(Shader const&);
 	public:
-		enum class Type { Vertex, Fragment };
+		enum class Type { Vertex   = GL_VERTEX_SHADER, 
+						  Fragment = GL_FRAGMENT_SHADER,
+						  Compute  = GL_COMPUTE_SHADER,
+						  TessCtrl = GL_TESS_CONTROL_SHADER,
+						  TessEval = GL_TESS_EVALUATION_SHADER,
+						  Geometry = GL_GEOMETRY_SHADER };
 		
-		Shader(std::string const& shader1, Type type1, std::string const& shader2, Type type2);
+		template <typename... Sources>
+		Shader(Sources const&... src);
+
 		~Shader();
 		
 		Shader(Shader const&) = delete;
@@ -64,6 +65,9 @@ class Shader {
 
 		template <typename... Args>
 		static void upload_uniform(GLuint program, std::string const& name, Args&&... args);    /* Always calls glGetUniformLocation */
+	
+		bool operator==(Shader const& other) const noexcept;
+		bool operator!=(Shader const& other) const noexcept;
 
 	private:
 		enum class StatusQuery { Compile, Link };
@@ -76,30 +80,28 @@ class Shader {
 							   End_ };
 
 
-		struct SourceFile {
-			SourceFile() = default;
-			SourceFile(std::string const& vert, std::string const& frag);
-			SourceFile(std::string&& vert, std::string&& frag);
-			SourceFile(std::filesystem::path const& vert, std::filesystem::path const& frag);
-			SourceFile(std::filesystem::path&& vert, std::filesystem::path&& frag);
+		struct Source {
+			Source() = default;
+			Source(std::string const& file, Type t);
+			Source(std::string&& file, Type t);
+			Source(std::filesystem::path const& file, Type t);
+			Source(std::filesystem::path&& file, Type t);
 
-			SourceFile(SourceFile const& other);
-			SourceFile(SourceFile&& other);
-			SourceFile& operator=(SourceFile const& other) &;
-			SourceFile& operator=(SourceFile&& other) &;
+			Source(Source const& other);
+			Source(Source&& other);
+			Source& operator=(Source const& other) &;
+			Source& operator=(Source&& other) &;
 
-			std::pair<std::filesystem::path, std::filesystem::path> get_stems() const;
 			Result<std::optional<std::string>> touch() noexcept;
 			void update_write_time(std::filesystem::file_time_type time = std::chrono::system_clock::now()) noexcept;
 
-			Result<std::variant<std::string,
-								std::pair<std::filesystem::file_time_type, 
-										  std::filesystem::file_time_type
-			>>> get_last_write_time() const noexcept;
+			Result<std::variant<std::string, std::filesystem::file_time_type>>
+				get_last_write_time() const noexcept;
 			bool has_changed();
 
-			std::filesystem::path vertex{}, fragment{};
-			std::filesystem::file_time_type last_vert_write{}, last_frag_write{};
+			std::filesystem::path path{};
+			std::filesystem::file_time_type last_write{};
+			Type type{};
 
 			private:
 				void reconstruct();
@@ -107,7 +109,7 @@ class Shader {
 
 		GLuint program_; /* Shader program id */
 		std::unordered_map<std::string, GLint> mutable uniforms_;
-		SourceFile source_;
+		std::vector<Source> sources_;
 		static std::size_t const depth_; /* Max recursive include depth */
 
 		static std::atomic_bool halt_execution_;
@@ -116,22 +118,33 @@ class Shader {
 		static std::vector<std::reference_wrapper<Shader>> instances_;
 		static callback_func reload_callback_;
 
-		void init(std::string const& shader1, Type type1, std::string const& shader2, Type type2);
+		template <std::size_t N>
+		void init();
+
+		template <typename... Args, std::size_t... Is>
+		static bool constexpr even_parameters_acceptable(even_index_sequence<Is...>);
+		template <typename... Args, std::size_t... Is>
+		static bool constexpr odd_parameters_acceptable(odd_index_sequence<Is...>);
 		
 		static Result<ErrorType, std::string> read_source(std::string const& source);
 		static std::string format_header_guard(std::string path);
 		static Result<ErrorType, std::string> process_include_directive(std::string const& directive, std::string const& source, std::size_t idx);
 		static Result<GLuint, std::string> compile(std::string const& source, Type type);
-		static Result<std::variant<GLuint, std::string>> link(GLuint vertex_id, GLuint fragment_id);
+
+		template <typename T, typename = std::enable_if_t<is_container_v<T>>>
+		static Result<std::variant<GLuint, std::string>> link(T const& ids);
 
 		static Result<std::optional<std::string>> assert_shader_status_ok(GLuint id, StatusQuery sq);
 
-		static SourceFile generate_source_info(std::string const& shader1, Type type1, std::string const& shader2, Type);
+		template <std::size_t N, typename... Sources>
+		void generate_source(std::string const& path, Type type, Sources const&... rest);
+	
+		static GLenum constexpr to_GLenum(Type type) noexcept;
 
 		template <typename... Args>
 		static void upload_uniform(GLint location, Args&&... args);
 
-		static void reload_on_change();
+		static void monitor_source_files();
 		void reload();
 		void update_internal_uniform_locations() const;
 };

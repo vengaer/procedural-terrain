@@ -17,14 +17,15 @@ void EventHandler::instantiate(std::shared_ptr<Camera> const& camera, Args const
 	static EventHandler handler(camera, args...);
 
 	instance_ = &handler;
-	auto* window = static_cast<Window*>(glfwGetWindowUserPointer(glfwGetCurrentContext()));
-	update_perspective(static_cast<float>(window->width()), static_cast<float>(window->height()));
+	update_perspective();
 	update_view();
 }
 
 template <typename... Args>
 void EventHandler::init(Args const&... args) {
-	inserter<std::vector<std::shared_ptr<Shader>>>{}(shaders_, args...);
+	if constexpr(sizeof...(Args))
+		inserter<std::unordered_map<std::shared_ptr<Shader>, glm::mat4>>{}(shader_model_pairs_, std::make_pair(args, glm::mat4{})...);
+
 	auto* context = glfwGetCurrentContext();
 
 	glfwSetInputMode(context, GLFW_STICKY_KEYS, GL_TRUE);
@@ -37,9 +38,10 @@ void EventHandler::init(Args const&... args) {
 
 template <typename... Args>
 void EventHandler::append_shaders(Args const&... args) {
-	static_assert(all_same_v<std::shared_ptr<Shader>, remove_cvref_t<Args>...>, "Parameter pack may only include std::shared_ptr<Shader>");
+	static_assert(sizeof...(Args) && all_same_v<std::shared_ptr<Shader>, remove_cvref_t<Args>...>, "Parameter pack may only include std::shared_ptr<Shader>");
 	
-	shaders_.reserve(shaders_.capacity() + sizeof...(args));
+	shader_model_pairs_.reserve(shader_model_pairs_.load_factor() + sizeof...(args));
 
-	inserter<std::vector<std::shared_ptr<Shader>>>{}(shaders_, args...);
+	inserter<std::unordered_map<std::shared_ptr<Shader>, glm::mat4>>{}(shader_model_pairs_, std::make_pair(args, glm::mat4{})...);
 }
+

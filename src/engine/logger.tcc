@@ -95,7 +95,7 @@ template <logging::Label S>
 void logging::Logger<LoggingTag>::format(std::ostream& os, std::size_t entry_num, std::mutex& mtx) {
 	std::lock_guard<std::mutex> lock{mtx};
 	os << std::setfill('0') << std::setw(7) << entry_num
-	   << " <" << get_time() << ">" << " - " << "<" << to_string(S) << "> : ";
+	   << " <" << get_time() << "> - <" << to_string(S) << "> : ";
 }
 
 template <typename LoggingTag>

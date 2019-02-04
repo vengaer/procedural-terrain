@@ -1,26 +1,23 @@
-#include "cuboid.h"
-
-Cuboid::Cuboid(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale) : Renderer{}, Transform{}, vertices_{}, indices_{} {
-	Renderer<Cuboid>::init(x_scale, y_scale, z_scale);
+template <typename ShaderPolicy>
+Cuboid<ShaderPolicy>::Cuboid(ShaderPolicy policy, GLfloat x_scale, GLfloat y_scale, GLfloat z_scale) : Renderer<Cuboid<ShaderPolicy>, ShaderPolicy>{policy}, Transform<ShaderPolicy>{policy}, vertices_{}, indices_{} {
+	Renderer<Cuboid<ShaderPolicy>, ShaderPolicy>::init(x_scale, y_scale, z_scale);
 }
 
-Cuboid::Cuboid(std::shared_ptr<Shader> const& shader, GLfloat x_scale, GLfloat y_scale, GLfloat z_scale) : Renderer{shader}, Transform{shader}, vertices_{}, indices_{} {
-	Renderer<Cuboid>::init(x_scale, y_scale, z_scale);
 
-}
-void Cuboid::init(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale) {
+template <typename ShaderPolicy>
+void Cuboid<ShaderPolicy>::init(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale) {
 	x_scale = glm::clamp(x_scale, 0.1f, 2.f);
 	y_scale = glm::clamp(y_scale, 0.1f, 2.f);
 	z_scale = glm::clamp(z_scale, 0.1f, 2.f);
 
-	vertices_.reserve(VERTEX_SIZE * 4u * 6u);
+	vertices_.reserve(this->VERTEX_SIZE * 4u * 6u);
 
 	{
 		std::array<GLfloat, 3> offsets { x_scale / 2.f, y_scale / 2.f, z_scale / 2.f };
 		std::array<std::pair<GLuint, GLuint>, 4> texture_coords { std::make_pair(0u, 0u), std::make_pair(1u, 0u), std::make_pair(1u, 1u), std::make_pair(0u, 1u) };
 
 
-		std::array<GLfloat, VERTEX_SIZE> vertex;
+		std::array<GLfloat, this->VERTEX_SIZE> vertex;
 		
 		auto face = 0u;
 		Axis fixed = Axis::None;
@@ -77,11 +74,13 @@ void Cuboid::init(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale) {
 	}
 }
 
-std::vector<GLfloat> const& Cuboid::vertices() const {
+template <typename ShaderPolicy>
+std::vector<GLfloat> const& Cuboid<ShaderPolicy>::vertices() const {
 	return vertices_;
 }
 
-std::vector<GLuint> const& Cuboid::indices() const {
+template <typename ShaderPolicy>
+std::vector<GLuint> const& Cuboid<ShaderPolicy>::indices() const {
 	return indices_;
 }
 

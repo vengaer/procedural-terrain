@@ -1,3 +1,107 @@
+template <typename... Sources>
+Shader::Shader(Sources const&... src) : program_{}, uniforms_{}, sources_(sizeof...(Sources)/2) {
+	static_assert(sizeof...(Sources) % 2 == 0, "Arguments must be given in \"pairs\" of std::string (or something convertible to it) and Shader::Type");
+	static_assert(even_parameters_acceptable<Sources...>(even_index_sequence_for<Sources...>{}), "Even arguments must be convertible to std::string");
+	static_assert(odd_parameters_acceptable<Sources...>(odd_index_sequence_for<Sources...>{}),   "Odd arguments must be of type Shader::Type");
+
+	generate_source<0u>(src...);
+	init<sizeof...(Sources)/2>();
+}
+	
+template <typename... Args, std::size_t... Is>
+bool constexpr Shader::even_parameters_acceptable(even_index_sequence<Is...>) {
+	return (std::is_convertible_v<remove_cvref_t<nth_type_t<Is, Args...>>, std::string> && ...);
+}
+
+template <typename... Args, std::size_t... Is>
+bool constexpr Shader::odd_parameters_acceptable(odd_index_sequence<Is...>) {
+	return (std::is_same_v<remove_cvref_t<nth_type_t<Is, Args...>>, Type> && ...);
+}
+
+template <std::size_t N, typename... Sources>
+void Shader::generate_source(std::string const& path, Type type, Sources const&... rest) {
+	sources_[N] = {path, type};
+	if constexpr(sizeof...(Sources))
+		generate_source<N+1u>(rest...);
+}
+
+template <std::size_t N>
+void Shader::init() {
+	std::array<GLuint, N> shader_ids;
+	Result<GLuint, std::string> result;
+
+	for(auto [idx, id] : enumerate(shader_ids)) {
+		auto path = sources_[idx].path.string();
+
+		LOG("Reading source ", sources_[idx].path.stem().string());
+		auto [outcome, data] = read_source(path);
+		auto& [error_type, content] = data;
+
+		if(outcome == Outcome::Failure) {
+			for(auto i = 0u; i < idx; i++)
+				glDeleteShader(shader_ids[i]);
+
+			if(error_type == ErrorType::FileIO)
+				throw FileIOException{content};
+			else if(error_type == ErrorType::Include)
+				throw ShaderIncludeException{content};
+		}
+	
+		LOG("Compiling ", sources_[idx].path.stem().string());
+		result = compile(content, sources_[idx].type);
+		id = std::get<0>(result.data);
+
+		if(result.outcome == Outcome::Failure) {
+			for(auto i = 0u; i < idx + 1; i++)
+				glDeleteShader(shader_ids[i]);
+			throw ShaderCompilationException{std::get<1>(result.data)};
+		}
+	}
+	LOG("Linking program");
+	auto [outcome, data] = link(shader_ids);
+
+	if(outcome == Outcome::Failure)
+		throw ShaderLinkingException{std::get<std::string>(data)};
+
+	std::lock_guard<std::mutex> lock{ics_mutex_};
+	program_ = std::get<GLuint>(data);
+	LOG("Linking successful, assigning new id ", program_);
+
+	LOG("Marking instance for automatic updating");
+	instances_.push_back(std::ref(*this));
+
+
+	if(halt_execution_) {
+		LOG("Creating separate thread for execution");
+		halt_execution_ = false;
+		updater_thread_ = std::thread(monitor_source_files);
+		LOG("Thread with id", updater_thread_.get_id(), " successfully created");
+	}
+}
+
+template <typename T, typename = std::enable_if_t<is_container_v<T>>>
+Result<std::variant<GLuint, std::string>> Shader::link(T const& ids) {
+	GLuint program_id = glCreateProgram();
+
+	for(auto id : ids)
+		glAttachShader(program_id, id);
+
+	glLinkProgram(program_id);
+
+	auto result = assert_shader_status_ok(program_id, StatusQuery::Link);
+
+	for(auto id : ids) {
+		glDetachShader(program_id, id);
+		glDeleteShader(id);
+	}
+
+	if(result.outcome == Outcome::Failure)
+		return { result.outcome, result.data.value() };
+
+	return { result.outcome, program_id };
+}
+
+
 template <typename... Args>
 void Shader::upload_uniform(std::string const& name, Args&&... args) const {
 	auto it = uniforms_.find(name);
@@ -17,8 +121,6 @@ void Shader::upload_uniform(GLuint program, std::string const& name, Args&&... a
 	upload_uniform(location, std::forward<Args>(args)...);
 }
 
-/* The compiler uses this template to generate functions that at runtime perform a call to the correct
- * version of glUniform and nothing else */
 template <typename... Args>
 void Shader::upload_uniform(GLint location, Args&&... args) {
 	static_assert(sizeof...(args) <= 4 && sizeof...(args) > 0, "Function must be given 1 to 4 parameters");

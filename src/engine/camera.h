@@ -2,10 +2,6 @@
 #define CAMERA_H
 
 #pragma once
-#include "frametime.h"
-#include "type_conversion.h"
-#include <cmath>
-#include <cstddef>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 

@@ -2,15 +2,13 @@
 #define CONTEXT_H
 
 #pragma once
-#include "exception.h"
-#include <cmath>
 #include <cstddef>
-#include <functional>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <string>
 
 class Context {
+	friend class EventHandler;
 	public:
 		Context(std::string const& name, std::size_t widht, std::size_t height, bool visible = true, bool shared = false);
 		~Context();
@@ -18,6 +16,10 @@ class Context {
 		Context(Context&&) = default;
 		Context& operator=(Context const&) = delete;
 		Context& operator=(Context&&) = default;
+
+		static Context const* primary();
+		std::size_t width() const;
+		std::size_t height() const;
 
 	protected:
 		GLFWwindow* context_;
@@ -29,6 +31,8 @@ class Context {
 	private:
 		bool is_visible_{true};
 		static Context* primary_;
+
+		void set_dimensions(std::size_t width, std::size_t height);
 		
 		void init(Type type, std::string const& name, bool shared, float version = -1.f);
 };
