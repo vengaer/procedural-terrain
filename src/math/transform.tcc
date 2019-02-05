@@ -1,7 +1,10 @@
 template <typename ShaderPolicy>
 Transform<ShaderPolicy>::Transform(ShaderPolicy policy) : transforms_{std::vector<glm::mat4>{glm::mat4{1.f}}}, policy_{policy} { 
-	if constexpr(ShaderPolicy::is_automatic)
+	if constexpr(ShaderPolicy::is_automatic) {
 		update_model();
+		policy_.shader()->template upload_uniform<true>(Shader::MODEL_UNIFORM_NAME, transforms_.top());
+		has_been_transformed_ = false;
+	}
 }
 
 template <typename ShaderPolicy>
@@ -47,7 +50,7 @@ void Transform<ShaderPolicy>::undo_last_transform() {
 
 template <typename ShaderPolicy>
 void Transform<ShaderPolicy>::reset_transforms() {
-	while(!transforms_.empty())
+	while(transforms_.size() > 1u)
 		transforms_.pop();
 }
 	
@@ -59,8 +62,7 @@ glm::mat4 Transform<ShaderPolicy>::model_matrix() const {
 template <typename ShaderPolicy>
 void Transform<ShaderPolicy>::add_transform(glm::mat4&& transform) {
 	transforms_.push(std::move(transform));
-	if constexpr(ShaderPolicy::is_automatic)
-		update_model();
+	has_been_transformed_ = true;
 }
 
 template <typename ShaderPolicy>

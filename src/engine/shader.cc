@@ -184,8 +184,6 @@ Result<std::optional<std::string>> Shader::assert_shader_status_ok(GLuint id, St
 			glGetShaderInfoLog(id, max_length, &max_length, &error_log[0]);
 		else
 			glGetProgramInfoLog(id, max_length, &max_length,  &error_log[0]);
-		for(auto c : error_log)
-			std::cout << c;
 
 		return { Outcome::Failure, std::optional<std::string>{std::string{std::begin(error_log), std::end(error_log)}} };
 	}
@@ -275,7 +273,13 @@ void Shader::reload() {
 	for(auto& source : sources_)
 		source.update_write_time();
 
+	LOG("Updating internal uniform locations");
 	update_internal_uniform_locations();
+
+	LOG("Reuploading uniforms to gpu");
+	enable();
+	for(auto const& [handle, data] : stored_uniform_data_)
+		upload_uniform(handle, data);
 }
 
 void Shader::update_internal_uniform_locations() const {
@@ -284,6 +288,9 @@ void Shader::update_internal_uniform_locations() const {
 }
 
 
+std::string const Shader::PROJECTION_UNIFORM_NAME = "ufrm_projection";
+std::string const Shader::VIEW_UNIFORM_NAME = "ufrm_view";
+std::string const Shader::MODEL_UNIFORM_NAME = "ufrm_model";
 std::size_t const Shader::depth_ = 8u;
 std::atomic_bool Shader::halt_execution_ = true;
 std::mutex Shader::ics_mutex_{};

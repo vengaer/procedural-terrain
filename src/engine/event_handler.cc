@@ -15,7 +15,7 @@ void EventHandler::update_perspective() {
 	
 	for(auto const& [shader, model] : shader_model_pairs_) {
 		shader->enable();
-		shader->upload_uniform(PROJECTION_UNIFORM_NAME, perspective_);
+		shader->template upload_uniform<true>(Shader::PROJECTION_UNIFORM_NAME, perspective_);
 	}
 }
 
@@ -24,7 +24,7 @@ void EventHandler::update_view() {
 
 	for(auto const& [shader, model] : shader_model_pairs_) {
 		shader->enable();
-		shader->upload_uniform(VIEW_UNIFORM_NAME, view);
+		shader->template upload_uniform<true>(Shader::VIEW_UNIFORM_NAME, view);
 	}
 }
 
@@ -39,7 +39,7 @@ void EventHandler::upload_model(std::shared_ptr<Shader> const& shader, glm::mat4
 	(*it).second = model;
 
 	shader->enable();
-	shader->upload_uniform(MODEL_UNIFORM_NAME, model);
+	shader->upload_uniform(Shader::MODEL_UNIFORM_NAME, model);
 }
 
 void EventHandler::key_callback(GLFWwindow*, int key, int, int, int mod_bits) {
@@ -154,28 +154,6 @@ void EventHandler::size_callback(GLFWwindow*, int width, int height) {
 	update_perspective();
 }
 
-void EventHandler::shader_reload_callback(Shader const& shader) {
-	LOG("Reload callback triggered, reuploading uniforms...");
-	shader.enable();
-	glm::mat4 const view = instance_->camera_->view();
-	shader.upload_uniform(PROJECTION_UNIFORM_NAME, perspective_);
-	shader.upload_uniform(VIEW_UNIFORM_NAME, view);
-
-	auto it = std::find_if(std::begin(shader_model_pairs_), std::end(shader_model_pairs_), [&shader](auto const& pair) {
-		return *pair.first == shader;
-	});
-
-	if(it == std::end(shader_model_pairs_))
-		throw ShaderReloadException{"Could not find model matrix to upload to new shader"};
-
-	shader.upload_uniform(MODEL_UNIFORM_NAME, (*it).second);
-}
-
-
-
-std::string const EventHandler::PROJECTION_UNIFORM_NAME = "ufrm_projection";
-std::string const EventHandler::VIEW_UNIFORM_NAME = "ufrm_view";
-std::string const EventHandler::MODEL_UNIFORM_NAME = "ufrm_model";
 std::unordered_map<std::shared_ptr<Shader>, glm::mat4> EventHandler::shader_model_pairs_{};
 bool EventHandler::instantiated_ = false;
 glm::mat4 EventHandler::perspective_{};

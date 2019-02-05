@@ -60,15 +60,15 @@ class Shader {
  		 * deduced. As the deduction relies on the type passed, pointers are not supported.
  		 * 	- If passing arithmetic types, any number between 1 and 4 works and calls the correct glUniform.
  		 *  - glm types should be passed directly and not by calling glm::value_ptr, using &...[0] or anything smiliar */
-		template <typename... Args>
+		template <bool Store = false, typename... Args>
 		void upload_uniform(std::string const& name, Args&&... args) const;						/* Stores uniform locations in hash map */
 
-		template <typename... Args>
-		static void upload_uniform(GLuint program, std::string const& name, Args&&... args);    /* Always calls glGetUniformLocation */
-	
 		bool operator==(Shader const& other) const noexcept;
 		bool operator!=(Shader const& other) const noexcept;
 
+		static std::string const PROJECTION_UNIFORM_NAME;
+		static std::string const VIEW_UNIFORM_NAME;
+		static std::string const MODEL_UNIFORM_NAME;
 	private:
 		enum class StatusQuery { Compile, Link };
 		enum class ErrorType { None,
@@ -109,6 +109,7 @@ class Shader {
 
 		GLuint program_; /* Shader program id */
 		std::unordered_map<std::string, GLint> mutable uniforms_;
+		std::unordered_map<std::string, glm::mat4> mutable stored_uniform_data_;
 		std::vector<Source> sources_;
 		static std::size_t const depth_; /* Max recursive include depth */
 

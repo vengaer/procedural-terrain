@@ -8,7 +8,7 @@ void EventHandler::instantiate(std::shared_ptr<Camera> const& camera, Args const
 	static_assert(all_same_v<std::shared_ptr<Shader>, remove_cvref_t<Args>...>, "Parameter pack may only include std::shared_ptr<Shader>");
 
 	if(instantiated_){
-		std::cerr << "Warning, multiple attempts to instantiate event handler\n";
+		ERR_LOG_WARN("Multiple attempts to instantiate event handler");
 		return;
 	}
 
@@ -33,14 +33,13 @@ void EventHandler::init(Args const&... args) {
 	glfwSetInputMode(context, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetCursorPosCallback(context, mouse_callback);
 	glfwSetWindowSizeCallback(context, size_callback);
-	Shader::set_reload_callback(shader_reload_callback);
 }
 
 template <typename... Args>
 void EventHandler::append_shaders(Args const&... args) {
 	static_assert(sizeof...(Args) && all_same_v<std::shared_ptr<Shader>, remove_cvref_t<Args>...>, "Parameter pack may only include std::shared_ptr<Shader>");
 	
-	shader_model_pairs_.reserve(shader_model_pairs_.load_factor() + sizeof...(args));
+	shader_model_pairs_.reserve(shader_model_pairs_.size() + sizeof...(args));
 
 	inserter<std::unordered_map<std::shared_ptr<Shader>, glm::mat4>>{}(shader_model_pairs_, std::make_pair(args, glm::mat4{})...);
 }

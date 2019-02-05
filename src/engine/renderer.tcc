@@ -5,7 +5,17 @@ Renderer<T, ShaderPolicy>::Renderer(ShaderPolicy policy) : vao_{0u}, vbo_{0u}, i
 
 template <typename T, typename ShaderPolicy>
 void Renderer<T, ShaderPolicy>::render() const {
-	policy_.draw(vao_, idx_size_);
+	if constexpr(policy_is_automatic(0) && object_is_transformable(0)){
+		if(object_has_been_transformed()) {
+			policy_.shader()->template upload_uniform<true>(Shader::MODEL_UNIFORM_NAME, get_model_matrix());
+			static_cast<T const&>(*this).has_been_updated_ = false;
+		}
+	}
+	
+	policy_();
+	glBindVertexArray(vao_);
+	glDrawElements(GL_TRIANGLES, idx_size_, GL_UNSIGNED_INT, static_cast<void*>(0));
+	glBindVertexArray(0);
 }
 
 template <typename T, typename ShaderPolicy>
@@ -97,4 +107,35 @@ GLuint constexpr Renderer<T, ShaderPolicy>::size(indices_tag) const {
 		throw OverflowException{"Size of indices array too large for OpenGL to handle\n"};
 
 	return static_cast<GLuint>(container_size);
+}
+
+template <typename T, typename ShaderPolicy>
+auto constexpr Renderer<T, ShaderPolicy>::policy_is_automatic(int) noexcept -> decltype((void)ShaderPolicy::is_automatic, std::declval<bool const&>()) {
+	return ShaderPolicy::is_automatic;
+}
+
+template <typename T, typename ShaderPolicy>
+bool constexpr Renderer<T, ShaderPolicy>::policy_is_automatic(long) noexcept {
+	return false;
+}
+
+template <typename T, typename ShaderPolicy>
+template <typename U>
+auto constexpr Renderer<T, ShaderPolicy>::object_is_transformable(int) noexcept -> decltype((void)static_cast<U const&>(std::declval<Renderer<T, ShaderPolicy>>()).has_been_transformed_, std::declval<bool const&>()) {
+	return true;
+}
+
+template <typename T, typename ShaderPolicy>
+bool constexpr Renderer<T, ShaderPolicy>::object_is_transformable(long) noexcept {
+	return false;
+}
+
+template <typename T, typename ShaderPolicy>
+bool Renderer<T, ShaderPolicy>::object_has_been_transformed() const noexcept {
+	return static_cast<T const&>(*this).has_been_transformed_;
+}
+
+template <typename T, typename ShaderPolicy>
+glm::mat4 Renderer<T, ShaderPolicy>::get_model_matrix() const noexcept {
+	return static_cast<T const&>(*this).transforms_.top();
 }

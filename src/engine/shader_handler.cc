@@ -1,20 +1,13 @@
 #include "shader_handler.h"
 
-void manual_shader_handler::draw(GLuint vao, GLuint idx_size) const noexcept {
-	glBindVertexArray(vao);
-	glDrawElements(GL_TRIANGLES, idx_size, GL_UNSIGNED_INT, static_cast<void*>(0));
-	glBindVertexArray(0);
-}
+void manual_shader_handler::operator()() const noexcept { }
 
 std::shared_ptr<Shader> const manual_shader_handler::shader() const noexcept {
 	return nullptr;
 }
 
-void automatic_shader_handler::draw(GLuint vao, GLuint idx_size) const noexcept {
+void automatic_shader_handler::operator()() const noexcept {
 	shader_->enable();
-	glBindVertexArray(vao);
-	glDrawElements(GL_TRIANGLES, idx_size, GL_UNSIGNED_INT, static_cast<void*>(0));
-	glBindVertexArray(0);
 }
 
 std::shared_ptr<Shader> const automatic_shader_handler::shader() const noexcept {

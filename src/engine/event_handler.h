@@ -7,7 +7,6 @@
 #include "logger.h"
 #include "traits.h"
 #include "shader.h"
-#include "shader_handler.h"
 #include "window.h"
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -29,9 +28,6 @@ class EventHandler {
 
 		static void upload_model(std::shared_ptr<Shader> const& shader, glm::mat4 model);
 	
-		static std::string const PROJECTION_UNIFORM_NAME;
-		static std::string const VIEW_UNIFORM_NAME;
-		static std::string const MODEL_UNIFORM_NAME;
 
 	private:
 		struct MousePosition {
@@ -68,7 +64,6 @@ class EventHandler {
 		static void key_callback(GLFWwindow*, int key, int, int, int mod_bits);
 		static void mouse_callback(GLFWwindow*, double x, double y);
 		static void size_callback(GLFWwindow*, int widht, int height);
-		static void shader_reload_callback(Shader const& shader);
 	
 };
 

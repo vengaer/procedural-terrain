@@ -1,5 +1,5 @@
 template <typename... Sources>
-Shader::Shader(Sources const&... src) : program_{}, uniforms_{}, sources_(sizeof...(Sources)/2) {
+Shader::Shader(Sources const&... src) : program_{}, uniforms_{}, stored_uniform_data_{}, sources_(sizeof...(Sources)/2) {
 	static_assert(sizeof...(Sources) % 2 == 0, "Arguments must be given in \"pairs\" of std::string (or something convertible to it) and Shader::Type");
 	static_assert(even_parameters_acceptable<Sources...>(even_index_sequence_for<Sources...>{}), "Even arguments must be convertible to std::string");
 	static_assert(odd_parameters_acceptable<Sources...>(odd_index_sequence_for<Sources...>{}),   "Odd arguments must be of type Shader::Type");
@@ -102,8 +102,13 @@ Result<std::variant<GLuint, std::string>> Shader::link(T const& ids) {
 }
 
 
-template <typename... Args>
+template <bool Store, typename... Args>
 void Shader::upload_uniform(std::string const& name, Args&&... args) const {
+	if constexpr(Store) {
+		static_assert(sizeof...(Args) == 1u && std::is_same_v<remove_cvref_t<nth_type_t<0, Args...>>, glm::mat4>, 
+					  "Only a single glm::mat4 may be passed if uniform is to be stored");
+		stored_uniform_data_[name] = get<0>(args...);
+	}
 	auto it = uniforms_.find(name);
 	
 	if(it == std::end(uniforms_)) {
@@ -115,11 +120,6 @@ void Shader::upload_uniform(std::string const& name, Args&&... args) const {
 	upload_uniform(location, std::forward<Args>(args)...);
 }
 
-template <typename... Args>
-void Shader::upload_uniform(GLuint program, std::string const& name, Args&&... args) {	
-	GLint location = glGetUniformLocation(program, name.c_str());
-	upload_uniform(location, std::forward<Args>(args)...);
-}
 
 template <typename... Args>
 void Shader::upload_uniform(GLint location, Args&&... args) {

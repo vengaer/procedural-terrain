@@ -7,6 +7,7 @@
 #include "shader_handler.h"
 #include "traits.h"
 #include <GL/glew.h>
+#include <glm/glm.hpp>
 #include <iostream>
 #include <limits>
 #include <memory>
@@ -54,6 +55,16 @@ class Renderer {
 		/* Tag dispatch */
 		GLuint constexpr size(vertices_tag) const;
 		GLuint constexpr size(indices_tag) const;
+
+		static auto constexpr policy_is_automatic(int) noexcept -> decltype((void)ShaderPolicy::is_automatic, std::declval<bool const&>());
+		static bool constexpr policy_is_automatic(long) noexcept;
+
+		template <typename U = T>
+		static auto constexpr object_is_transformable(int) noexcept -> decltype((void)static_cast<U const&>(std::declval<Renderer<T, ShaderPolicy>>()).has_been_transformed_, std::declval<bool const&>());
+		static bool constexpr object_is_transformable(long) noexcept;
+
+		bool object_has_been_transformed() const noexcept;
+		glm::mat4 get_model_matrix() const noexcept;
 };
 
 #include "renderer.tcc"

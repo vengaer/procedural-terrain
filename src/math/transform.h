@@ -47,10 +47,11 @@ class Transform {
 		
 	protected:
 		Transform(ShaderPolicy policy = {});
-
-	private:
 		using stack_t = std::stack<glm::mat4, std::vector<glm::mat4>>;
 		stack_t transforms_;
+		bool mutable has_been_transformed_{false};
+
+	private:
 		ShaderPolicy const policy_;
 
 		void add_transform(glm::mat4&& transform);
