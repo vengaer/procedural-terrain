@@ -12,10 +12,10 @@
 #include <utility>
 
 template <typename Container, typename = std::void_t<decltype(std::begin(std::declval<Container>()))>>
-auto constexpr opt_c_begin(Container&& c);
+auto constexpr opt_c_begin(Container&& c) noexcept;
 
 template <typename Container, typename = std::void_t<decltype(std::end(std::declval<Container>()))>>
-auto constexpr opt_c_end(Container&& c);
+auto constexpr opt_c_end(Container&& c) noexcept;
 
 template <typename... Iters>
 class zip_iterator {

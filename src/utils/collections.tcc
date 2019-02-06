@@ -1,5 +1,5 @@
 template <typename Container, typename = std::void_t<decltype(std::begin(std::declval<Container>()))>>
-auto constexpr opt_c_begin(Container&& c) {
+auto constexpr opt_c_begin(Container&& c) noexcept {
 	if constexpr(std::is_const_v<std::remove_reference_t<Container>>)
 		return std::cbegin(c);
 	else
@@ -7,7 +7,7 @@ auto constexpr opt_c_begin(Container&& c) {
 }
 
 template <typename Container, typename = std::void_t<decltype(std::end(std::declval<Container>()))>>
-auto constexpr opt_c_end(Container&& c) {
+auto constexpr opt_c_end(Container&& c) noexcept {
 	if constexpr(std::is_const_v<std::remove_reference_t<Container>>)
 		return std::cend(c);
 	else
