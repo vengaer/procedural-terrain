@@ -1,5 +1,5 @@
-#ifndef TIME_H
-#define TIME_H
+#ifndef FRAMETIME_H
+#define FRAMETIME_H
 
 #pragma once
 
