@@ -15,11 +15,13 @@ Shader::~Shader() {
 		return std::addressof(ref_wrapper.get()) == this;
 	}));
 
+	#ifndef RESTRICT_THREAD_USAGE
 	if(instances_.size() == 0) {
 		LOG("Joining updater thread with id ", updater_thread_.get_id());
 		halt_execution_ = true;
 		updater_thread_.join();
 	}
+	#endif
 }
 
 void Shader::enable() const {

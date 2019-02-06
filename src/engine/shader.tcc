@@ -71,12 +71,14 @@ void Shader::init() {
 	instances_.push_back(std::ref(*this));
 
 
+	#ifndef RESTRICT_THREAD_USAGE
 	if(halt_execution_) {
 		LOG("Creating separate thread for execution");
 		halt_execution_ = false;
 		updater_thread_ = std::thread(monitor_source_files);
 		LOG("Thread with id", updater_thread_.get_id(), " successfully created");
 	}
+	#endif
 }
 
 template <typename T, typename = std::enable_if_t<is_container_v<T>>>
