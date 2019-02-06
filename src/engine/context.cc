@@ -44,8 +44,10 @@ void Context::init(Type type, std::string const& name, bool shared, float versio
 	if(!primary_) {
 		if(type != Type::Primary)
 			throw OutOfOrderInitializationException{"Primary context must be created before any secondary ones"};
+
 		if(!glfwInit())
 			throw GLException{"Failed to initialize GLFW"};
+
 		LOG("Context type is primary");
 	}
 

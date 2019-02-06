@@ -26,11 +26,13 @@ int main() {
 		Window window{"test", width, height};
 		std::shared_ptr<Shader> plane_shader = std::make_shared<Shader>( "/home/vilhelm/repos/c++/procedural_terrain/src/shaders/plane.vert", Shader::Type::Vertex, 
 																		 "/home/vilhelm/repos/c++/procedural_terrain/src/shaders/plane.frag", Shader::Type::Fragment );
+		std::shared_ptr<Shader> sun_shader = std::make_shared<Shader>( "/home/vilhelm/repos/c++/procedural_terrain/src/shaders/sun.vert", Shader::Type::Vertex, 
+																		 "/home/vilhelm/repos/c++/procedural_terrain/src/shaders/sun.frag", Shader::Type::Fragment );
 
 		std::shared_ptr<Camera> cam = std::make_shared<Camera>();
 		EventHandler::instantiate(cam);
 		Plane p{automatic_shader_handler{plane_shader}};
-		Ellipsoid e{automatic_shader_handler{plane_shader}};
+		Ellipsoid e{automatic_shader_handler{sun_shader}};
 		Cuboid c{automatic_shader_handler{plane_shader}};
 		Cylinder cyl{automatic_shader_handler{plane_shader}};
 
