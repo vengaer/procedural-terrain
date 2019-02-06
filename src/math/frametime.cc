@@ -1,6 +1,10 @@
 #include "frametime.h"
+#include "shader.h"
+#include "traits.h"
 #include <cstddef>
 #include <deque>
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 #include <numeric>
 
 namespace frametime {
@@ -15,10 +19,10 @@ namespace frametime {
 
 
 void frametime::update() {
-
 	current_frame = static_cast<float>(glfwGetTime());
 	delta_time = current_frame - last_frame;
 	last_frame = current_frame;
+	Shader::upload_to_all(Shader::TIME_UNIFORM_NAME, current_frame);
 }
 
 float frametime::delta() {
