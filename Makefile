@@ -27,7 +27,7 @@ LDFLAGS = -lGLEW -lglfw -lGL -lm -lX11 -lpthread -ldl -lstdc++fs
 terrain: $(OBJ)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS) 
 
-.PHONY: clean run debug stats
+.PHONY: clean run debug single_thread stats 
 clean:
 	rm -f $(OBJ) terrain; rm -rf logs/
 
@@ -36,6 +36,10 @@ run: terrain
 
 debug: CPPFLAGS := $(CPPFLAGS) -D LOG_FULL_VERBOSE
 debug: terrain
+	./terrain
+
+single_thread : CPPFLAGS := $(CPPFLAGS) -D RESTRICT_THREAD_USAGE
+single_thread: terrain
 	./terrain
 
 stats:
