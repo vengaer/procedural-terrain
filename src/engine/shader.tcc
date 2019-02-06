@@ -1,5 +1,5 @@
 template <typename... Sources>
-Shader::Shader(Sources const&... src) : program_{}, uniforms_{}, stored_uniform_data_{}, sources_(sizeof...(Sources)/2) {
+Shader::Shader(Sources const&... src) : program_{}, cached_uniform_locations_{}, stored_uniform_data_{}, sources_(sizeof...(Sources)/2) {
 	static_assert(sizeof...(Sources) % 2 == 0, "Arguments must be given in \"pairs\" of std::string (or something convertible to it) and Shader::Type");
 	static_assert(even_parameters_acceptable<Sources...>(even_index_sequence_for<Sources...>{}), "Even arguments must be convertible to std::string");
 	static_assert(odd_parameters_acceptable<Sources...>(odd_index_sequence_for<Sources...>{}),   "Odd arguments must be of type Shader::Type");
@@ -111,12 +111,11 @@ void Shader::upload_uniform(std::string const& name, Args&&... args) const {
 					  "Only a single glm::mat4 may be passed if uniform is to be stored");
 		stored_uniform_data_[name] = get<0>(args...);
 	}
-	auto it = uniforms_.find(name);
+	auto it = cached_uniform_locations_.find(name);
 	
-	if(it == std::end(uniforms_)) {
-		auto result = uniforms_.emplace(name, glGetUniformLocation(program_, name.c_str()));
-		it = result.first;
-	}
+	if(it == std::end(cached_uniform_locations_))
+		it = cached_uniform_locations_.emplace_hint(std::end(cached_uniform_locations_), name, glGetUniformLocation(program_, name.c_str()));
+	
 	GLint location = it->second;	
 	
 	enable();
@@ -133,9 +132,9 @@ void Shader::upload_to_all(std::string const& name, Args&&... args) {
 
 template <typename... Args>
 void Shader::upload_uniform(GLint location, Args&&... args) {
-	static_assert(sizeof...(args) <= 4 && sizeof...(args) > 0, "Function must be given 1 to 4 parameters");
+	static_assert(0 < sizeof...(args) && sizeof...(args) < 5, "Function must be given 1 to 4 parameters");
 	static_assert(all_same_v<Args...>, "All parameters must be of the same type");
-	static_assert((!std::is_pointer_v<Args> && ...), "Pointers are not supported. If using glm, pass the entire object rather than calling glm::value_ptr");
+	static_assert((!std::is_pointer_v<std::remove_const_t<Args>> && ...), "Pointers are not supported. If using glm, pass the entire object rather than calling glm::value_ptr");
 
 	using order_t = uniform::TensorOrder;
 	using decay_t = uniform::DecayType;	
@@ -143,9 +142,9 @@ void Shader::upload_uniform(GLint location, Args&&... args) {
 
 	using uniform::deduce;
 
-	order_t constexpr order = deduce<Args...>::tensor_order();
-	decay_t constexpr decay = deduce<Args...>::decay_type();
-	dim_t   constexpr dim   = deduce<Args...>::tensor_dimensions();
+	order_t constexpr order = deduce<remove_cvref_t<Args>...>::tensor_order();
+	decay_t constexpr decay = deduce<remove_cvref_t<Args>...>::decay_type();
+	dim_t   constexpr dim   = deduce<remove_cvref_t<Args>...>::tensor_dimensions();
 
 	bind_enum<order_t, decay_t, dim_t> bind;
 

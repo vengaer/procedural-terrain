@@ -72,6 +72,7 @@ class Shader {
 		static std::string const PROJECTION_UNIFORM_NAME;
 		static std::string const VIEW_UNIFORM_NAME;
 		static std::string const MODEL_UNIFORM_NAME;
+		static std::string const TIME_UNIFORM_NAME;
 	private:
 		enum class StatusQuery { Compile, Link };
 		enum class ErrorType { None,
@@ -111,7 +112,7 @@ class Shader {
 		};
 
 		GLuint program_; /* Shader program id */
-		std::unordered_map<std::string, GLint> mutable uniforms_;
+		std::unordered_map<std::string, GLint> mutable cached_uniform_locations_;
 		std::unordered_map<std::string, glm::mat4> mutable stored_uniform_data_;
 		std::vector<Source> sources_;
 		static std::size_t const depth_; /* Max recursive include depth */
@@ -149,7 +150,7 @@ class Shader {
 		static void upload_uniform(GLint location, Args&&... args);
 
 		static void monitor_source_files();
-		void reload();
+		bool reload();
 		void update_internal_uniform_locations() const;
 };
 

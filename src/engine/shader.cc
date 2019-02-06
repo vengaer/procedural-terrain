@@ -185,6 +185,8 @@ Result<std::optional<std::string>> Shader::assert_shader_status_ok(GLuint id, St
 		else
 			glGetProgramInfoLog(id, max_length, &max_length,  &error_log[0]);
 
+		error_log.erase(std::remove(std::begin(error_log), std::end(error_log), '\n'), std::end(error_log));
+
 		return { Outcome::Failure, std::optional<std::string>{std::string{std::begin(error_log), std::end(error_log)}} };
 	}
 
@@ -205,9 +207,12 @@ void Shader::monitor_source_files() {
 			for(auto& shader : instances_){
 				for(auto& source : shader.get().sources_) {
 					if(source.has_changed()) {
-						shader.get().reload();
-						if(reload_callback_)
-							(*reload_callback_)(shader.get());
+						if(shader.get().reload()) {
+							if(reload_callback_)
+								(*reload_callback_)(shader.get());
+						}
+						else
+							source.update_write_time(); /* Dont' attempt to reload unless a new change is made */
 						break;
 					}
 				}
@@ -217,7 +222,7 @@ void Shader::monitor_source_files() {
 	}
 }
 
-void Shader::reload() {
+bool Shader::reload() {
 	LOG("Change to shader source detected, reloading...");
 	
 	std::vector<GLuint> shader_ids(sources_.size());
@@ -240,7 +245,7 @@ void Shader::reload() {
 			else if(error_type == ErrorType::Include) {
 				ERR_LOG_WARN("Error including source file when updating. Process returned message \'", content, "\'");
 			}
-			return;
+			return false;
 		}
 		LOG("Compiling ", sources_[idx].path.stem().string());
 		result = compile(content, sources_[idx].type);
@@ -249,8 +254,9 @@ void Shader::reload() {
 		if(result.outcome == Outcome::Failure) {
 			for(auto i = 0u; i < idx + 1; i++)
 				glDeleteShader(shader_ids[i]);
-			ERR_LOG_WARN("Error compiling shader, process returned messager \'", std::get<1>(result.data), "\'");
-			return;
+						
+			ERR_LOG_WARN("Error compiling shader, process returned message \'", std::get<1>(result.data), "\'");
+			return false;
 		}
 	}
 	LOG("Relinking shader with id ", program_);
@@ -262,11 +268,11 @@ void Shader::reload() {
 			auto [touch_outcome, opt] = source.touch();
 			if(touch_outcome == Outcome::Failure) {
 				ERR_LOG_CRIT("Failed to schedule relinking. \'", opt.value(), "\' was returned. The operation will be  aborted");
-				return;
+				return false;
 			}
 		}
 		ERR_LOG("Scheduling successful, another attempt will be made shortly");
-		return;
+		return false;
 	}
 	glDeleteProgram(program_);
 	program_ = std::get<GLuint>(data);
@@ -282,10 +288,11 @@ void Shader::reload() {
 	enable();
 	for(auto const& [handle, data] : stored_uniform_data_)
 		upload_uniform(handle, data);
+	return true;
 }
 
 void Shader::update_internal_uniform_locations() const {
-	for(auto& [handle, location] : uniforms_)
+	for(auto& [handle, location] : cached_uniform_locations_)
 		location = glGetUniformLocation(program_, handle.c_str());
 }
 
@@ -293,6 +300,7 @@ void Shader::update_internal_uniform_locations() const {
 std::string const Shader::PROJECTION_UNIFORM_NAME = "ufrm_projection";
 std::string const Shader::VIEW_UNIFORM_NAME = "ufrm_view";
 std::string const Shader::MODEL_UNIFORM_NAME = "ufrm_model";
+std::string const Shader::TIME_UNIFORM_NAME = "ufrm_time";
 std::size_t const Shader::depth_ = 8u;
 std::atomic_bool Shader::halt_execution_ = true;
 std::mutex Shader::ics_mutex_{};
