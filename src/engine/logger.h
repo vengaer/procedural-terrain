@@ -22,19 +22,26 @@
 #pragma once
 #include "exception.h"
 #include "traits.h"
+#include <algorithm>
+#include <atomic>
 #include <chrono>
 #include <cstddef>
 #include <filesystem>
 #include <fstream>
+#include <functional>
 #include <iomanip>
 #include <iostream>
+#include <iterator>
 #include <mutex>
+#include <regex>
 #include <sstream>
 #include <string>
 #include <system_error>
+#include <thread>
 #include <tuple>
 #include <type_traits>
 #include <utility>
+#include <vector>
 
 
 namespace logging {
@@ -49,6 +56,9 @@ namespace logging {
 	class LoggerBase {
 		protected:
 			Label last_{Label::Debug};
+
+			static std::string extract_label(std::string const& message);
+			static std::string extract_content(std::string const& message);
 	};
 
 	template <typename, typename = ErrOutLoggingTag>
@@ -57,14 +67,25 @@ namespace logging {
 	template <typename T>
 	class FileLogger<T, enable_on_match_t<T, FileLoggingTag>> : public LoggerBase{
 		protected:
-			std::ofstream ofs_;
-			std::mutex ofs_mutex_;
+			std::ofstream ofs_{};
+			std::stringstream buffer_{};
+			std::mutex ofs_mutex_{}, buffer_mutex_{};
 			std::size_t ofs_entry_{};
 
 			FileLogger();
 			~FileLogger();
+
+			static std::size_t LOG_SIZE; 			/* Approximate (file will almost always be bigger) */
+			std::atomic_bool is_compressing_{false};
 		private:
+			std::string log_file_{};
+			std::thread compressor_thread_{};
+			std::atomic_bool should_compress_{true};
+
 			void init();
+
+			void monitor_log_file();
+			void compress_content();
 	};
 
 
@@ -81,7 +102,8 @@ namespace logging {
 			static std::string get_date();
 
 			template <Label S>
-			static void format(std::ostream& os, std::size_t entry_num, std::mutex& mtx);
+			static void format(std::ostream& os, std::size_t entry_num);
+
 		private:
 			static std::mutex cout_mutex_, cerr_mutex_;
 			std::size_t std_entry_{};
@@ -89,7 +111,7 @@ namespace logging {
 			static std::time_t raw_time();
 
 			template <typename Tuple, std::size_t... Is>
-			static void print(Tuple const& t, std::index_sequence<Is...>, std::ostream& os, std::mutex& mtx);
+			static void print(Tuple const& t, std::index_sequence<Is...>, std::ostream& os);
 
 	};
 

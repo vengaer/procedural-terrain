@@ -18,6 +18,7 @@
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <map>
 #include <mutex>
 #include <optional>
 #include <string>
@@ -113,7 +114,7 @@ class Shader {
 
 		GLuint program_; /* Shader program id */
 		std::unordered_map<std::string, GLint> mutable cached_uniform_locations_;
-		std::unordered_map<std::string, glm::mat4> mutable stored_uniform_data_;
+		std::map<std::string, glm::mat4> mutable stored_uniform_data_;
 		std::vector<Source> sources_;
 		static std::size_t const depth_; /* Max recursive include depth */
 

@@ -12,12 +12,15 @@
 #include "window.h"
 #include <type_traits>
 
+#include <regex>
+
 
 template <typename Exception, typename = std::enable_if_t<is_exception_v<Exception>>>
 int handle_exception(Exception const& err);
 
 int main() {
 	unsigned constexpr width = 960, height = 540;
+	
 
 	try{
 		Window window{"test", width, height};
