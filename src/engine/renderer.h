@@ -6,6 +6,7 @@
 #include "render_constraints.h"
 #include "shader_handler.h"
 #include "traits.h"
+#include "transform.h"
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 #include <iostream>
@@ -56,14 +57,14 @@ class Renderer {
 		GLuint constexpr size(vertices_tag) const;
 		GLuint constexpr size(indices_tag) const;
 
-		static auto constexpr policy_is_automatic(int) noexcept -> decltype((void)ShaderPolicy::is_automatic, std::declval<bool const&>());
+		static auto constexpr policy_is_automatic(int) noexcept -> std::remove_reference_t<decltype((void)ShaderPolicy::is_automatic, std::declval<bool>())>;
 		static bool constexpr policy_is_automatic(long) noexcept;
 
 		template <typename U = T>
-		static auto constexpr object_is_transformable(int) noexcept -> decltype((void)static_cast<U const&>(std::declval<Renderer<T, ShaderPolicy>>()).has_been_transformed_, std::declval<bool const&>());
+		static auto constexpr object_is_transformable(int) noexcept -> std::remove_reference_t<decltype((void)std::declval<U>().has_been_transformed(), std::declval<bool>())>;
 		static bool constexpr object_is_transformable(long) noexcept;
 
-		bool object_has_been_transformed() const noexcept;
+		bool& object_has_been_transformed() const noexcept;
 		glm::mat4 get_model_matrix() const noexcept;
 };
 

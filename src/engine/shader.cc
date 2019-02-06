@@ -260,8 +260,10 @@ void Shader::reload() {
 		ERR_LOG_CRIT("Error linking shader. Process returned message \'", std::get<std::string>(data), "\'. Attempting to schedule relinking for next cycle...");
 		for(auto& source : sources_) {
 			auto [touch_outcome, opt] = source.touch();
-			if(touch_outcome == Outcome::Failure)
-				throw ShaderLinkingException{opt.value()};
+			if(touch_outcome == Outcome::Failure) {
+				ERR_LOG_CRIT("Failed to schedule relinking. \'", opt.value(), "\' was returned. The operation will be  aborted");
+				return;
+			}
 		}
 		ERR_LOG("Scheduling successful, another attempt will be made shortly");
 		return;

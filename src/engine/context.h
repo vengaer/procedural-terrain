@@ -21,6 +21,8 @@ class Context {
 		std::size_t width() const;
 		std::size_t height() const;
 
+		explicit operator GLFWwindow*() const;
+
 	protected:
 		GLFWwindow* context_;
 		std::size_t width_, height_;

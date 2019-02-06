@@ -63,6 +63,9 @@ class Shader {
 		template <bool Store = false, typename... Args>
 		void upload_uniform(std::string const& name, Args&&... args) const;						/* Stores uniform locations in hash map */
 
+		template <bool Store = false, typename... Args>
+		static void upload_to_all(std::string const& name, Args&&... args);
+
 		bool operator==(Shader const& other) const noexcept;
 		bool operator!=(Shader const& other) const noexcept;
 

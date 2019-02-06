@@ -8,7 +8,7 @@ void Renderer<T, ShaderPolicy>::render() const {
 	if constexpr(policy_is_automatic(0) && object_is_transformable(0)){
 		if(object_has_been_transformed()) {
 			policy_.shader()->template upload_uniform<true>(Shader::MODEL_UNIFORM_NAME, get_model_matrix());
-			static_cast<T const&>(*this).has_been_updated_ = false;
+			object_has_been_transformed() = false;
 		}
 	}
 	
@@ -110,7 +110,7 @@ GLuint constexpr Renderer<T, ShaderPolicy>::size(indices_tag) const {
 }
 
 template <typename T, typename ShaderPolicy>
-auto constexpr Renderer<T, ShaderPolicy>::policy_is_automatic(int) noexcept -> decltype((void)ShaderPolicy::is_automatic, std::declval<bool const&>()) {
+auto constexpr Renderer<T, ShaderPolicy>::policy_is_automatic(int) noexcept -> std::remove_reference_t<decltype((void)ShaderPolicy::is_automatic, std::declval<bool>())> {
 	return ShaderPolicy::is_automatic;
 }
 
@@ -121,7 +121,7 @@ bool constexpr Renderer<T, ShaderPolicy>::policy_is_automatic(long) noexcept {
 
 template <typename T, typename ShaderPolicy>
 template <typename U>
-auto constexpr Renderer<T, ShaderPolicy>::object_is_transformable(int) noexcept -> decltype((void)static_cast<U const&>(std::declval<Renderer<T, ShaderPolicy>>()).has_been_transformed_, std::declval<bool const&>()) {
+auto constexpr Renderer<T, ShaderPolicy>::object_is_transformable(int) noexcept -> std::remove_reference_t<decltype((void)std::declval<U>().has_been_transformed(), std::declval<bool>())> {
 	return true;
 }
 
@@ -131,11 +131,11 @@ bool constexpr Renderer<T, ShaderPolicy>::object_is_transformable(long) noexcept
 }
 
 template <typename T, typename ShaderPolicy>
-bool Renderer<T, ShaderPolicy>::object_has_been_transformed() const noexcept {
-	return static_cast<T const&>(*this).has_been_transformed_;
+bool& Renderer<T, ShaderPolicy>::object_has_been_transformed() const noexcept {
+	return static_cast<T const&>(*this).has_been_transformed();
 }
 
 template <typename T, typename ShaderPolicy>
 glm::mat4 Renderer<T, ShaderPolicy>::get_model_matrix() const noexcept {
-	return static_cast<T const&>(*this).transforms_.top();
+	return static_cast<T const&>(*this).model_matrix();
 }

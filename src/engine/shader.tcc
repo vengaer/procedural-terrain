@@ -95,8 +95,10 @@ Result<std::variant<GLuint, std::string>> Shader::link(T const& ids) {
 		glDeleteShader(id);
 	}
 
-	if(result.outcome == Outcome::Failure)
+	if(result.outcome == Outcome::Failure) {
+		glDeleteProgram(program_id);
 		return { result.outcome, result.data.value() };
+	}
 
 	return { result.outcome, program_id };
 }
@@ -117,8 +119,16 @@ void Shader::upload_uniform(std::string const& name, Args&&... args) const {
 	}
 	GLint location = it->second;	
 	
+	enable();
 	upload_uniform(location, std::forward<Args>(args)...);
 }
+
+template <bool Store, typename... Args>
+void Shader::upload_to_all(std::string const& name, Args&&... args) {
+	for(auto const& shader : instances_)
+		shader.get().template upload_uniform<Store>(name, std::forward<Args>(args)...);
+}
+
 
 
 template <typename... Args>

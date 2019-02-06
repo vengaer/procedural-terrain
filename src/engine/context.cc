@@ -1,5 +1,6 @@
 #include "context.h"
 #include "exception.h"
+#include "logger.h"
 #include <cmath>
 #include <functional>
 
@@ -29,34 +30,43 @@ std::size_t Context::height() const {
 	return height_;
 }
 
+Context::operator GLFWwindow*() const {
+	return context_;
+}
+
 void Context::set_dimensions(std::size_t width, std::size_t height) {
 	width_ = width;
 	height_ = height;
 }
 
 void Context::init(Type type, std::string const& name, bool shared, float version) {
+	LOG("Creating ", (is_visible_ ? "visible" : "invisible"), " context");
 	if(!primary_) {
 		if(type != Type::Primary)
-			throw OutOfOrderInitializationException{"Secondary context created before the primary\n"};
+			throw OutOfOrderInitializationException{"Primary context must be created before any secondary ones"};
 		if(!glfwInit())
-			throw GLException{"Failed to initialize GLFW\n"};
+			throw GLException{"Failed to initialize GLFW"};
+		LOG("Context type is primary");
 	}
 
 	if(!std::signbit(version)) {
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, static_cast<std::size_t>(version));
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, static_cast<std::size_t>(10.f*std::fmod(version, 1.f)));
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+		LOG("OpenGL version ", version, " specified");
 	}
 	if(!is_visible_)
 		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 		
 	context_ = glfwCreateWindow(width_, height_, name.c_str(), nullptr, shared ? primary_->context_ : nullptr);
 	
-	if(type == Type::Primary)
+	if(!primary_ && type == Type::Primary) {
 		primary_ = this;
+		LOG("Primary context set successfully");
+	}
 
 	if(!context_)
-		throw GLException{"Could not create GLFW window.\nDoes your graphics driver support OpenGL version " + std::to_string(version) +"?"};
+		throw GLException{"Could not create GLFW window. Most likely, OpenGL version " + std::to_string(version) +" is not supported"};
 
 	glfwMakeContextCurrent(context_);
 	glfwSetWindowUserPointer(context_, this);

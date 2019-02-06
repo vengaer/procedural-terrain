@@ -1,5 +1,5 @@
 template <typename ShaderPolicy>
-Ellipsoid<ShaderPolicy>::Ellipsoid(ShaderPolicy policy, GLuint vertical_segments, GLuint horizontal_segments, GLfloat x_scale, GLfloat y_scale, GLfloat z_scale) : Renderer<Ellipsoid<ShaderPolicy>, ShaderPolicy>{policy}, Transform<ShaderPolicy>{policy}, vertices_{}, indices_{} {
+Ellipsoid<ShaderPolicy>::Ellipsoid(ShaderPolicy policy, GLuint vertical_segments, GLuint horizontal_segments, GLfloat x_scale, GLfloat y_scale, GLfloat z_scale) : Renderer<Ellipsoid<ShaderPolicy>, ShaderPolicy>{policy}, Transform{}, vertices_{}, indices_{} {
 	Renderer<Ellipsoid<ShaderPolicy>, ShaderPolicy>::init(vertical_segments, horizontal_segments, x_scale, y_scale, z_scale);
 }
 

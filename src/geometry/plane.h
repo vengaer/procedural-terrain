@@ -15,7 +15,7 @@
 #include <vector>
 
 template <typename ShaderPolicy = manual_shader_handler>
-class Plane : public Renderer<Plane<ShaderPolicy>, ShaderPolicy>, public Transform<ShaderPolicy> {
+class Plane : public Renderer<Plane<ShaderPolicy>, ShaderPolicy>, public Transform {
 	public:
 		Plane(ShaderPolicy policy = {}, GLfloat x_len = 1.f, GLfloat dx = .5f, GLfloat z_len = 1.f, GLfloat dz = .5f);
 		

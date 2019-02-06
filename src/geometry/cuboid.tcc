@@ -1,5 +1,5 @@
 template <typename ShaderPolicy>
-Cuboid<ShaderPolicy>::Cuboid(ShaderPolicy policy, GLfloat x_scale, GLfloat y_scale, GLfloat z_scale) : Renderer<Cuboid<ShaderPolicy>, ShaderPolicy>{policy}, Transform<ShaderPolicy>{policy}, vertices_{}, indices_{} {
+Cuboid<ShaderPolicy>::Cuboid(ShaderPolicy policy, GLfloat x_scale, GLfloat y_scale, GLfloat z_scale) : Renderer<Cuboid<ShaderPolicy>, ShaderPolicy>{policy}, Transform{}, vertices_{}, indices_{} {
 	Renderer<Cuboid<ShaderPolicy>, ShaderPolicy>::init(x_scale, y_scale, z_scale);
 }
 

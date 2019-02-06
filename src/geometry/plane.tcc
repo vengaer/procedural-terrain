@@ -1,5 +1,5 @@
 template <typename ShaderPolicy>
-Plane<ShaderPolicy>::Plane(ShaderPolicy policy, GLfloat x_len, GLfloat dx, GLfloat z_len, GLfloat dz) : Renderer<Plane<ShaderPolicy>, ShaderPolicy>{policy}, Transform<ShaderPolicy>{policy}, vertices_{}, indices_{} {
+Plane<ShaderPolicy>::Plane(ShaderPolicy policy, GLfloat x_len, GLfloat dx, GLfloat z_len, GLfloat dz) : Renderer<Plane<ShaderPolicy>, ShaderPolicy>{policy}, Transform{}, vertices_{}, indices_{} {
 	/* Initialize Renderer, pass parameters */
 	Renderer<Plane<ShaderPolicy>, ShaderPolicy>::init(x_len, dx, z_len, dz);
 }

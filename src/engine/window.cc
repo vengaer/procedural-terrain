@@ -25,11 +25,6 @@ void Window::update() const{
 	glfwPollEvents();
 }
 
-GLFWwindow* Window::context() const {
-	return context_;
-}
-
-
 void Window::init(){
 	glewExperimental = GL_TRUE;
 

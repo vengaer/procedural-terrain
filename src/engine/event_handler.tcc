@@ -35,12 +35,3 @@ void EventHandler::init(Args const&... args) {
 	glfwSetWindowSizeCallback(context, size_callback);
 }
 
-template <typename... Args>
-void EventHandler::append_shaders(Args const&... args) {
-	static_assert(sizeof...(Args) && all_same_v<std::shared_ptr<Shader>, remove_cvref_t<Args>...>, "Parameter pack may only include std::shared_ptr<Shader>");
-	
-	shader_model_pairs_.reserve(shader_model_pairs_.size() + sizeof...(args));
-
-	inserter<std::unordered_map<std::shared_ptr<Shader>, glm::mat4>>{}(shader_model_pairs_, std::make_pair(args, glm::mat4{})...);
-}
-

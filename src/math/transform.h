@@ -2,27 +2,11 @@
 #define TRANSFORM_H
 
 #pragma once
-#include "event_handler.h"
-#include "inserter.h"
-#include "renderer.h"
-#include "shader_handler.h"
-#include "traits.h"
-#include "transform.h"
-#include "type_conversion.h"
-#include <algorithm>
 #include <cmath>
-#include <functional>
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <memory>
 #include <stack>
-#include <string>
-#include <type_traits>
-#include <utility>
 #include <vector>
 
-template <typename ShaderPolicy = manual_shader_handler>
 class Transform {
 	public:
 		enum class Axis { X, Y, Z };
@@ -45,18 +29,18 @@ class Transform {
 
 		glm::mat4 model_matrix() const;
 		
+		bool& has_been_transformed() const;
+		
 	protected:
-		Transform(ShaderPolicy policy = {});
+		Transform();
+
+	private:
 		using stack_t = std::stack<glm::mat4, std::vector<glm::mat4>>;
 		stack_t transforms_;
 		bool mutable has_been_transformed_{false};
 
-	private:
-		ShaderPolicy const policy_;
-
 		void add_transform(glm::mat4&& transform);
-		void update_model() const;
+
 };
 
-#include "transform.tcc"
 #endif

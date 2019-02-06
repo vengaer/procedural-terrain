@@ -4,6 +4,7 @@
 #pragma once
 #include <array>
 #include <cstddef>
+#include <exception>
 #include <iostream>
 #include <iterator>
 #include <tuple>
@@ -23,7 +24,10 @@ template <std::size_t N>
 using size_t_constant = std::integral_constant<std::size_t, N>;
 
 template <typename T, typename U, typename Ret = void>
-using enable_on_match_t = std::enable_if_t<std::is_same_v<T, U>, Ret>;
+struct enable_on_match : std::enable_if<std::is_same_v<T,U>, Ret> { };
+
+template <typename T, typename U, typename Ret = void>
+using enable_on_match_t = typename enable_on_match<T,U,Ret>::type;
 
 template <typename T>
 struct remove_cvref : std::remove_cv<std::remove_reference_t<T>> { };
@@ -79,6 +83,12 @@ struct is_container : std::false_type { };
 
 template <typename T>
 struct is_container<T, std::void_t<decltype(std::begin(std::declval<T>())), decltype(std::end(std::declval<T>()))>> : std::true_type { };
+
+template <typename T>
+struct is_exception : std::is_base_of<std::exception, T> { };
+
+template <typename T>
+inline bool constexpr is_exception_v = is_exception<T>::value;
 
 template <typename T>
 inline bool constexpr is_container_v = is_container<T>::value;

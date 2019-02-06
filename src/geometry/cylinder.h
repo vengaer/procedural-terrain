@@ -18,7 +18,7 @@
 
 
 template <typename ShaderPolicy = manual_shader_handler>
-class Cylinder : public Renderer<Cylinder<ShaderPolicy>, ShaderPolicy>, public Transform<ShaderPolicy> {
+class Cylinder : public Renderer<Cylinder<ShaderPolicy>, ShaderPolicy>, public Transform {
 	public:
 		enum class Axis { X, Y, Z };
 		Cylinder(ShaderPolicy policy = {}, GLfloat height = 1.f, GLuint horizontal_segments = 30u, GLuint vertical_segments = 1u, Axis main_axis = Axis::Y, GLfloat off_axis1_scale = 0.5f, GLfloat off_axis2_scale = 0.5f);

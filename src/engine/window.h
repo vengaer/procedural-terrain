@@ -21,8 +21,6 @@ class Window : public Context {
 	
 	private:
 		void init();
-
-		GLFWwindow* context() const;
 };
 
 #endif
