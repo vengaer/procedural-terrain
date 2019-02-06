@@ -12,9 +12,6 @@ class Transform {
 		enum class Axis { X, Y, Z };
 		enum class Sign { Pos, Neg };
 
-		Transform(Transform const&) = delete;
-		Transform& operator=(Transform const&) = delete;
-
 		void translate(glm::vec3 direction);
 		void translate(float distance, Axis axis, Sign sign = Sign::Pos);
 
