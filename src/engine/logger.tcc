@@ -93,17 +93,19 @@ void logging::FileLogger<T, enable_on_match_t<T, logging::FileLoggingTag>>::comp
 	
 	ifs.close();
 
-	std::unique(std::begin(data),
-				std::end(data),
-				[](auto const& str1, auto const str2) {
+	data.erase(
+		std::unique(std::begin(data),
+					std::end(data),
+					[](auto const& str1, auto const str2) {
 
-		std::string const str1_label = extract_label(str1);
-		std::string const str2_label = extract_label(str2);
-		if(str1_label == "Critical" || str2_label == "Critical")
-			return false;
+			std::string const str1_label = extract_label(str1);
+			std::string const str2_label = extract_label(str2);
+			if(str1_label == "Critical" || str2_label == "Critical")
+				return false;
 
-		return str1_label == str2_label && extract_content(str1) == extract_content(str2);
-	});
+			return str1_label == str2_label && extract_content(str1) == extract_content(str2);
+		}),
+		std::end(data));
 
 	std::size_t start_idx = 0u;
 	if(std::size_t size = data.size(); size > LOG_SIZE)
