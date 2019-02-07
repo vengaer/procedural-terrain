@@ -1,3 +1,4 @@
+#include <iostream>
 template <typename Bits>
 Bitmask<Bits>::Bitmask() noexcept : current_{static_cast<value_type>(0)} { }
 
@@ -10,6 +11,13 @@ Bitmask<Bits>::Bitmask(Bitmask const& other) noexcept : current_{other.current_}
 template <typename Bits>
 Bitmask<Bits>& Bitmask<Bits>::operator=(Bitmask const& other) & noexcept {
 	current_ = other.current_;
+	return *this;
+}
+
+template <typename Bits>
+Bitmask<Bits>& Bitmask<Bits>::operator=(value_type value) & noexcept {
+	current_ = value;
+	return *this;
 }
 
 template <typename Bits>

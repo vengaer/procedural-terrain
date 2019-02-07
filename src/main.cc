@@ -23,8 +23,9 @@ int main() {
 		Window window{"test", width, height};
 		std::shared_ptr<Shader> plane_shader = std::make_shared<Shader>( "/home/vilhelm/repos/c++/procedural_terrain/src/shaders/plane.vert", Shader::Type::Vertex, 
 																		 "/home/vilhelm/repos/c++/procedural_terrain/src/shaders/plane.frag", Shader::Type::Fragment );
-		std::shared_ptr<Shader> sun_shader = std::make_shared<Shader>( "/home/vilhelm/repos/c++/procedural_terrain/src/shaders/sun.vert", Shader::Type::Vertex, 
-																		 "/home/vilhelm/repos/c++/procedural_terrain/src/shaders/sun.frag", Shader::Type::Fragment );
+		std::shared_ptr<Shader> sun_shader =   std::make_shared<Shader>( "/home/vilhelm/repos/c++/procedural_terrain/src/shaders/sun.vert", Shader::Type::Vertex, 
+																		 "/home/vilhelm/repos/c++/procedural_terrain/src/shaders/sun.frag", Shader::Type::Fragment,
+																		 Shader::AuxOpt::bloom | Shader::AuxOpt::blur);
 
 		std::shared_ptr<Camera> cam = std::make_shared<Camera>();
 		EventHandler::instantiate(cam);

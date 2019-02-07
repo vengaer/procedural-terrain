@@ -2,6 +2,7 @@
 #define SHADER_H
 
 #pragma once
+#include "bitmask.h"
 #include "collections.h"
 #include "ct_sequence.h"
 #include "exception.h"
@@ -30,7 +31,14 @@
 
 class Shader {
 	using callback_func = void(*)(Shader const&);
+	struct OptFeatures {
+		using value_type = unsigned char;
+		static value_type constexpr bloom = 0x1; /* Bloom effect */
+		static value_type constexpr blur  = 0x2; /* Gaussian blur */
+	};
 	public:
+		using AuxOpt = Bitmask<OptFeatures>;
+
 		enum class Type { Vertex   = GL_VERTEX_SHADER, 
 						  Fragment = GL_FRAGMENT_SHADER,
 						  Compute  = GL_COMPUTE_SHADER,
@@ -38,6 +46,10 @@ class Shader {
 						  TessEval = GL_TESS_EVALUATION_SHADER,
 						  Geometry = GL_GEOMETRY_SHADER };
 		
+		/* Takes any number of pairs of std::string (holding paths to source files) and Shader::Type.*/
+		/* Optionally, an AuxOpt instance may be added as the last argument */
+		/* The following example constructs a shader program that uses multiple render targets from N source files */
+		/* Shader{source1, Shader::Type::Vertex, source2, Shader::Type::Fragment, ..., sourceN, Shader::Type::Fragment, Shader::AuxOpt::mrt} */
 		template <typename... Sources>
 		Shader(Sources const&... src);
 
@@ -112,11 +124,18 @@ class Shader {
 				void reconstruct();
 		};
 
-		GLuint program_; /* Shader program id */
-		std::unordered_map<std::string, GLint> mutable cached_uniform_locations_;
-		std::map<std::string, glm::mat4> mutable stored_uniform_data_;
+		GLuint program_{}; /* Shader program id */
+		std::unordered_map<std::string, GLint> mutable cached_uniform_locations_{};
+		std::map<std::string, glm::mat4> mutable stored_uniform_data_{};
 		std::vector<Source> sources_;
-		static std::size_t const depth_; /* Max recursive include depth */
+		static std::size_t constexpr depth_{8u}; /* Max recursive include depth */
+
+		AuxOpt auxiliary_options_{static_cast<typename AuxOpt::value_type>(0x0)};
+		GLuint fbo_{};
+		std::vector<GLuint> color_buffers_{};
+		std::vector<GLuint> color_attachments_{};
+		std::vector<GLuint> blur_fbos_{};
+		std::vector<GLuint> blur_buffers_{};
 
 		static std::atomic_bool halt_execution_;
 		static std::mutex ics_mutex_;
@@ -126,6 +145,9 @@ class Shader {
 
 		template <std::size_t N>
 		void init();
+
+		void setup_render_targets();
+		void generate_color_buffers(std::size_t num_to_generate);
 
 		template <typename... Args, std::size_t... Is>
 		static bool constexpr even_parameters_acceptable(even_index_sequence<Is...>);
@@ -142,7 +164,7 @@ class Shader {
 
 		static Result<std::optional<std::string>> assert_shader_status_ok(GLuint id, StatusQuery sq);
 
-		template <std::size_t N, typename... Sources>
+		template <std::size_t N, std::size_t Size, typename... Sources>
 		void generate_source(std::string const& path, Type type, Sources const&... rest);
 	
 		static GLenum constexpr to_GLenum(Type type) noexcept;

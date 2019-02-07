@@ -41,24 +41,26 @@ struct remove_cvptr : std::remove_cv<std::remove_pointer_t<T>> { };
 template <typename T>
 using remove_cvptr_t = typename remove_cvptr<T>::type;
 
-template <typename, typename = void>
-struct fundamental_type_impl { };
+namespace traits_impl {
+	template <typename, typename = void>
+	struct fundamental_type_impl { };
+
+	template <typename T>
+	struct fundamental_type_impl<T, std::enable_if_t<std::is_fundamental_v<T>>> : type_is<T> { };
+
+	template <typename T>
+	struct fundamental_type_impl<T, std::void_t<typename T::value_type>> : std::conditional_t<
+																					std::is_fundamental_v<typename T::value_type>,
+																					type_is<typename T::value_type>,
+																					fundamental_type_impl<typename T::value_type>
+																				> { };
+
+	template <typename T>
+	struct fundamental_type_impl<T*> : type_is<T> { };
+}
 
 template <typename T>
-struct fundamental_type_impl<T, std::enable_if_t<std::is_fundamental_v<T>>> : type_is<T> { };
-
-template <typename T>
-struct fundamental_type_impl<T, std::void_t<typename T::value_type>> : std::conditional_t<
-																				std::is_fundamental_v<typename T::value_type>,
-																				type_is<typename T::value_type>,
-																				fundamental_type_impl<typename T::value_type>
-																			> { };
-
-template <typename T>
-struct fundamental_type_impl<T*> : type_is<T> { };
-
-template <typename T>
-struct fundamental_type : fundamental_type_impl<std::decay_t<T>> { };
+struct fundamental_type : traits_impl::fundamental_type_impl<std::decay_t<T>> { };
 
 template <typename T>
 using fundamental_type_t = typename fundamental_type<T>::type;
@@ -225,117 +227,118 @@ template <typename T, typename... P0toN>
 inline bool constexpr is_convertible_to_one_of_v = is_convertible_to_one_of<T, P0toN...>::value;
 
 /* Helpers */
-template <typename>
-struct is_std_array_impl : std::false_type { };
+namespace traits_impl {
+	template <typename>
+	struct is_std_array_impl : std::false_type { };
 
-template <typename T, std::size_t N>
-struct is_std_array_impl<std::array<T,N>> : std::true_type { };
-
-
-template <typename, typename = void>
-struct has_subscript_operator_impl : std::false_type { };
-
-template <typename T>
-struct has_subscript_operator_impl<T, std::void_t<decltype(std::declval<T>().operator[](std::declval<std::size_t>()))>> : std::true_type { };
-
-template <typename T, std::size_t N>
-struct has_subscript_operator_impl<T[N]> : std::true_type { };
-
-template <typename T>
-struct has_subscript_operator_impl<T[]> : std::true_type { };
+	template <typename T, std::size_t N>
+	struct is_std_array_impl<std::array<T,N>> : std::true_type { };
 
 
-template <typename>
-struct is_contiguously_stored_impl : std::false_type { };
+	template <typename, typename = void>
+	struct has_subscript_operator_impl : std::false_type { };
 
-template <typename T, typename... Ts>
-struct is_contiguously_stored_impl<std::vector<T, Ts...>> : std::true_type { };
+	template <typename T>
+	struct has_subscript_operator_impl<T, std::void_t<decltype(std::declval<T>().operator[](std::declval<std::size_t>()))>> : std::true_type { };
 
-template <typename T, std::size_t N>
-struct is_contiguously_stored_impl<std::array<T, N>> : std::true_type { };
+	template <typename T, std::size_t N>
+	struct has_subscript_operator_impl<T[N]> : std::true_type { };
 
-template <typename T, std::size_t N>
-struct is_contiguously_stored_impl<T[N]> : std::true_type { };
-
-template <typename T>
-struct is_contiguously_stored_impl<T[]> : std::true_type { };
+	template <typename T>
+	struct has_subscript_operator_impl<T[]> : std::true_type { };
 
 
-template <typename, typename = void>
-struct wraps_numeric_type_impl : std::false_type { };
+	template <typename>
+	struct is_contiguously_stored_impl : std::false_type { };
 
-template <typename T>
-struct wraps_numeric_type_impl<T, std::void_t<typename T::value_type>> : std::is_arithmetic<typename T::value_type> { };
+	template <typename T, typename... Ts>
+	struct is_contiguously_stored_impl<std::vector<T, Ts...>> : std::true_type { };
 
-template <typename T, std::size_t N>
-struct wraps_numeric_type_impl<T[N]> : std::is_arithmetic<T> { };
+	template <typename T, std::size_t N>
+	struct is_contiguously_stored_impl<std::array<T, N>> : std::true_type { };
 
-template <typename T>
-struct wraps_numeric_type_impl<T[]> : std::is_arithmetic<T> { };
+	template <typename T, std::size_t N>
+	struct is_contiguously_stored_impl<T[N]> : std::true_type { };
 
-
-template <typename, typename = void>
-struct wraps_integral_type_impl : std::false_type { };
-
-template <typename T>
-struct wraps_integral_type_impl<T, std::void_t<typename T::value_type>> : std::is_integral<typename T::value_type> { };
-
-template <typename T, std::size_t N>
-struct wraps_integral_type_impl<T[N]> : std::is_integral<T> { };
-
-template <typename T>
-struct wraps_integral_type_impl<T[]> : std::is_integral<T> { };
+	template <typename T>
+	struct is_contiguously_stored_impl<T[]> : std::true_type { };
 
 
-template <typename, typename = void>
-struct wraps_unsigned_type_impl : std::false_type { };
+	template <typename, typename = void>
+	struct wraps_numeric_type_impl : std::false_type { };
 
-template <typename T>
-struct wraps_unsigned_type_impl<T, std::void_t<typename T::value_type>> : std::is_unsigned<typename T::value_type> { };
+	template <typename T>
+	struct wraps_numeric_type_impl<T, std::void_t<typename T::value_type>> : std::is_arithmetic<typename T::value_type> { };
 
-template <typename T, std::size_t N>
-struct wraps_unsigned_type_impl<T[N]> : std::is_unsigned<T> { };
+	template <typename T, std::size_t N>
+	struct wraps_numeric_type_impl<T[N]> : std::is_arithmetic<T> { };
 
-template <typename T>
-struct wraps_unsigned_type_impl<T[]> : std::is_unsigned<T> { };
+	template <typename T>
+	struct wraps_numeric_type_impl<T[]> : std::is_arithmetic<T> { };
 
+
+	template <typename, typename = void>
+	struct wraps_integral_type_impl : std::false_type { };
+
+	template <typename T>
+	struct wraps_integral_type_impl<T, std::void_t<typename T::value_type>> : std::is_integral<typename T::value_type> { };
+
+	template <typename T, std::size_t N>
+	struct wraps_integral_type_impl<T[N]> : std::is_integral<T> { };
+
+	template <typename T>
+	struct wraps_integral_type_impl<T[]> : std::is_integral<T> { };
+
+
+	template <typename, typename = void>
+	struct wraps_unsigned_type_impl : std::false_type { };
+
+	template <typename T>
+	struct wraps_unsigned_type_impl<T, std::void_t<typename T::value_type>> : std::is_unsigned<typename T::value_type> { };
+
+	template <typename T, std::size_t N>
+	struct wraps_unsigned_type_impl<T[N]> : std::is_unsigned<T> { };
+
+	template <typename T>
+	struct wraps_unsigned_type_impl<T[]> : std::is_unsigned<T> { };
+}
 
 
 /* Container traits */
 /* ---------------- */
 template <typename T>
-struct is_std_array : is_std_array_impl<remove_cvref_t<T>> { };
+struct is_std_array : traits_impl::is_std_array_impl<remove_cvref_t<T>> { };
 
 template <typename T>
 inline bool constexpr is_std_array_v = is_std_array<T>::value;
 
 template <typename T>
-struct has_subscript_operator : has_subscript_operator_impl<remove_cvref_t<T>> { };
+struct has_subscript_operator : traits_impl::has_subscript_operator_impl<remove_cvref_t<T>> { };
 
 template <typename T>
 inline bool constexpr has_subscript_operator_v = has_subscript_operator<T>::value;
 
 
 template <typename T>
-struct is_contiguously_stored : is_contiguously_stored_impl<remove_cvref_t<T>> { }; 	
+struct is_contiguously_stored : traits_impl::is_contiguously_stored_impl<remove_cvref_t<T>> { }; 	
 
 template <typename T>
 inline bool constexpr is_contiguously_stored_v = is_contiguously_stored<T>::value;
 
 template <typename T>
-struct wraps_numeric_type : wraps_numeric_type_impl<remove_cvref_t<T>> { }; 
+struct wraps_numeric_type : traits_impl::wraps_numeric_type_impl<remove_cvref_t<T>> { }; 
 
 template <typename T>
 inline bool constexpr wraps_numeric_type_v = wraps_numeric_type<T>::value;
 
 template <typename T>
-struct wraps_integral_type : wraps_integral_type_impl<remove_cvref_t<T>> { };	
+struct wraps_integral_type : traits_impl::wraps_integral_type_impl<remove_cvref_t<T>> { };	
 
 template <typename T>
 inline bool constexpr wraps_integral_type_v = wraps_integral_type<T>::value;
 
 template <typename T>
-struct wraps_unsigned_type : wraps_unsigned_type_impl<remove_cvref_t<T>> { };			
+struct wraps_unsigned_type : traits_impl::wraps_unsigned_type_impl<remove_cvref_t<T>> { };			
 
 template <typename T>
 inline bool constexpr wraps_unsigned_type_v = wraps_unsigned_type<T>::value;
