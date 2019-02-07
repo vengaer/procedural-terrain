@@ -38,6 +38,7 @@ struct indices_tag { };
 template <typename T, typename ShaderPolicy = manual_shader_handler>
 class Renderer {
 	public:
+		~Renderer();
 		void render() const;
 	
 		static GLuint constexpr VERTEX_SIZE = 8u;

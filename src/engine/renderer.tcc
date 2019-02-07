@@ -4,6 +4,12 @@ Renderer<T, ShaderPolicy>::Renderer(ShaderPolicy policy) : vao_{0u}, vbo_{0u}, i
 }
 
 template <typename T, typename ShaderPolicy>
+Renderer<T, ShaderPolicy>::~Renderer() {
+	glDeleteVertexArrays(1, &vao_);
+	glDeleteBuffers(1, &vbo_);
+}
+
+template <typename T, typename ShaderPolicy>
 void Renderer<T, ShaderPolicy>::render() const {
 	if constexpr(policy_is_automatic(0) && object_is_transformable(0)){
 		if(object_has_been_transformed()) {
