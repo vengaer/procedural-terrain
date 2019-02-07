@@ -108,13 +108,8 @@ void logging::FileLogger<T, enable_on_match_t<T, logging::FileLoggingTag>>::comp
 	std::size_t start_idx = 0u;
 	if(std::size_t size = data.size(); size > LOG_SIZE)
 		start_idx = size - LOG_SIZE;
+	
 	ofs_.open(log_file_);
-	if(!ofs_.is_open()) {
-		ERR_LOG_WARN("Unable to clear ", log_file_, " during compression.");
-		return;
-	}
-	ofs_.close();
-	ofs_.open(log_file_, std::ios::app);
 	if(!ofs_.is_open()) {
 		ERR_LOG_WARN("Unable to reopen ",  log_file_, " after compression.");
 		return;
