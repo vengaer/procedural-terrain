@@ -150,7 +150,7 @@ void logging::Logger<LoggingTag>::print(Args&&... args) {
 			format<S>(this->ofs_, this->ofs_entry_++);
 			print(std::forward_as_tuple(std::forward<Args>(args)...), std::index_sequence_for<Args...>{}, this->ofs_);
 		}
-		else {
+		else { /* Currently compressing file, write to buffer and carry on */
 			std::lock_guard<std::mutex> lock{this->buffer_mutex_};
 			format<S>(this->buffer_, this->ofs_entry_++);
 			print(std::forward_as_tuple(std::forward<Args>(args)...), std::index_sequence_for<Args...>{}, this->buffer_);

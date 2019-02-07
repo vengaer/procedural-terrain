@@ -2,6 +2,7 @@
 #define EVENT_HANDLER_H
 
 #pragma once
+#include "bitmask.h"
 #include "camera.h"
 #include "logger.h"
 #include <GL/glew.h>
@@ -20,25 +21,24 @@ class EventHandler {
 			double y;
 		};
 
-		struct KeyModifiers {
-			enum class State { Inactive, Active };
-			State shift;
-			State ctrl;
-			State alt;
-			State super;
+		struct KeyMods {
+			using value_type = int;
+			static value_type constexpr shift = 0x1;
+			static value_type constexpr ctrl  = 0x2;
+			static value_type constexpr alt   = 0x4;
+			static value_type constexpr super = 0x8;
 		};
+		using Mods = Bitmask<KeyMods>;
+	
 		std::shared_ptr<Camera> camera_;
 		
 		static bool instantiated_;
 		static EventHandler* instance_;
 		static MousePosition mouse_position_;
 
-
 		EventHandler(std::shared_ptr<Camera> const& camera);
 		
 		void init();
-
-		static KeyModifiers modifier_states(int mod_bits);
 
 		static void update_perspective();
 		static void update_view();

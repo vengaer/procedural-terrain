@@ -61,14 +61,13 @@ void EventHandler::update_view() {
 void EventHandler::key_callback(GLFWwindow*, int key, int, int, int mod_bits) {
 	using Dir = Camera::Direction;
 	using Speed = Camera::Speed;
-	using State = KeyModifiers::State;
+	Mods modifiers = mod_bits;
 
 	auto& camera = instance_->camera_;
-	KeyModifiers const mods = modifier_states(mod_bits);
 	
-	Speed speed = mods.shift == State::Active ?
-					Speed::Fast :
-					Speed::Default;
+	Speed speed = ((modifiers & Mods::shift) == Mods::shift) ?
+													Speed::Fast :
+													Speed::Default;
 
 	switch(key) {
 		case GLFW_KEY_W:
@@ -88,7 +87,7 @@ void EventHandler::key_callback(GLFWwindow*, int key, int, int, int mod_bits) {
 			update_view();
 			break;
 		case GLFW_KEY_SPACE:
-			if(mods.ctrl == State::Active)
+			if((modifiers & Mods::ctrl) == Mods::ctrl)
 				camera->translate(Dir::Down, speed);
 			else
 				camera->translate(Dir::Up, speed);
@@ -98,59 +97,6 @@ void EventHandler::key_callback(GLFWwindow*, int key, int, int, int mod_bits) {
 
 }
 
-EventHandler::KeyModifiers EventHandler::modifier_states(int mod_bits) {	
-	using State = KeyModifiers::State;
-	KeyModifiers mod;
-
-	switch(mod_bits) {
-		case 1:
-			mod = { State::Active, State::Inactive, State::Inactive, State::Inactive };
-			break;
-		case 2:
-			mod = { State::Inactive, State::Active, State::Inactive, State::Inactive };
-			break;
-		case 3:
-			mod = { State::Active, State::Active, State::Inactive, State::Inactive };
-			break;
-		case 4:
-			mod = { State::Inactive, State::Inactive, State::Active, State::Inactive };
-			break;
-		case 5:
-			mod = { State::Active, State::Inactive, State::Active, State::Inactive };
-			break;
-		case 6:
-			mod = { State::Inactive, State::Active, State::Active, State::Inactive };
-			break;
-		case 7:
-			mod = { State::Active, State::Active, State::Active, State::Inactive };
-			break;
-		case 8:
-			mod = { State::Inactive, State::Inactive, State::Inactive, State::Active };
-			break;
-		case 9:
-			mod = { State::Active, State::Inactive, State::Inactive, State::Active };
-			break;
-		case 10:
-			mod = { State::Inactive, State::Active, State::Inactive, State::Active };
-			break;
-		case 11:
-			mod = { State::Active, State::Active, State::Inactive, State::Active };
-			break;
-		case 12:
-			mod = { State::Inactive, State::Inactive, State::Active, State::Active };
-			break;
-		case 13:
-			mod = { State::Active, State::Inactive, State::Active, State::Active };
-			break;
-		case 14:
-			mod = { State::Inactive, State::Active, State::Active, State::Active };
-			break;
-		case 15:
-			mod = { State::Active, State::Active, State::Active, State::Active };
-			break;
-	}
-	return mod;
-}
 
 void EventHandler::mouse_callback(GLFWwindow*, double x, double y) {
 	double delta_x = glm::clamp(x - mouse_position_.x, -5.0, 5.0);
