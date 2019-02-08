@@ -2,6 +2,7 @@
 #define BITMASK_H
 
 #pragma once
+#include "traits.h"
 #include <type_traits>
 
 /* Example usage:
@@ -32,14 +33,26 @@ class Bitmask : public Bits {
 	static_assert(std::is_integral_v<typename Bits::value_type>, "Template argument must name an integral value_type alias");
 	public:
 		using value_type = typename Bits::value_type;
+		using internal_type = promote_t<value_type>;
+
 		Bitmask() noexcept;
-		Bitmask(value_type val) noexcept;
+
+		Bitmask(internal_type&& val) noexcept; /* internal_type only */
+		
+		template <typename T, 
+				  typename = std::enable_if_t<std::is_integral_v<remove_cvref_t<T>> && 
+											  std::is_const_v<std::remove_reference_t<T>>>>
+		Bitmask(T&& val) noexcept; /* const integral type */
+
+		template <typename T>
+		explicit Bitmask(T&& val) noexcept; /* Other types require explicit conversion */
+
 		
 		Bitmask(Bitmask const& other) noexcept;
 		Bitmask& operator=(Bitmask const& other) & noexcept;
-		Bitmask& operator=(value_type value) & noexcept;
+		Bitmask& operator=(internal_type value) & noexcept;
 
-		operator value_type() noexcept;
+		explicit operator internal_type() noexcept;
 
 		bool operator==(Bitmask const& other) const noexcept;
 		bool operator!=(Bitmask const& other) const noexcept;
@@ -47,20 +60,32 @@ class Bitmask : public Bits {
 		template <typename T>
 		friend Bitmask<T> operator|(Bitmask<T> left, Bitmask<T> right) noexcept;
 		template <typename T>
+		friend Bitmask<T> operator|(Bitmask<T> left, typename Bitmask<T>::internal_type right) noexcept;
+		template <typename T>
 		friend Bitmask<T> operator&(Bitmask<T> left, Bitmask<T> right) noexcept;
 		template <typename T>
+		friend Bitmask<T> operator&(Bitmask<T> left, typename Bitmask<T>::internal_type right) noexcept;
+		template <typename T>
 		friend Bitmask<T> operator^(Bitmask<T> left, Bitmask<T> right) noexcept;
+		template <typename T>
+		friend Bitmask<T> operator^(Bitmask<T> left, typename Bitmask<T>::internal_type right) noexcept;
 		template <typename T>
 		friend Bitmask<T> operator~(Bitmask<T> mask) noexcept;
 		template <typename T>
 		friend Bitmask<T>& operator|=(Bitmask<T>& left, Bitmask<T> right);
 		template <typename T>
+		friend Bitmask<T>& operator|=(Bitmask<T>& left, typename Bitmask<T>::internal_type right);
+		template <typename T>
 		friend Bitmask<T>& operator&=(Bitmask<T> left, Bitmask<T> right);
 		template <typename T>
+		friend Bitmask<T>& operator&=(Bitmask<T> left, typename Bitmask<T>::internal_type right);
+		template <typename T>
 		friend Bitmask<T>& operator^=(Bitmask<T> left, Bitmask<T> right);
+		template <typename T>
+		friend Bitmask<T>& operator^=(Bitmask<T> left, typename Bitmask<T>::internal_type right);
 
 	private:
-		value_type current_{};
+		internal_type current_{};
 };
 
 #include "bitmask.tcc"
