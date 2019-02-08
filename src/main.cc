@@ -1,6 +1,6 @@
 #include "bitmask.h"
-#include "cuboid.h"
 #include "camera.h"
+#include "cuboid.h"
 #include "cylinder.h"
 #include "ellipsoid.h"
 #include "frametime.h"
@@ -17,15 +17,15 @@ template <typename Exception, typename = std::enable_if_t<is_exception_v<Excepti
 int handle_exception(Exception const& err);
 
 int main() {
-	unsigned constexpr width = 960, height = 540;
 
+	unsigned constexpr width = 960, height = 540;
 	try{
 		Window window{"test", width, height};
-		std::shared_ptr<Shader> plane_shader = std::make_shared<Shader>( "/home/vilhelm/repos/c++/procedural_terrain/src/shaders/plane.vert", Shader::Type::Vertex, 
-																		 "/home/vilhelm/repos/c++/procedural_terrain/src/shaders/plane.frag", Shader::Type::Fragment );
-		std::shared_ptr<Shader> sun_shader =   std::make_shared<Shader>( "/home/vilhelm/repos/c++/procedural_terrain/src/shaders/sun.vert", Shader::Type::Vertex, 
-																		 "/home/vilhelm/repos/c++/procedural_terrain/src/shaders/sun.frag", Shader::Type::Fragment,
-																		 Shader::AuxOpt::bloom | Shader::AuxOpt::blur);
+		std::shared_ptr<Shader> plane_shader = std::make_shared<Shader>("src/shaders/plane.vert", Shader::Type::Vertex, 
+																		"src/shaders/plane.frag", Shader::Type::Fragment);
+		std::shared_ptr<Shader> sun_shader   = std::make_shared<Shader>("src/shaders/sun.vert", Shader::Type::Vertex, 
+																		"src/shaders/sun.frag", Shader::Type::Fragment,
+																		Shader::Fx::Bloom | Shader::Fx::Blur);
 
 		std::shared_ptr<Camera> cam = std::make_shared<Camera>();
 		EventHandler::instantiate(cam);
@@ -37,11 +37,10 @@ int main() {
 
 		glClearColor(0.1f, 0.2f, 0.4f, 0.5f);
 		while(!window.should_close()){
-			frametime::update();
 			window.clear();
+			frametime::update();
 			//p.render();
 			e.render();			//		
-			//plane_shader->upload_uniform("ufrm_model", c.model_matrix());
 			//c.render();
 			//cyl.render();
 
