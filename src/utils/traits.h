@@ -7,6 +7,7 @@
 #include <exception>
 #include <iostream>
 #include <iterator>
+#include <limits>
 #include <tuple>
 #include <type_traits>
 #include <utility>
@@ -351,6 +352,80 @@ struct supports_preallocation<T, std::void_t<decltype(std::declval<T>().reserve(
 
 template <typename T>
 inline bool constexpr supports_preallocation_v = supports_preallocation<T>::value;
+
+template <typename, typename, typename = void>
+struct is_explicitly_convertible : std::false_type { };
+
+template <typename To, typename From>
+struct is_explicitly_convertible<To, From, std::void_t<decltype(static_cast<To>(std::declval<From>()))>> : std::true_type { };
+
+template <typename To, typename From>
+inline bool constexpr is_explicitly_convertible_v = is_explicitly_convertible<To, From>::value;
+
+/* Checks whether T can hold the entire range of U */
+template <typename T, typename U>
+struct can_hold_entire_range_of : std::bool_constant<(std::numeric_limits<T>::max() >= std::numeric_limits<U>::max() &&
+													  std::numeric_limits<T>::lowest() <= std::numeric_limits<U>::lowest())> { };
+
+template <typename T, typename U>
+inline bool constexpr can_hold_entire_range_of_v = can_hold_entire_range_of<T,U>::value;
+
+namespace traits_impl {
+	template <typename T>
+	struct promote_size_spec_char : type_is<std::conditional_t<
+												can_hold_entire_range_of_v<int, T>,
+											    int,
+											    std::conditional_t<
+													can_hold_entire_range_of_v<unsigned int, T>,
+													unsigned int,
+													std::conditional_t<
+														can_hold_entire_range_of_v<long, T>,
+														long,
+														std::conditional_t<
+															can_hold_entire_range_of_v<unsigned long, T>,
+															unsigned long,
+															std::conditional_t<
+																can_hold_entire_range_of_v<long long, T>,
+																long long,
+																unsigned long long
+															>
+														>
+													>
+												>
+											>> { };
+														
+	
+	template <typename T, typename = void>
+	struct promote_impl : type_is<T> { };
+
+	template <typename T>
+	struct promote_impl<T, std::enable_if_t<is_one_of_v<T, signed char,
+														   signed short>>> : type_is<int> { };
+
+	template <typename T>
+	struct promote_impl<T, std::enable_if_t<is_one_of_v<T, unsigned char,
+														   unsigned short>>> 
+		: type_is<std::conditional_t<can_hold_entire_range_of_v<int, T>,
+									 int,
+									 unsigned int>> { };
+
+	template <typename T>
+	struct promote_impl<T, std::enable_if_t<is_one_of_v<T, wchar_t,
+														   char16_t,
+														   char32_t>>> : promote_size_spec_char<T> { };
+
+	template <>
+	struct promote_impl<bool> : type_is<int> { };
+}
+
+/* Returns type corresponding to the result of implicit integral promotion for all integral types
+ * but unscoped enums, bit fields and char8_t (c++20) */
+template <typename T, typename = std::enable_if_t<std::is_integral_v<remove_cvref_t<T>>>>
+struct promote : traits_impl::promote_impl<T> { };
+
+template <typename T>
+using promote_t = typename promote<T>::type;
+
 
 
 #endif
