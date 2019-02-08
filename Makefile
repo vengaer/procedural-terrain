@@ -27,7 +27,7 @@ LDFLAGS = -lGLEW -lglfw -lGL -lm -lX11 -lpthread -ldl -lstdc++fs
 terrain: $(OBJ)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS) 
 
-.PHONY: clean run debug single_thread stats 
+.PHONY: clean run debug single_thread stats TODO
 clean:
 	rm -f $(OBJ) terrain; rm -rf logs/
 
@@ -44,3 +44,6 @@ single_thread: terrain
 
 stats:
 	find ./ -type f \( -iname \*.cc -o -iname \*.tcc -o -iname \*.h -o -iname \*.vert -o -iname \*.frag -o -iname \*.glsl \) | xargs wc -l
+
+TODO:
+	grep -lr TODO . | grep -v Makefile
