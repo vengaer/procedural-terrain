@@ -18,6 +18,19 @@ Shader::~Shader() {
 			return std::addressof(ref_wrapper.get()) == this;
 		}));
 
+	if((effects_ & Fx::Bloom) == Fx::Bloom) {
+		//TODO: Cleanup bloom
+	}
+	if((effects_ & Fx::Blur) == Fx::Blur) {
+		//TODO: Cleanup blur
+	}
+	if((effects_ & Fx::Reflect) == Fx::Reflect) {
+		//TODO: Cleanup reflection
+	}
+	if((effects_ & Fx::Refract) == Fx::Refract) {
+		//TODO: Cleanup refraction
+	}
+
 	#ifndef RESTRICT_THREAD_USAGE
 	if(instances_.size() == 0) {
 		LOG("Joining updater thread with id ", updater_thread_.get_id());
@@ -25,11 +38,6 @@ Shader::~Shader() {
 		updater_thread_.join();
 	}
 	#endif
-
-	if((auxiliary_options_ & AuxOpt::bloom) == AuxOpt::bloom)
-		glDeleteFramebuffers(1, &fbo_);
-	if((auxiliary_options_ & AuxOpt::blur) == AuxOpt::blur)
-		glDeleteFramebuffers(2, &blur_fbos_[0]);
 }
 
 void Shader::enable() const {
@@ -58,54 +66,6 @@ void Shader::set_reload_callback(callback_func func) {
 
 GLuint Shader::program_id() const {
 	return program_;
-}
-
-void Shader::setup_render_targets() {
-	glGenFramebuffers(1, &fbo_);
-	glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
-	generate_color_buffers(2u);
-}
-
-void Shader::generate_color_buffers(std::size_t num_to_generate) {
-	color_buffers_.reserve(num_to_generate);
-	for(auto i = 0u; i < num_to_generate; ++i)
-		color_buffers_.push_back(0u);
-
-	glGenTextures(num_to_generate, &color_buffers_[0]);
-	for(auto i = 0u; i < num_to_generate; ++i) {
-		glBindTexture(GL_TEXTURE_2D, color_buffers_[i]);
-		glTexImage2D(GL_TEXTURE_2D, 
-					 0, 
-					 GL_RGB16F, 
-					 1920, 
-					 1080, 
-					 0,
-					 GL_RGB, 
-					 GL_FLOAT, 
-					 0);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, 
-							   GL_COLOR_ATTACHMENT0 + i, 
-							   GL_TEXTURE_2D,
-							   color_buffers_[i],
-							   0);
-	}
-	color_attachments_.reserve(num_to_generate);
-	for(auto i = 0u; i < num_to_generate; ++i) 
-		color_attachments_.push_back(GL_COLOR_ATTACHMENT0 + i);
-
-	glDrawBuffers(2, &color_attachments_[0]);
-	
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	if((auxiliary_options_ & AuxOpt::blur) != AuxOpt::blur)
-		return;
-
-	// TODO: blur
 }
 
 Result<Shader::ErrorType, std::string> Shader::read_source(std::string const& source){
@@ -359,6 +319,7 @@ std::string const Shader::PROJECTION_UNIFORM_NAME = "ufrm_projection";
 std::string const Shader::VIEW_UNIFORM_NAME = "ufrm_view";
 std::string const Shader::MODEL_UNIFORM_NAME = "ufrm_model";
 std::string const Shader::TIME_UNIFORM_NAME = "ufrm_time";
+typename Shader::Fx Shader::effects_{};
 std::atomic_bool Shader::halt_execution_ = true;
 std::mutex Shader::ics_mutex_{};
 std::thread Shader::updater_thread_{};

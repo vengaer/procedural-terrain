@@ -61,7 +61,7 @@ void EventHandler::update_view() {
 void EventHandler::key_callback(GLFWwindow*, int key, int, int, int mod_bits) {
 	using Dir = Camera::Direction;
 	using Speed = Camera::Speed;
-	Mods modifiers = mod_bits;
+	Mods modifiers = static_cast<Mods>(mod_bits);
 
 	auto& camera = instance_->camera_;
 	

@@ -31,13 +31,15 @@
 
 class Shader {
 	using callback_func = void(*)(Shader const&);
-	struct OptFeatures {
+	struct OptionalEffects {
 		using value_type = unsigned char;
-		static value_type constexpr bloom = 0x1; /* Bloom effect */
-		static value_type constexpr blur  = 0x2; /* Gaussian blur */
+		static value_type constexpr Bloom =   0x1; /* Bloom effect */
+		static value_type constexpr Blur  =   0x2; /* Gaussian blur */
+		static value_type constexpr Reflect = 0x4; /* Reflection */
+		static value_type constexpr Refract = 0x8; /* Refraction */
 	};
 	public:
-		using AuxOpt = Bitmask<OptFeatures>;
+		using Fx = Bitmask<OptionalEffects>;
 
 		enum class Type { Vertex   = GL_VERTEX_SHADER, 
 						  Fragment = GL_FRAGMENT_SHADER,
@@ -47,9 +49,9 @@ class Shader {
 						  Geometry = GL_GEOMETRY_SHADER };
 		
 		/* Takes any number of pairs of std::string (holding paths to source files) and Shader::Type.*/
-		/* Optionally, an AuxOpt instance may be added as the last argument */
+		/* Optionally, an Fx instance may be added as the last argument */
 		/* The following example constructs a shader program that uses multiple render targets from N source files */
-		/* Shader{source1, Shader::Type::Vertex, source2, Shader::Type::Fragment, ..., sourceN, Shader::Type::Fragment, Shader::AuxOpt::mrt} */
+		/* Shader{source1, Shader::Type::Vertex, source2, Shader::Type::Fragment, ..., sourceN, Shader::Type::Fragment, Shader::Fx::Bloom} */
 		template <typename... Sources>
 		Shader(Sources const&... src);
 
@@ -130,12 +132,7 @@ class Shader {
 		std::vector<Source> sources_;
 		static std::size_t constexpr depth_{8u}; /* Max recursive include depth */
 
-		AuxOpt auxiliary_options_{static_cast<typename AuxOpt::value_type>(0x0)};
-		GLuint fbo_{};
-		std::vector<GLuint> color_buffers_{};
-		std::vector<GLuint> color_attachments_{};
-		std::vector<GLuint> blur_fbos_{};
-		std::vector<GLuint> blur_buffers_{};
+		static Fx effects_;
 
 		static std::atomic_bool halt_execution_;
 		static std::mutex ics_mutex_;
@@ -144,10 +141,7 @@ class Shader {
 		static callback_func reload_callback_;
 
 		template <std::size_t N>
-		void init();
-
-		void setup_render_targets();
-		void generate_color_buffers(std::size_t num_to_generate);
+		void init(Fx fx);
 
 		template <typename... Args, std::size_t... Is>
 		static bool constexpr even_parameters_acceptable(even_index_sequence<Is...>);
