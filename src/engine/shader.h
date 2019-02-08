@@ -31,6 +31,7 @@
 
 class Shader {
 	using callback_func = void(*)(Shader const&);
+
 	struct OptionalEffects {
 		using value_type = unsigned char;
 		static value_type constexpr Bloom =   0x1; /* Bloom effect */
@@ -68,6 +69,8 @@ class Shader {
 
 		static void set_reload_callback(callback_func);
 
+		static void reallocate_texture(int width, int height);
+
 		GLuint program_id() const;
 		
 		/* (Indirect) Wrappers for glUniform */
@@ -97,7 +100,10 @@ class Shader {
 							   Include, 
 							   Linking,
 							   End_ };
-
+		struct Viewport {
+			int width;
+			int height;
+		};
 
 		struct Source {
 			Source() = default;
@@ -132,6 +138,9 @@ class Shader {
 		std::vector<Source> sources_;
 		static std::size_t constexpr depth_{8u}; /* Max recursive include depth */
 
+		static GLuint fbo_;
+		static GLuint rbo_;
+		static GLuint texture_buffer_;
 		static Fx effects_;
 
 		static std::atomic_bool halt_execution_;
@@ -142,6 +151,10 @@ class Shader {
 
 		template <std::size_t N>
 		void init(Fx fx);
+	
+		static void setup_texture_environment(int width, int height);
+
+		static void delete_buffers() noexcept;
 
 		template <typename... Args, std::size_t... Is>
 		static bool constexpr even_parameters_acceptable(even_index_sequence<Is...>);
@@ -169,6 +182,8 @@ class Shader {
 		static void monitor_source_files();
 		bool reload();
 		void update_internal_uniform_locations() const;
+
+		static Viewport viewport_info() noexcept;
 };
 
 #include "shader.tcc"

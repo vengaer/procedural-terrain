@@ -5,17 +5,21 @@ Shader::Shader(Sources const&... src) : sources_(sizeof...(Sources)/2) {
 	if constexpr(pack_size % 2 == 1) {
 		static_assert(is_explicitly_convertible_v<Fx,remove_cvref_t<nth_type_t<pack_size - 1u, Sources...>>>, 
 					  "Number of arguments passed is odd and the last argument is not an Fx instance");
-		static_assert(even_parameters_acceptable<Sources...>(make_even_index_sequence<pack_size - 1u>{}), "Even arguments must be convertible to std::string");
-		static_assert(odd_parameters_acceptable<Sources...>(make_odd_index_sequence<pack_size - 1u>{}),   "Odd arguments must be of type Shader::Type");
+		static_assert(even_parameters_acceptable<Sources...>(make_even_index_sequence<pack_size - 1u>{}), 
+					  "Even arguments must be convertible to std::string");
+		static_assert(odd_parameters_acceptable<Sources...>(make_odd_index_sequence<pack_size - 1u>{}), 
+					  "Odd arguments must be of type Shader::Type");
 
 		effects = get<pack_size - 1>(src...);
 	}
 	else {
-		static_assert(even_parameters_acceptable<Sources...>(even_index_sequence_for<Sources...>{}), "Even arguments must be convertible to std::string");
-		static_assert(odd_parameters_acceptable<Sources...>(odd_index_sequence_for<Sources...>{}),   "Odd arguments must be of type Shader::Type");
+		static_assert(even_parameters_acceptable<Sources...>(even_index_sequence_for<Sources...>{}), 
+					  "Even arguments must be convertible to std::string");
+		static_assert(odd_parameters_acceptable<Sources...>(odd_index_sequence_for<Sources...>{}),   
+					  "Odd arguments must be of type Shader::Type");
 	}
 
-	generate_source<0u, pack_size/2u>(src...); /* Integer division => this works even with Fx at the end of the pack */
+	generate_source<0u, pack_size/2u>(src...); /* Integer division => works even with Fx at end of pack */
 	init<sizeof...(Sources)/2>(effects);
 }
 	
@@ -76,6 +80,16 @@ void Shader::init(Fx fx) {
 	program_ = std::get<GLuint>(data);
 	LOG("Linking successful, assigning new id ", program_);
 
+	std::size_t instances_size;
+	{
+		std::lock_guard<std::mutex> lock{ics_mutex_};
+		instances_size = instances_.size();
+	}
+	if(!instances_size) {
+		auto vp = viewport_info();
+		setup_texture_environment(vp.width, vp.height);
+	}
+	
 
 	LOG("Processing requested effects");
 	if((fx & Fx::Bloom) == Fx::Bloom && (effects_ & Fx::Bloom) != Fx::Bloom){

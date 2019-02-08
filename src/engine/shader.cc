@@ -33,6 +33,7 @@ Shader::~Shader() {
 
 	#ifndef RESTRICT_THREAD_USAGE
 	if(instances_.size() == 0) {
+		delete_buffers();
 		LOG("Joining updater thread with id ", updater_thread_.get_id());
 		halt_execution_ = true;
 		updater_thread_.join();
@@ -66,6 +67,63 @@ void Shader::set_reload_callback(callback_func func) {
 
 GLuint Shader::program_id() const {
 	return program_;
+}
+
+void Shader::reallocate_texture(int width, int height) {
+	delete_buffers();
+	setup_texture_environment(width, height);
+}
+
+void Shader::setup_texture_environment(int width, int height) {
+
+	glGenFramebuffers(1, &fbo_);
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
+
+	glGenTextures(1, &texture_buffer_);
+	glBindTexture(GL_TEXTURE_2D, texture_buffer_);
+	
+	glTexImage2D(GL_TEXTURE_2D, 
+				 0, 
+				 GL_RGB, 
+				 width, 
+				 height, 
+				 0, 
+				 GL_RGB, 
+				 GL_UNSIGNED_BYTE, 
+				 nullptr);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glFramebufferTexture2D(GL_FRAMEBUFFER, 
+						   GL_COLOR_ATTACHMENT0, 
+						   GL_TEXTURE_2D, 
+						   texture_buffer_,
+						   0);
+
+	glGenRenderbuffers(1, &rbo_);
+	glBindRenderbuffer(GL_RENDERBUFFER, rbo_);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, 
+							  GL_DEPTH_STENCIL_ATTACHMENT, 
+							  GL_RENDERBUFFER,
+							  rbo_);
+
+	if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		throw FramebufferException{"Generated framebuffer not complete"};
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void Shader::delete_buffers() noexcept {
+	LOG("Cleaning up static resources");
+	glDeleteFramebuffers(1, &fbo_);
+	glDeleteTextures(1, &texture_buffer_);
+	glDeleteRenderbuffers(1, &rbo_);
 }
 
 Result<Shader::ErrorType, std::string> Shader::read_source(std::string const& source){
@@ -314,12 +372,24 @@ void Shader::update_internal_uniform_locations() const {
 		location = glGetUniformLocation(program_, handle.c_str());
 }
 
+typename Shader::Viewport Shader::viewport_info() noexcept {
+		Viewport vp;
+		auto const* primary_context = static_cast<Context*>(glfwGetWindowUserPointer(glfwGetCurrentContext()))->primary();
+		glfwGetWindowSize(static_cast<GLFWwindow*>(*primary_context), &vp.width, &vp.height);
+		return vp;
+}
+
 
 std::string const Shader::PROJECTION_UNIFORM_NAME = "ufrm_projection";
 std::string const Shader::VIEW_UNIFORM_NAME = "ufrm_view";
 std::string const Shader::MODEL_UNIFORM_NAME = "ufrm_model";
 std::string const Shader::TIME_UNIFORM_NAME = "ufrm_time";
+
+GLuint Shader::fbo_{};
+GLuint Shader::rbo_{};
+GLuint Shader::texture_buffer_{};
 typename Shader::Fx Shader::effects_{};
+
 std::atomic_bool Shader::halt_execution_ = true;
 std::mutex Shader::ics_mutex_{};
 std::thread Shader::updater_thread_{};
