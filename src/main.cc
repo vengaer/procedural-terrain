@@ -60,7 +60,6 @@ int main() {
 * 20-29 - Function argument related
 * 30-39 - Over- or underflow
 * 40-49 - File system related
-* 100   - "Unknown" exception (e.g. std::bad_alloc, std::bad_variant_access...)
 */
 template <typename Exception, typename = std::enable_if_t<is_exception_v<Exception>>>
 int handle_exception(Exception const& err) {
@@ -86,6 +85,10 @@ int handle_exception(Exception const& err) {
 	else if(typeid(err) == typeid(FileIOException)) {
 			type = "FileIOException"s;
 			ret_val = 41;
+	}
+	else if(typeid(err) == typeid(FramebufferException)) {
+			ret_val = 14;
+			type = "FramebufferException"s;
 	}
 	else if(typeid(err) == typeid(GLException)) {
 			type = "GLException"s;
@@ -124,8 +127,7 @@ int handle_exception(Exception const& err) {
 			ret_val = 31;
 	}
 	else {
-		type = "Unknown exception"s;
-		ret_val = 100;
+		throw;
 	}
 	ERR_LOG_CRIT("Program terminated after an instance of ", type,  " was thrown: ", err.what());
 	return ret_val;
