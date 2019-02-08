@@ -72,8 +72,7 @@ struct is_renderable_helper<T, std::void_t<decltype(std::declval<T>().vertices()
 
 	public:
 		static bool constexpr value = (vertices_is_applicable_stl_container || vertices_is_applicable_c_array_v<T>) && 
-									  (indices_is_applicable_stl_container || indices_is_applicable_c_array_v<T>) && 
-									   has_arbitrary_init_v<T>;
+									  (indices_is_applicable_stl_container || indices_is_applicable_c_array_v<T>);
 };
 
 template <typename T>

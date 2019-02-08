@@ -37,15 +37,15 @@ class Bitmask : public Bits {
 
 		Bitmask() noexcept;
 
-		Bitmask(internal_type&& val) noexcept; /* internal_type only */
+		Bitmask(internal_type&& val) noexcept; /* internal_type rvalue only for e.g. Bitmask<Bits>::opt1 | Bitmask<Bits>::opt2*/
 		
 		template <typename T, 
 				  typename = std::enable_if_t<std::is_integral_v<remove_cvref_t<T>> && 
 											  std::is_const_v<std::remove_reference_t<T>>>>
-		Bitmask(T&& val) noexcept; /* const integral type */
+		Bitmask(T&& val) noexcept; 			   /* const integral type for e.g Bitmask<Bits>::opt1 */
 
 		template <typename T>
-		explicit Bitmask(T&& val) noexcept; /* Other types require explicit conversion */
+		explicit Bitmask(T&& val) noexcept;    /* Other types require explicit conversion */
 
 		
 		Bitmask(Bitmask const& other) noexcept;

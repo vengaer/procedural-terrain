@@ -19,15 +19,21 @@
  * For a class T, the criteria are as follows:
  * 1. T must name public a function vertices() that returns a container that's stored contiguously in memory (std::vector, std::array or c-style array)
  * 	  and wraps a numeric type. CV and ref modifiers for the container are accepted, pointers to stl containers are not. Returning c-style dynamic arrays is valid.
- *		- If a dynamic c-style array is returned by vertices(), T must also name a public function vertices_size() that returns the size of the array returned by vertices() (an integral value).
+ *		- If a dynamic c-style array is returned by vertices(), T must also name a public function vertices_size() that returns the size of 
+ *		  the array returned by vertices() (an integral value).
  * 	  
  * 2. T must name a public function indices() that returns a container that's, again, stored contiguously but wraps an integral type.
  *    Cv and ref modifiers for the container are accepted, pointers to stl containers are not. Returning c-style dynamic arrays is valid.
- *      - If a dynamic c-style array is returned by indices(), T must also name a public function indices_size() that returns the size of the array returned by indices() (integral value).
+ *      - If a dynamic c-style array is returned by indices(), T must also name a public function indices_size() that returns the size of the 
+ *        array returned by indices() (integral value).
  *
- * 3. T must name a public function init(Args...), taking any number of arguments. The only requirements for the function is that the object is completely constructed once the function returns.
- *    T::init should not be called explicitly in the constructor of T. Instead, the constructor of T should call Renderer<T>::init(Args&&...) and pass along all the arguments that T::init(Args...) 
- *    needs. Renderer<T>::init(Args&&...) will then call T::init(Args...) and forward the parameters it receives from the T constructor. This ensures that the objects are contructed in the correct order.
+ * 3. T must name a public function init(Args...), taking any number of arguments. The only requirements for the function is that the 
+ * 	  object is completely constructed once the function returns. T::init should not be called explicitly in the constructor of T. 
+ * 	  Instead, the constructor of T should call Renderer<T>::init(Args&&...) and pass along all the arguments that T::init(Args...) needs. 
+ * 	  Renderer<T>::init(Args&&...) will then call T::init(Args...) and forward the parameters it receives from the T constructor. 
+ * 	  This ensures that the objects are contructed in the correct order.
+ *    	- An exception to this rule is if all members of T (including vertices and indices containers) are static.
+ *    	
  *
  * Any attempt to inherit from Renderer with a class that does not fulfill these requirements will trigger a static assert in the Renderer contructor */
 
@@ -58,7 +64,8 @@ class Renderer {
 		GLuint constexpr size(vertices_tag) const;
 		GLuint constexpr size(indices_tag) const;
 
-		static auto constexpr policy_is_automatic(int) noexcept -> std::remove_reference_t<decltype((void)ShaderPolicy::is_automatic, std::declval<bool>())>;
+		template <typename U = ShaderPolicy> /* Delay template instantiation */
+		static auto constexpr policy_is_automatic(int) noexcept -> std::remove_reference_t<decltype((void)U::is_automatic, std::declval<bool>())>;
 		static bool constexpr policy_is_automatic(long) noexcept;
 
 		template <typename U = T>

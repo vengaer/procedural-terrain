@@ -16,9 +16,9 @@ void Renderer<T, ShaderPolicy>::render() const {
 			policy_.shader()->template upload_uniform<true>(Shader::MODEL_UNIFORM_NAME, get_model_matrix());
 			object_has_been_transformed() = false;
 		}
+		policy_();
 	}
 	
-	policy_();
 	glBindVertexArray(vao_);
 	glDrawElements(GL_TRIANGLES, idx_size_, GL_UNSIGNED_INT, static_cast<void*>(0));
 	glBindVertexArray(0);
@@ -27,8 +27,8 @@ void Renderer<T, ShaderPolicy>::render() const {
 template <typename T, typename ShaderPolicy>
 template <typename... Args>
 void Renderer<T, ShaderPolicy>::init(Args&&... args) {
-	/* Initialize T */
-	static_cast<T&>(*this).init(std::forward<Args>(args)...);
+	if constexpr(has_arbitrary_init_v<T>)
+		static_cast<T&>(*this).init(std::forward<Args>(args)...); /* Initialize T */
 
 	/* vao */
 	glGenVertexArrays(1, &vao_);
@@ -39,8 +39,7 @@ void Renderer<T, ShaderPolicy>::init(Args&&... args) {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_);
 
 	{
-		/* Get ref to vertices */
-		auto const& vertices = static_cast<T&>(*this).vertices();
+		auto const& vertices = static_cast<T&>(*this).vertices(); /* Ref to vertices */
 		using value_type = fundamental_type_t<decltype(vertices)>;
 
 		auto const VALUE_TYPE_SIZE  = sizeof(value_type);
@@ -62,8 +61,7 @@ void Renderer<T, ShaderPolicy>::init(Args&&... args) {
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, VERTEX_SIZE * VALUE_TYPE_SIZE, (void*)(6 * VALUE_TYPE_SIZE));
 	}
 	{
-		/* Get ref to indices */
-		auto const& indices = static_cast<T&>(*this).indices();
+		auto const& indices = static_cast<T&>(*this).indices(); /* Ref to indices */
 		
 		using value_type = fundamental_type_t<decltype(indices)>;
 		auto const VALUE_TYPE_SIZE = sizeof(value_type);
@@ -116,7 +114,8 @@ GLuint constexpr Renderer<T, ShaderPolicy>::size(indices_tag) const {
 }
 
 template <typename T, typename ShaderPolicy>
-auto constexpr Renderer<T, ShaderPolicy>::policy_is_automatic(int) noexcept -> std::remove_reference_t<decltype((void)ShaderPolicy::is_automatic, std::declval<bool>())> {
+template <typename U>
+auto constexpr Renderer<T, ShaderPolicy>::policy_is_automatic(int) noexcept -> std::remove_reference_t<decltype((void)U::is_automatic, std::declval<bool>())> {
 	return ShaderPolicy::is_automatic;
 }
 
