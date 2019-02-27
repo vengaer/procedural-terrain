@@ -61,8 +61,8 @@ class Renderer {
 		ShaderPolicy const policy_;
 
 		/* Tag dispatch */
-		GLuint constexpr size(vertices_tag) const;
-		GLuint constexpr size(indices_tag) const;
+		GLuint size(vertices_tag) const;
+		GLuint size(indices_tag) const;
 
 		template <typename U = ShaderPolicy> /* Delay template instantiation */
 		static auto constexpr policy_is_automatic(int) noexcept -> std::remove_reference_t<decltype((void)U::is_automatic, std::declval<bool>())>;

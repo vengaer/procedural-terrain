@@ -124,7 +124,7 @@ void Shader::init(Fx fx) {
 	#endif
 }
 
-template <typename T, typename = std::enable_if_t<is_container_v<T>>>
+template <typename T, typename>
 Result<std::variant<GLuint, std::string>> Shader::link(T const& ids) {
 	GLuint program_id = glCreateProgram();
 

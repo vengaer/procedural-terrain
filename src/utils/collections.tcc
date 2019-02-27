@@ -1,4 +1,4 @@
-template <typename Container, typename = std::void_t<decltype(std::begin(std::declval<Container>()))>>
+template <typename Container, typename>
 auto constexpr opt_c_begin(Container&& c) noexcept {
 	if constexpr(std::is_const_v<std::remove_reference_t<Container>>)
 		return std::cbegin(c);
@@ -6,7 +6,7 @@ auto constexpr opt_c_begin(Container&& c) noexcept {
 		return std::begin(c);
 }
 
-template <typename Container, typename = std::void_t<decltype(std::end(std::declval<Container>()))>>
+template <typename Container, typename>
 auto constexpr opt_c_end(Container&& c) noexcept {
 	if constexpr(std::is_const_v<std::remove_reference_t<Container>>)
 		return std::cend(c);
@@ -142,7 +142,7 @@ typename fold_collection<Container, Op>::iterator fold_collection<Container, Op>
 }
 
 /* fold */
-template <typename Container, typename Op = std::plus<value_type_t<Container>>>
+template <typename Container, typename Op>
 fold_collection<Container, Op> fold(Container&& c, value_type_t<Container> init, Op op) {
 	return fold_collection{std::forward<Container>(c), std::move(init), op};
 } 

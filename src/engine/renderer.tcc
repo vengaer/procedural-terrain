@@ -84,7 +84,7 @@ void Renderer<T, ShaderPolicy>::init(Args&&... args) {
 }
 
 template <typename T, typename ShaderPolicy>
-GLuint constexpr Renderer<T, ShaderPolicy>::size(vertices_tag) const {
+GLuint Renderer<T, ShaderPolicy>::size(vertices_tag) const {
 	std::size_t container_size;
 
 	if constexpr(is_contiguously_stored_v<decltype(static_cast<T const&>(*this).vertices())>)
@@ -99,7 +99,7 @@ GLuint constexpr Renderer<T, ShaderPolicy>::size(vertices_tag) const {
 }
 
 template <typename T, typename ShaderPolicy>
-GLuint constexpr Renderer<T, ShaderPolicy>::size(indices_tag) const {
+GLuint Renderer<T, ShaderPolicy>::size(indices_tag) const {
 	std::size_t container_size;
 
 	if constexpr(is_contiguously_stored_v<decltype(static_cast<T const&>(*this).indices())>)
