@@ -63,10 +63,10 @@ void logging::FileLogger<T, enable_on_match_t<T, logging::FileLoggingTag>>::moni
 			is_compressing_ = true;
 			std::lock_guard<std::mutex> lock{ofs_mutex_};
 			compress_content();
+			is_compressing_ = false;
 			std::lock_guard<std::mutex> lock_buf{buffer_mutex_};	
 			ofs_ << buffer_.rdbuf();
 			buffer_.str(std::string{});
-			is_compressing_ = false;
 		}
 
 		std::this_thread::sleep_for(60s);

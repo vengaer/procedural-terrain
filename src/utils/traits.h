@@ -42,6 +42,18 @@ struct remove_cvptr : std::remove_cv<std::remove_pointer_t<T>> { };
 template <typename T>
 using remove_cvptr_t = typename remove_cvptr<T>::type;
 
+template <typename T>
+struct remove_ptrcv : std::remove_pointer<std::remove_cv_t<T>> { };
+
+template <typename T>
+using remove_ptrcv_t = typename remove_ptrcv<T>::type;
+
+template <typename T>
+struct remove_cvptrcv : std::remove_cv<remove_ptrcv_t<T>> { };
+
+template <typename T>
+using remove_cvptrcv_t = typename remove_cvptrcv<T>::type;
+
 namespace traits_impl {
 	template <typename, typename = void>
 	struct fundamental_type_impl { };
@@ -356,58 +368,10 @@ struct can_hold_entire_range_of : std::bool_constant<(std::numeric_limits<T>::ma
 template <typename T, typename U>
 inline bool constexpr can_hold_entire_range_of_v = can_hold_entire_range_of<T,U>::value;
 
-namespace traits_impl {
-	template <typename T>
-	struct promote_size_spec_char : type_is<std::conditional_t<
-												can_hold_entire_range_of_v<int, T>,
-											    int,
-											    std::conditional_t<
-													can_hold_entire_range_of_v<unsigned int, T>,
-													unsigned int,
-													std::conditional_t<
-														can_hold_entire_range_of_v<long, T>,
-														long,
-														std::conditional_t<
-															can_hold_entire_range_of_v<unsigned long, T>,
-															unsigned long,
-															std::conditional_t<
-																can_hold_entire_range_of_v<long long, T>,
-																long long,
-																unsigned long long
-															>
-														>
-													>
-												>
-											>> { };
-														
-	
-	template <typename T, typename = void>
-	struct promote_impl : type_is<T> { };
-
-	template <typename T>
-	struct promote_impl<T, std::enable_if_t<is_one_of_v<T, signed char,
-														   signed short>>> : type_is<int> { };
-
-	template <typename T>
-	struct promote_impl<T, std::enable_if_t<is_one_of_v<T, unsigned char,
-														   unsigned short>>> 
-		: type_is<std::conditional_t<can_hold_entire_range_of_v<int, T>,
-									 int,
-									 unsigned int>> { };
-
-	template <typename T>
-	struct promote_impl<T, std::enable_if_t<is_one_of_v<T, wchar_t,
-														   char16_t,
-														   char32_t>>> : promote_size_spec_char<T> { };
-
-	template <>
-	struct promote_impl<bool> : type_is<int> { };
-}
-
 /* Returns type corresponding to the result of implicit integral promotion for all integral types
  * but unscoped enums, bit fields and char8_t (c++20) */
 template <typename T, typename = std::enable_if_t<std::is_integral_v<remove_cvref_t<T>>>>
-struct promote : traits_impl::promote_impl<T> { };
+struct promote : type_is<decltype(std::declval<T>() | std::declval<T>())> { };
 
 template <typename T>
 using promote_t = typename promote<T>::type;

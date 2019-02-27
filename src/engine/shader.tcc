@@ -1,6 +1,9 @@
 template <typename... Sources>
 Shader::Shader(Sources const&... src) : sources_(sizeof...(Sources)/2) {
 	std::size_t constexpr pack_size = sizeof...(Sources);
+
+	static_assert(pack_size > 0u, "Cannot create empty shader");
+
 	Fx effects{};
 	if constexpr(pack_size % 2 == 1) {
 		static_assert(is_explicitly_convertible_v<Fx,remove_cvref_t<nth_type_t<pack_size - 1u, Sources...>>>, 
@@ -20,7 +23,7 @@ Shader::Shader(Sources const&... src) : sources_(sizeof...(Sources)/2) {
 	}
 
 	generate_source<0u, pack_size/2u>(src...); /* Integer division => works even with Fx at end of pack */
-	init<sizeof...(Sources)/2>(effects);
+	init<pack_size/2>(effects);
 }
 	
 template <typename... Args, std::size_t... Is>

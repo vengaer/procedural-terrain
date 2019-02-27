@@ -132,7 +132,7 @@ class Shader {
 				void reconstruct();
 		};
 
-		GLuint program_{}; /* Shader program id */
+		std::atomic<GLuint> program_{}; /* Shader program id */
 		std::unordered_map<std::string, GLint> mutable cached_uniform_locations_{};
 		std::map<std::string, glm::mat4> mutable stored_uniform_data_{};
 		std::vector<Source> sources_;

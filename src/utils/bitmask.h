@@ -40,8 +40,7 @@ class Bitmask : public Bits {
 		Bitmask(internal_type&& val) noexcept; /* internal_type rvalue only for e.g. Bitmask<Bits>::opt1 | Bitmask<Bits>::opt2*/
 		
 		template <typename T, 
-				  typename = std::enable_if_t<std::is_integral_v<remove_cvref_t<T>> && 
-											  std::is_const_v<std::remove_reference_t<T>>>>
+				  typename = std::enable_if_t<std::is_const_v<std::remove_reference_t<T>>>>
 		Bitmask(T&& val) noexcept; 			   /* const integral type for e.g Bitmask<Bits>::opt1 */
 
 		template <typename T>

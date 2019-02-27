@@ -8,15 +8,16 @@
 
 class Canvas : public Renderer<Canvas> {
 	static GLuint constexpr VERTEX_ARRAY_SIZE{4u * VERTEX_SIZE};
+	static GLuint constexpr INDICES_ARRAY_SIZE{6u};
 	public:
 		Canvas();
 	
 		std::array<GLfloat, VERTEX_ARRAY_SIZE> const& vertices() const;
-		std::array<GLuint, 6u> const& indices() const;
+		std::array<GLuint, INDICES_ARRAY_SIZE> const& indices() const;
 
 	private:
 		static std::array<GLfloat, VERTEX_ARRAY_SIZE> const vertices_;
-		static std::array<GLuint, 6u> const indices_;
+		static std::array<GLuint, INDICES_ARRAY_SIZE> const indices_;
 		
 };
 

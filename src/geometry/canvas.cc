@@ -19,7 +19,7 @@ std::array<GLfloat, Canvas::VERTEX_ARRAY_SIZE> const Canvas::vertices_{
 	-1.f,  1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 1.f
 };
 
-std::array<GLuint, 6u> const Canvas::indices_ {
+std::array<GLuint, Canvas::INDICES_ARRAY_SIZE> const Canvas::indices_ {
 	0u, 1u, 3u,
 	1u, 2u, 3u
 };
