@@ -31,14 +31,14 @@ Shader::~Shader() {
 		//TODO: Cleanup refraction
 	}
 
-	#ifndef RESTRICT_THREAD_USAGE
 	if(instances_.size() == 0) {
 		delete_buffers();
+		#ifndef RESTRICT_THREAD_USAGE
 		LOG("Joining updater thread with id ", updater_thread_.get_id());
 		halt_execution_ = true;
 		updater_thread_.join();
+		#endif
 	}
-	#endif
 }
 
 void Shader::enable() const {
