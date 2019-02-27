@@ -15,9 +15,10 @@ void Cylinder<ShaderPolicy>::init(GLfloat height, GLuint horizontal_segments, GL
 	GLfloat height_increment = height / vertical_segments;
 
 	/* 2 additional rings for 2 sets of normals for top / bottom faces */
-
 	auto const NUMBER_OF_VERTICES = 2 + (1 + 2 + vertical_segments) * horizontal_segments;
-	vertices_.reserve(this->VERTEX_SIZE * NUMBER_OF_VERTICES);
+
+	auto constexpr VERTEX_SIZE = Renderer<Cylinder<ShaderPolicy>, ShaderPolicy>::VERTEX_SIZE;
+	vertices_.reserve(VERTEX_SIZE * NUMBER_OF_VERTICES);
 
 	{
 		/* off_axes.first == x and off_axes.second == y when viewed in xy coord system */
@@ -25,7 +26,7 @@ void Cylinder<ShaderPolicy>::init(GLfloat height, GLuint horizontal_segments, GL
 		using std::sin;
 		using std::cos;
 
-		std::array<GLfloat, this->VERTEX_SIZE> vertex;
+		std::array<GLfloat, VERTEX_SIZE> vertex;
 		
 		/* Bottom center */
 		vertex[enum_value(off_axes.first)] = 0.f;

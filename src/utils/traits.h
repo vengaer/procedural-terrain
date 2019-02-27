@@ -105,20 +105,6 @@ struct nth_type<0, P0, P1toM...> : type_is<P0> { };
 template <std::size_t N, typename... P0toM>
 using nth_type_t = typename nth_type<N, P0toM...>::type;
 
-template <std::size_t N, typename P0, typename... P1toM>
-struct nth_value {
-	decltype(auto) constexpr operator()(P0&&, P1toM&&... tail) {			/* constexpr iff parameters are constexpr */
-		return nth_value<N-1, P1toM...>{}(std::forward<P1toM>(tail)...);
-	}
-};
-
-template <typename P0, typename... P1toM>
-struct nth_value<0, P0, P1toM...>{
-	decltype(auto) constexpr operator()(P0&& head, P1toM&&...) {
-		return head;
-	}
-};
-
 template <std::size_t N, typename... Args>
 decltype(auto) constexpr get(Args&&... args) {
 	return std::get<N>(std::forward_as_tuple(args...));

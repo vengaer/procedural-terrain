@@ -15,14 +15,16 @@ void Plane<ShaderPolicy>::init(GLfloat x_len, GLfloat dx, GLfloat z_len, GLfloat
 	GLuint x_iters = static_cast<GLuint>(x_len / dx) + 1;
 	GLuint z_iters = static_cast<GLuint>(z_len / dz) + 1;
 
-	vertices_.reserve(this->VERTEX_SIZE*x_iters*z_iters);
+	auto constexpr VERTEX_SIZE = Renderer<Plane<ShaderPolicy>, ShaderPolicy>::VERTEX_SIZE;
+
+	vertices_.reserve(VERTEX_SIZE*x_iters*z_iters);
 	
 	{
 		GLfloat x_start = -static_cast<GLfloat>(x_len/2);
 		GLfloat x = x_start;
 		GLfloat z = -static_cast<GLfloat>(z_len/2);
 		GLfloat s ,t;
-		std::array<GLfloat, this->VERTEX_SIZE> vertex;
+		std::array<GLfloat, VERTEX_SIZE> vertex;
 		for(auto i = 0u; i < z_iters; i++, z += dz, x = x_start){
 			t = interpolation::linear(static_cast<GLfloat>(i)/static_cast<GLfloat>(z_iters-1));
 

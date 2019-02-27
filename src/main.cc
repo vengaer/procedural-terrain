@@ -61,7 +61,7 @@ int main() {
 * 30-39 - Over- or underflow
 * 40-49 - File system related
 */
-template <typename Exception, typename = std::enable_if_t<is_exception_v<Exception>>>
+template <typename Exception, typename>
 int handle_exception(Exception const& err) {
 	using namespace std::string_literals;
 	std::string type;

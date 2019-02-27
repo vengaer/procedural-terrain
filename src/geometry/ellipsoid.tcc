@@ -16,13 +16,15 @@ void Ellipsoid<ShaderPolicy>::init(GLuint vertical_segments, GLuint horizontal_s
  	 * horizontal_segments + 1 for horizontal vertices*/
 	auto const NUMBER_OF_VERTICES = 2 + (vertical_segments - 1) * horizontal_segments;
 
-	vertices_.reserve(this->VERTEX_SIZE * NUMBER_OF_VERTICES);
+	auto constexpr VERTEX_SIZE = Renderer<Ellipsoid<ShaderPolicy>, ShaderPolicy>::VERTEX_SIZE;
+
+	vertices_.reserve(VERTEX_SIZE * NUMBER_OF_VERTICES);
 	
 	{
 		using std::sin;
 		using std::cos;
 
-		std::array<GLfloat, this->VERTEX_SIZE> vertex;
+		std::array<GLfloat, VERTEX_SIZE> vertex;
 		GLfloat x,y,z;
 		GLfloat s,t;
 		GLfloat theta, phi;

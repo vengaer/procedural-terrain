@@ -229,7 +229,7 @@ void Shader::upload_uniform(GLint location, Args&&... args) {
 	else {
 		static_assert(sizeof...(args) == 1, "Only a single non-fundamental type may be passed");
 
-		auto const* value_ptr = glm::value_ptr(nth_value<0, Args...>{}(std::forward<Args>(args)...));
+		auto const* value_ptr = glm::value_ptr(get<0>(std::forward<Args>(args)...));
 
 		/* GLfloat* uniforms */
 		if constexpr (bind(order, decay, dim) == bind(order_t::_0th, decay_t::FloatPtr, dim_t::_1)) 		/* Will currently never be true */
