@@ -9,6 +9,7 @@
 #include "logger.h"
 #include "result.h"
 #include "traits.h"
+#include "type_conversion.h"
 #include "uniform_impl.h"
 #include <array>
 #include <atomic>
@@ -20,6 +21,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <map>
+#include <memory>
 #include <mutex>
 #include <optional>
 #include <string>
@@ -74,7 +76,10 @@ class Shader {
 		static void bind_scene_texture() noexcept;
 		static void unbind_scene_texture() noexcept;
 
-		static void reallocate_texture(int width, int height);
+		static void reallocate_textures(int width, int height);
+
+		template <typename Callable>
+		void blur(Callable render) const;
 
 		GLuint program_id() const;
 		
@@ -105,6 +110,14 @@ class Shader {
 							   Include, 
 							   Linking,
 							   End_ };
+		
+		enum class Texture {
+			Scene,
+			Bloom,
+			BlurVert,
+			BlurHoriz
+		};
+
 		struct Viewport {
 			int width;
 			int height;
@@ -138,6 +151,7 @@ class Shader {
 		};
 
 		std::atomic<GLuint> program_{}; /* Shader program id */
+		Fx local_effects_{};
 		std::unordered_map<std::string, GLint> mutable cached_uniform_locations_{};
 		std::map<std::string, glm::mat4> mutable stored_uniform_data_{};
 		std::vector<Source> sources_;
@@ -145,8 +159,17 @@ class Shader {
 
 		static GLuint fbo_;
 		static GLuint rbo_;
-		static GLuint texture_buffer_;
+		static std::array<GLuint, 2> blur_fbos_;
+		static std::array<GLuint, 4> texture_buffer_;
+		static std::size_t tex_buf_load_;
+		static std::array<GLuint, 4> constexpr color_attachments_{
+			GL_COLOR_ATTACHMENT0,
+			GL_COLOR_ATTACHMENT1,
+			GL_COLOR_ATTACHMENT2,
+			GL_COLOR_ATTACHMENT3
+		};
 		static Fx effects_;
+		static std::unique_ptr<Shader> blur_shader_;
 
 		static std::atomic_bool halt_execution_;
 		static std::mutex ics_mutex_;
@@ -155,9 +178,10 @@ class Shader {
 		static callback_func reload_callback_;
 
 		template <std::size_t N>
-		void init(Fx fx);
+		void init();
 	
 		static void setup_texture_environment(int width, int height);
+		static void setup_blur(int width, int height);
 
 		static void delete_buffers() noexcept;
 

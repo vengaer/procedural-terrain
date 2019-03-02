@@ -19,8 +19,9 @@ int handle_exception(Exception const& err);
 
 int main() {
 	unsigned constexpr width = 960, height = 540;
+	
 	try{
-		Window window{"test", width, height};
+		Window window{"Main", width, height};
 		std::shared_ptr<Shader> canvas_shader = std::make_shared<Shader>("assets/shaders/canvas.vert", Shader::Type::Vertex,
 																		 "assets/shaders/canvas.frag", Shader::Type::Fragment);
 		std::shared_ptr<Shader> plane_shader  = std::make_shared<Shader>("assets/shaders/plane.vert", Shader::Type::Vertex, 
@@ -31,24 +32,21 @@ int main() {
 
 		std::shared_ptr<Camera> cam = std::make_shared<Camera>();
 		EventHandler::instantiate(cam);
-		Plane p{automatic_shader_handler{plane_shader}};
-		Ellipsoid e{automatic_shader_handler{sun_shader}};
-		Cuboid c{automatic_shader_handler{plane_shader}};
-		Cylinder cyl{automatic_shader_handler{plane_shader}};
+		Ellipsoid sun{automatic_shader_handler{sun_shader}};
 
 		Canvas canvas{automatic_shader_handler{canvas_shader}, {0.1f, 0.2f, 0.4f, 0.5f}};
 
+		sun_shader->blur([&sun]() {
+			sun.render();
+		});
 
-		glClearColor(0.1f, 0.2f, 0.4f, 0.5f);
 		while(!window.should_close()){
 			window.clear();
 			frametime::update();
-			//p.render();
-			e.render();			
-			//c.render();
-			//cyl.render();
 
-			canvas.render(); /* Render the scene */
+			sun.render();			
+
+			canvas.render(); /* Draw the scene */
 			window.update();
 		}
 	}
