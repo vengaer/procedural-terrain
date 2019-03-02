@@ -134,6 +134,7 @@ void Shader::setup_texture_environment(int width, int height) {
 	bind_default_framebuffer();
 }
 
+/* TODO: finish  bloom */
 void Shader::setup_blur(int width, int height) {
 	auto constexpr num_buf = 2u;
 	glGenFramebuffers(num_buf, &blur_fbos_[0]);

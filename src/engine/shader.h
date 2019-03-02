@@ -78,6 +78,7 @@ class Shader {
 
 		static void reallocate_textures(int width, int height);
 
+		/* TODO: finish blur (and make this nicer) */
 		template <typename Callable>
 		void blur(Callable render) const;
 
@@ -181,6 +182,7 @@ class Shader {
 		void init();
 	
 		static void setup_texture_environment(int width, int height);
+		/* TODO: finish blur */
 		static void setup_blur(int width, int height);
 
 		static void delete_buffers() noexcept;
