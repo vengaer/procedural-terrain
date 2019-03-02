@@ -16,6 +16,7 @@
 
 template <typename ShaderPolicy = manual_shader_handler>
 class Cuboid : public Renderer<Cuboid<ShaderPolicy>, ShaderPolicy>, public Transform {
+	using renderer_t = Renderer<Cuboid<ShaderPolicy>, ShaderPolicy>;
 	public:
 		Cuboid(ShaderPolicy policy = {}, GLfloat x_scale = 1.f, GLfloat y_scale = 1.f, GLfloat z_scale = 1.f);
 

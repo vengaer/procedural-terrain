@@ -17,6 +17,7 @@
 
 template <typename ShaderPolicy = manual_shader_handler>
 class Ellipsoid : public Renderer<Ellipsoid<ShaderPolicy>, ShaderPolicy>, public Transform {
+	using renderer_t = Renderer<Ellipsoid<ShaderPolicy>, ShaderPolicy>;
 	public:
 		Ellipsoid(ShaderPolicy policy = {}, GLuint vertical_segments = 30u, GLuint horizontal_segments = 30u,  GLfloat x_scale = 1.f, GLfloat y_scale = 1.f, GLfloat z_scale = 1.f);
 

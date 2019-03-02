@@ -1,6 +1,6 @@
 template <typename ShaderPolicy>
-Cuboid<ShaderPolicy>::Cuboid(ShaderPolicy policy, GLfloat x_scale, GLfloat y_scale, GLfloat z_scale) : Renderer<Cuboid<ShaderPolicy>, ShaderPolicy>{policy}, Transform{}, vertices_{}, indices_{} {
-	Renderer<Cuboid<ShaderPolicy>, ShaderPolicy>::init(x_scale, y_scale, z_scale);
+Cuboid<ShaderPolicy>::Cuboid(ShaderPolicy policy, GLfloat x_scale, GLfloat y_scale, GLfloat z_scale) : renderer_t{policy}, Transform{}, vertices_{}, indices_{} {
+	renderer_t::init(x_scale, y_scale, z_scale);
 }
 
 
@@ -10,7 +10,7 @@ void Cuboid<ShaderPolicy>::init(GLfloat x_scale, GLfloat y_scale, GLfloat z_scal
 	y_scale = glm::clamp(y_scale, 0.1f, 2.f);
 	z_scale = glm::clamp(z_scale, 0.1f, 2.f);
 
-	auto constexpr VERTEX_SIZE = Renderer<Cuboid<ShaderPolicy>, ShaderPolicy>::VERTEX_SIZE;
+	auto constexpr VERTEX_SIZE = renderer_t::VERTEX_SIZE;
 	vertices_.reserve(VERTEX_SIZE * 4u * 6u);
 
 	{

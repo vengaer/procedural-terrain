@@ -1,6 +1,6 @@
 template <typename ShaderPolicy>
-Cylinder<ShaderPolicy>::Cylinder(ShaderPolicy policy, GLfloat height, GLuint horizontal_segments, GLuint vertical_segments, Axis main_axis, GLfloat off_axis1_scale, GLfloat off_axis2_scale) : Renderer<Cylinder<ShaderPolicy>, ShaderPolicy>{policy}, Transform{}, vertices_{}, indices_{} {
-	Renderer<Cylinder<ShaderPolicy>, ShaderPolicy>::init(height, horizontal_segments, vertical_segments, main_axis, off_axis1_scale, off_axis2_scale);
+Cylinder<ShaderPolicy>::Cylinder(ShaderPolicy policy, GLfloat height, GLuint horizontal_segments, GLuint vertical_segments, Axis main_axis, GLfloat off_axis1_scale, GLfloat off_axis2_scale) : renderer_t{policy}, Transform{}, vertices_{}, indices_{} {
+	renderer_t::init(height, horizontal_segments, vertical_segments, main_axis, off_axis1_scale, off_axis2_scale);
 }
 
 template <typename ShaderPolicy>
@@ -17,7 +17,7 @@ void Cylinder<ShaderPolicy>::init(GLfloat height, GLuint horizontal_segments, GL
 	/* 2 additional rings for 2 sets of normals for top / bottom faces */
 	auto const NUMBER_OF_VERTICES = 2 + (1 + 2 + vertical_segments) * horizontal_segments;
 
-	auto constexpr VERTEX_SIZE = Renderer<Cylinder<ShaderPolicy>, ShaderPolicy>::VERTEX_SIZE;
+	auto constexpr VERTEX_SIZE = renderer_t::VERTEX_SIZE;
 	vertices_.reserve(VERTEX_SIZE * NUMBER_OF_VERTICES);
 
 	{

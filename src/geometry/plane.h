@@ -16,6 +16,7 @@
 
 template <typename ShaderPolicy = manual_shader_handler>
 class Plane : public Renderer<Plane<ShaderPolicy>, ShaderPolicy>, public Transform {
+	using renderer_t = Renderer<Plane<ShaderPolicy>, ShaderPolicy>;
 	public:
 		Plane(ShaderPolicy policy = {}, GLfloat x_len = 1.f, GLfloat dx = .5f, GLfloat z_len = 1.f, GLfloat dz = .5f);
 		

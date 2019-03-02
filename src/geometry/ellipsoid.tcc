@@ -1,6 +1,6 @@
 template <typename ShaderPolicy>
-Ellipsoid<ShaderPolicy>::Ellipsoid(ShaderPolicy policy, GLuint vertical_segments, GLuint horizontal_segments, GLfloat x_scale, GLfloat y_scale, GLfloat z_scale) : Renderer<Ellipsoid<ShaderPolicy>, ShaderPolicy>{policy}, Transform{}, vertices_{}, indices_{} {
-	Renderer<Ellipsoid<ShaderPolicy>, ShaderPolicy>::init(vertical_segments, horizontal_segments, x_scale, y_scale, z_scale);
+Ellipsoid<ShaderPolicy>::Ellipsoid(ShaderPolicy policy, GLuint vertical_segments, GLuint horizontal_segments, GLfloat x_scale, GLfloat y_scale, GLfloat z_scale) : renderer_t{policy}, Transform{}, vertices_{}, indices_{} {
+	renderer_t::init(vertical_segments, horizontal_segments, x_scale, y_scale, z_scale);
 }
 
 template <typename ShaderPolicy>
@@ -16,7 +16,7 @@ void Ellipsoid<ShaderPolicy>::init(GLuint vertical_segments, GLuint horizontal_s
  	 * horizontal_segments + 1 for horizontal vertices*/
 	auto const NUMBER_OF_VERTICES = 2 + (vertical_segments - 1) * horizontal_segments;
 
-	auto constexpr VERTEX_SIZE = Renderer<Ellipsoid<ShaderPolicy>, ShaderPolicy>::VERTEX_SIZE;
+	auto constexpr VERTEX_SIZE = renderer_t::VERTEX_SIZE;
 
 	vertices_.reserve(VERTEX_SIZE * NUMBER_OF_VERTICES);
 	
