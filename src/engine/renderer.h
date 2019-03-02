@@ -64,7 +64,15 @@ class Renderer {
 		GLuint size(vertices_tag) const;
 		GLuint size(indices_tag) const;
 
-		template <typename U = ShaderPolicy> /* Delay template instantiation */
+		template <typename U = T> /* Delay template instantiation */
+		static auto constexpr requires_setup(int) noexcept -> std::remove_reference_t<decltype((void)std::declval<U>().render_setup(), std::declval<bool>())>;
+		static bool constexpr requires_setup(long) noexcept;
+
+		template <typename U = T>
+		static auto constexpr requires_cleanup(int) noexcept -> std::remove_reference_t<decltype((void)std::declval<U>().render_cleanup(), std::declval<bool>())>;
+		static bool constexpr requires_cleanup(long) noexcept;
+
+		template <typename U = ShaderPolicy> 
 		static auto constexpr policy_is_automatic(int) noexcept -> std::remove_reference_t<decltype((void)U::is_automatic, std::declval<bool>())>;
 		static bool constexpr policy_is_automatic(long) noexcept;
 

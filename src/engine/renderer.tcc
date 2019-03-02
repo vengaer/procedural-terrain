@@ -11,17 +11,25 @@ Renderer<T, ShaderPolicy>::~Renderer() {
 
 template <typename T, typename ShaderPolicy>
 void Renderer<T, ShaderPolicy>::render() const {
-	if constexpr(policy_is_automatic(0) && object_is_transformable(0)){
+	if constexpr(requires_setup(0))
+		static_cast<T const&>(*this).render_setup();
+
+	if constexpr(object_is_transformable(0)) {
 		if(object_has_been_transformed()) {
 			policy_.shader()->template upload_uniform<true>(Shader::MODEL_UNIFORM_NAME, get_model_matrix());
 			object_has_been_transformed() = false;
 		}
-		policy_();
 	}
+
+	if constexpr(policy_is_automatic(0))
+		policy_();
 	
 	glBindVertexArray(vao_);
 	glDrawElements(GL_TRIANGLES, idx_size_, GL_UNSIGNED_INT, static_cast<void*>(0));
 	glBindVertexArray(0);
+	
+	if constexpr(requires_cleanup(0)) 
+		static_cast<T const&>(*this).render_cleanup();
 }
 
 template <typename T, typename ShaderPolicy>
@@ -111,6 +119,28 @@ GLuint Renderer<T, ShaderPolicy>::size(indices_tag) const {
 		throw OverflowException{"Size of indices array too large for OpenGL to handle\n"};
 
 	return static_cast<GLuint>(container_size);
+}
+
+template <typename T, typename ShaderPolicy>
+template <typename U>
+auto constexpr Renderer<T, ShaderPolicy>::requires_setup(int) noexcept -> std::remove_reference_t<decltype((void)std::declval<U>().render_setup(), std::declval<bool>())> {
+	return true;
+}
+
+template <typename T, typename ShaderPolicy>
+bool constexpr Renderer<T, ShaderPolicy>::requires_setup(long) noexcept {
+	return false;
+}
+
+template <typename T, typename ShaderPolicy>
+template <typename U>
+auto constexpr Renderer<T, ShaderPolicy>::requires_cleanup(int) noexcept -> std::remove_reference_t<decltype((void)std::declval<U>().render_cleanup(), std::declval<bool>())> {
+	return true;
+}
+
+template <typename T, typename ShaderPolicy>
+bool constexpr Renderer<T, ShaderPolicy>::requires_cleanup(long) noexcept {
+	return false;
 }
 
 template <typename T, typename ShaderPolicy>
