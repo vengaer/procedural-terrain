@@ -14,6 +14,12 @@
 #include "window.h"
 #include <type_traits>
 
+/* TODO: Fix bloom. Textures seem correct but the mixing doesn't work. 
+ * 		 Blur doesn't seem ot work at all... 
+ * 		 Will most likely crash if no shader requests bloom
+ * 		 */
+
+
 template <typename Exception, typename = std::enable_if_t<is_exception_v<Exception>>>
 int handle_exception(Exception const& err);
 
@@ -33,18 +39,27 @@ int main() {
 		std::shared_ptr<Camera> cam = std::make_shared<Camera>();
 		EventHandler::instantiate(cam);
 		Ellipsoid sun{automatic_shader_handler{sun_shader}};
+		Cuboid cube{automatic_shader_handler{plane_shader}};
+		cube.translate(glm::vec3{2.0, 0.0, 0.0});
 
 		Canvas canvas{automatic_shader_handler{canvas_shader}, {0.1f, 0.2f, 0.4f, 0.5f}};
+
+		/* Ugly, fix... */
+		canvas_shader->enable();
+		canvas_shader->upload_uniform("scene", 0);
+		canvas_shader->upload_uniform("bloom", 1);
 
 		sun_shader->blur([&sun]() {
 			sun.render();
 		});
+		/* ...until here */
 
 		while(!window.should_close()){
 			window.clear();
 			frametime::update();
 
 			sun.render();			
+			cube.render();
 
 			canvas.render(); /* Draw the scene */
 			window.update();

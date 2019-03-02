@@ -19,7 +19,7 @@ void Canvas<ShaderPolicy>::render_setup() const {
 
 template <typename ShaderPolicy>
 void Canvas<ShaderPolicy>::render_cleanup() const {
-	Shader::unbind_scene_texture();
+	//Shader::unbind_scene_texture();
 	Shader::bind_main_framebuffer();
 	glClearColor(clear_color_.r, clear_color_.g, clear_color_.b, clear_color_.a);
 	glEnable(GL_DEPTH_TEST);

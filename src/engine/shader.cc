@@ -63,11 +63,21 @@ void Shader::bind_default_framebuffer() noexcept {
 }
 
 void Shader::bind_scene_texture() noexcept {
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture_buffer_[enum_value(Texture::Scene)]);
+	if((effects_ & Fx::Bloom) == Fx::Bloom) {
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, texture_buffer_[enum_value(Texture::Bloom)]);
+	}
 }
 
 void Shader::unbind_scene_texture() noexcept {
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, 0);
+	if((effects_ & Fx::Bloom) == Fx::Bloom) {
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
 }
 
 GLuint Shader::program_id() const {
@@ -75,7 +85,7 @@ GLuint Shader::program_id() const {
 }
 
 void Shader::reallocate_textures(int width, int height) {
-	bind_default_framebuffer();
+	unbind_scene_texture();
 	delete_buffers();
 	setup_texture_environment(width, height);
 	bind_main_framebuffer();
@@ -421,6 +431,7 @@ bool Shader::reload() {
 	enable();
 	for(auto const& [handle, data] : stored_uniform_data_)
 		upload_uniform(handle, data);
+
 	return true;
 }
 
