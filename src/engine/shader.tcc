@@ -91,6 +91,7 @@ void Shader::init(Fx fx) {
 	if(!instances_size) {
 		auto vp = viewport_info();
 		setup_texture_environment(vp.width, vp.height);
+		bind_main_framebuffer();
 	}
 	
 

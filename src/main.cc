@@ -1,5 +1,6 @@
 #include "bitmask.h"
 #include "camera.h"
+#include "canvas.h"
 #include "cuboid.h"
 #include "cylinder.h"
 #include "ellipsoid.h"
@@ -17,15 +18,16 @@ template <typename Exception, typename = std::enable_if_t<is_exception_v<Excepti
 int handle_exception(Exception const& err);
 
 int main() {
-
 	unsigned constexpr width = 960, height = 540;
 	try{
 		Window window{"test", width, height};
-		std::shared_ptr<Shader> plane_shader = std::make_shared<Shader>("src/shaders/plane.vert", Shader::Type::Vertex, 
-																		"src/shaders/plane.frag", Shader::Type::Fragment);
-		std::shared_ptr<Shader> sun_shader   = std::make_shared<Shader>("src/shaders/sun.vert", Shader::Type::Vertex, 
-																		"src/shaders/sun.frag", Shader::Type::Fragment,
-																		Shader::Fx::Bloom | Shader::Fx::Blur);
+		std::shared_ptr<Shader> canvas_shader = std::make_shared<Shader>("assets/shaders/canvas.vert", Shader::Type::Vertex,
+																		 "assets/shaders/canvas.frag", Shader::Type::Fragment);
+		std::shared_ptr<Shader> plane_shader  = std::make_shared<Shader>("assets/shaders/plane.vert", Shader::Type::Vertex, 
+											 							 "assets/shaders/plane.frag", Shader::Type::Fragment);
+		std::shared_ptr<Shader> sun_shader    = std::make_shared<Shader>("assets/shaders/sun.vert", Shader::Type::Vertex, 
+																		 "assets/shaders/sun.frag", Shader::Type::Fragment,
+																		 Shader::Fx::Bloom | Shader::Fx::Blur);
 
 		std::shared_ptr<Camera> cam = std::make_shared<Camera>();
 		EventHandler::instantiate(cam);
@@ -34,16 +36,19 @@ int main() {
 		Cuboid c{automatic_shader_handler{plane_shader}};
 		Cylinder cyl{automatic_shader_handler{plane_shader}};
 
+		Canvas canvas{automatic_shader_handler{canvas_shader}, {0.1f, 0.2f, 0.4f, 0.5f}};
+
 
 		glClearColor(0.1f, 0.2f, 0.4f, 0.5f);
 		while(!window.should_close()){
 			window.clear();
 			frametime::update();
 			//p.render();
-			e.render();			//		
+			e.render();			
 			//c.render();
 			//cyl.render();
 
+			canvas.render(); /* Render the scene */
 			window.update();
 		}
 	}

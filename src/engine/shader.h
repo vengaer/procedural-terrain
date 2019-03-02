@@ -69,6 +69,11 @@ class Shader {
 
 		static void set_reload_callback(callback_func);
 
+		static void bind_main_framebuffer() noexcept;
+		static void bind_default_framebuffer() noexcept;
+		static void bind_scene_texture() noexcept;
+		static void unbind_scene_texture() noexcept;
+
 		static void reallocate_texture(int width, int height);
 
 		GLuint program_id() const;

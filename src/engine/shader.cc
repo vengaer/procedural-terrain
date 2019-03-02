@@ -65,6 +65,22 @@ void Shader::set_reload_callback(callback_func func) {
 	reload_callback_ = func;
 }
 
+void Shader::bind_main_framebuffer() noexcept {
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
+}
+
+void Shader::bind_default_framebuffer() noexcept {
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void Shader::bind_scene_texture() noexcept {
+	glBindTexture(GL_TEXTURE_2D, texture_buffer_);
+}
+
+void Shader::unbind_scene_texture() noexcept {
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
 GLuint Shader::program_id() const {
 	return program_;
 }
@@ -77,7 +93,7 @@ void Shader::reallocate_texture(int width, int height) {
 void Shader::setup_texture_environment(int width, int height) {
 
 	glGenFramebuffers(1, &fbo_);
-	glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
+	bind_main_framebuffer();
 
 	glGenTextures(1, &texture_buffer_);
 	glBindTexture(GL_TEXTURE_2D, texture_buffer_);
@@ -116,7 +132,7 @@ void Shader::setup_texture_environment(int width, int height) {
 	if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		throw FramebufferException{"Generated framebuffer not complete"};
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	bind_default_framebuffer();
 }
 
 void Shader::delete_buffers() noexcept {
