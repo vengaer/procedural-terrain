@@ -26,8 +26,8 @@ int main() {
 	
 	try{
 		Window window{"Main", width, height};
-		std::shared_ptr<Shader> canvas_shader  = std::make_shared<Shader>("assets/shaders/canvas.vert", Shader::Type::Vertex,
-																		  "assets/shaders/canvas.frag", Shader::Type::Fragment);
+		std::shared_ptr<Shader> scene_shader   = std::make_shared<Shader>("assets/shaders/scene.vert", Shader::Type::Vertex,
+																		  "assets/shaders/scene.frag", Shader::Type::Fragment);
 		std::shared_ptr<Shader> terrain_shader = std::make_shared<Shader>("assets/shaders/terrain.vert", Shader::Type::Vertex, 
 											 							  "assets/shaders/terrain.frag", Shader::Type::Fragment);
 		std::shared_ptr<Shader> sun_shader     = std::make_shared<Shader>("assets/shaders/sun.vert", Shader::Type::Vertex, 
@@ -40,16 +40,20 @@ int main() {
 		Ellipsoid sun{automatic_shader_handler{sun_shader}};
         sun.translate(glm::vec3{-80.0, 40.0, 0.0});
         sun.scale(glm::vec3{10.0, 10.0, 10.0});
+        
+        float const water_height   = -10.8f;
+        float const terrain_height = -10.f;
+        float const height_diff = water_height - terrain_height;
 
         Plane water{automatic_shader_handler{water_shader}};
-        water.translate(glm::vec3{0.0, -10.8, 0.0});
+        water.translate(glm::vec3{0.0, water_height, 0.0});
         water.scale(glm::vec3{40.0, 1.0, 40.0});
         
         Terrain terrain{automatic_shader_handler{terrain_shader}, 10.f, 2.f, .05f, 2.f, .05f};
-        terrain.translate(glm::vec3{0.0, -10.0, 0.0});
+        terrain.translate(glm::vec3{0.0, terrain_height, 0.0});
         terrain.scale(glm::vec3{20.0, 1.0, 20.0});
 
-		Scene scene{automatic_shader_handler{canvas_shader}, {0.1f, 0.2f, 0.4f, 0.5f}};
+		Scene scene{automatic_shader_handler{scene_shader}, {0.1f, 0.2f, 0.4f, 0.5f}};
 
         Shader::upload_to_all("ufrm_sun_position", sun.position());
         
@@ -60,7 +64,6 @@ int main() {
 			frametime::update();
 
 			sun.render();			
-
 			terrain.render();
             water.render();
 

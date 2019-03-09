@@ -20,9 +20,12 @@ uniform mat4 ufrm_view;
 uniform vec3 ufrm_sun_position;
 uniform float ufrm_terrain_amplitude;
 
+uniform vec4 ufrm_clipping_plane;
 
 void main() {
+    gl_ClipDistance[0] = dot(vec4(position_, 1.0), ufrm_clipping_plane);
 	gl_Position = ufrm_projection * ufrm_view * ufrm_model * vec4(position_, 1.0);
+
     sun_position = ufrm_sun_position;
     position = vec3(ufrm_model * vec4(position_, 1.0));
     camera_view = vec3(ufrm_view[0][3], ufrm_view[1][3], ufrm_view[2][3]);
