@@ -9,9 +9,6 @@
 Shader::~Shader() {
 	LOG("Deleting shader");
 
-	/* Account for static shader */
-	std::size_t const size_of_empty = blur_shader_ != nullptr;
-
 	std::lock_guard<std::mutex> lock{ics_mutex_};
 	instances_.erase(
 		std::remove_if(std::begin(instances_), 
@@ -20,7 +17,7 @@ Shader::~Shader() {
 			return std::addressof(ref_wrapper.get()) == this;
 		}));
 
-	if(instances_.size() == size_of_empty) {
+	if(instances_.size() == 0u) {
 		delete_buffers();
 		#ifndef RESTRICT_THREAD_USAGE
 		LOG("Joining updater thread with id ", updater_thread_.get_id());
@@ -64,20 +61,12 @@ void Shader::bind_default_framebuffer() noexcept {
 
 void Shader::bind_scene_texture() noexcept {
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture_buffer_[enum_value(Texture::Scene)]);
-	if((effects_ & Fx::Bloom) == Fx::Bloom) {
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, texture_buffer_[enum_value(Texture::Bloom)]);
-	}
+	glBindTexture(GL_TEXTURE_2D, texture_buffer_);
 }
 
 void Shader::unbind_scene_texture() noexcept {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, 0);
-	if((effects_ & Fx::Bloom) == Fx::Bloom) {
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, 0);
-	}
 }
 
 GLuint Shader::program_id() const {
@@ -95,37 +84,32 @@ void Shader::setup_texture_environment(int width, int height) {
 	glGenFramebuffers(1, &fbo_);
 	bind_main_framebuffer();
 
-	glGenTextures(tex_buf_load_, &texture_buffer_[0]);
-	
-	for(auto i = 0u; i < tex_buf_load_; i++) {
-		glBindTexture(GL_TEXTURE_2D, texture_buffer_[i]);
+	glGenTextures(1, &texture_buffer_);
 
-		auto const buffertype = i == 1u ? GL_FLOAT : GL_UNSIGNED_BYTE;
-		auto const bits_per_col = i == 1u ? GL_RGBA16F : GL_RGB;
-		
-		glTexImage2D(GL_TEXTURE_2D, 
-					 0, 
-					 bits_per_col, 
-					 width, 
-					 height, 
-					 0, 
-					 GL_RGB, 
-					 buffertype, 
-					 nullptr);
+    glBindTexture(GL_TEXTURE_2D, texture_buffer_);
+    
+    glTexImage2D(GL_TEXTURE_2D, 
+                 0, 
+                 GL_RGB, 
+                 width, 
+                 height, 
+                 0, 
+                 GL_RGB, 
+                 GL_UNSIGNED_BYTE, 
+                 nullptr);
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		
-		glBindTexture(GL_TEXTURE_2D, 0);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    
+    glBindTexture(GL_TEXTURE_2D, 0);
 
-		glFramebufferTexture2D(GL_FRAMEBUFFER, 
-							   GL_COLOR_ATTACHMENT0 + i, 
-							   GL_TEXTURE_2D, 
-							   texture_buffer_[i],
-							   0);
-	}
+    glFramebufferTexture2D(GL_FRAMEBUFFER, 
+                           GL_COLOR_ATTACHMENT0, 
+                           GL_TEXTURE_2D, 
+                           texture_buffer_,
+                           0);
 
 	glGenRenderbuffers(1, &rbo_);
 	glBindRenderbuffer(GL_RENDERBUFFER, rbo_);
@@ -140,56 +124,13 @@ void Shader::setup_texture_environment(int width, int height) {
 	if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		throw FramebufferException{"Generated framebuffer not complete"};
 
-	glDrawBuffers(tex_buf_load_, &color_attachments_[0]);
 	bind_default_framebuffer();
-}
-
-/* TODO: finish  bloom */
-void Shader::setup_blur(int width, int height) {
-	auto constexpr num_buf = 2u;
-	glGenFramebuffers(num_buf, &blur_fbos_[0]);
-
-	std::array<std::size_t, num_buf> idcs{enum_value(Texture::BlurVert), enum_value(Texture::BlurHoriz)};
-
-	for(auto i = 0u; i < num_buf; i++) {
-		auto const idx = idcs[i];
-
-		glBindFramebuffer(GL_FRAMEBUFFER, blur_fbos_[i]);
-		glBindTexture(GL_TEXTURE_2D, texture_buffer_[idx]);
-		
-		glTexImage2D(GL_TEXTURE_2D,
-					 0,
-					 GL_RGB16F,
-					 width,
-					 height,
-					 0,
-					 GL_RGB,
-					 GL_FLOAT,
-					 nullptr);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-		glFramebufferTexture2D(GL_FRAMEBUFFER,
-							   GL_COLOR_ATTACHMENT0,
-							   GL_TEXTURE_2D,
-							   texture_buffer_[idx],
-							   0);
-	}
-	if(!blur_shader_) {
-		blur_shader_ = std::make_unique<Shader>("assets/shaders/blur.vert", Type::Vertex,
-												"assets/shaders/blur.frag", Type::Fragment);
-	}
-
-	bind_main_framebuffer();
 }
 
 void Shader::delete_buffers() noexcept {
 	LOG("Cleaning up static resources");
 	glDeleteFramebuffers(1, &fbo_);
-	glDeleteTextures(tex_buf_load_, &texture_buffer_[0]);
+	glDeleteTextures(1, &texture_buffer_);
 	glDeleteRenderbuffers(1, &rbo_);
 }
 
@@ -440,14 +381,6 @@ void Shader::update_internal_uniform_locations() const {
 		location = glGetUniformLocation(program_, handle.c_str());
 }
 
-typename Shader::Viewport Shader::viewport_info() noexcept {
-		Viewport vp;
-		auto const* primary_context = static_cast<Context*>(glfwGetWindowUserPointer(glfwGetCurrentContext()))->primary();
-		glfwGetWindowSize(static_cast<GLFWwindow*>(*primary_context), &vp.width, &vp.height);
-		return vp;
-}
-
-
 std::string const Shader::PROJECTION_UNIFORM_NAME = "ufrm_projection";
 std::string const Shader::VIEW_UNIFORM_NAME = "ufrm_view";
 std::string const Shader::MODEL_UNIFORM_NAME = "ufrm_model";
@@ -455,12 +388,7 @@ std::string const Shader::TIME_UNIFORM_NAME = "ufrm_time";
 
 GLuint Shader::fbo_{};
 GLuint Shader::rbo_{};
-std::array<GLuint, 2> Shader::blur_fbos_{};
-std::array<GLuint, 4> Shader::texture_buffer_{};
-std::size_t Shader::tex_buf_load_{};
-typename Shader::Fx Shader::effects_{};
-
-std::unique_ptr<Shader> Shader::blur_shader_{nullptr};
+GLuint Shader::texture_buffer_{};
 
 std::atomic_bool Shader::halt_execution_ = true;
 std::mutex Shader::ics_mutex_{};

@@ -2,7 +2,6 @@
 #define SHADER_H
 
 #pragma once
-#include "bitmask.h"
 #include "collections.h"
 #include "ct_sequence.h"
 #include "exception.h"
@@ -11,6 +10,7 @@
 #include "traits.h"
 #include "type_conversion.h"
 #include "uniform_impl.h"
+#include "viewport.h"
 #include <array>
 #include <atomic>
 #include <chrono>
@@ -33,17 +33,7 @@
 
 class Shader {
 	using callback_func = void(*)(Shader const&);
-
-	struct OptionalEffects {
-		using value_type = unsigned char;
-		static value_type constexpr Bloom =   0x1; /* Bloom effect */
-		static value_type constexpr Blur  =   0x2; /* Gaussian blur */
-		static value_type constexpr Reflect = 0x4; /* Reflection */
-		static value_type constexpr Refract = 0x8; /* Refraction */
-	};
 	public:
-		using Fx = Bitmask<OptionalEffects>;
-
 		enum class Type { Vertex   = GL_VERTEX_SHADER, 
 						  Fragment = GL_FRAGMENT_SHADER,
 						  Compute  = GL_COMPUTE_SHADER,
@@ -78,10 +68,6 @@ class Shader {
 
 		static void reallocate_textures(int width, int height);
 
-		/* TODO: finish blur (and make this nicer) */
-		template <typename Callable>
-		void blur(Callable render) const;
-
 		GLuint program_id() const;
 		
 		/* (Indirect) Wrappers for glUniform */
@@ -111,18 +97,6 @@ class Shader {
 							   Include, 
 							   Linking,
 							   End_ };
-		
-		enum class Texture {
-			Scene,
-			Bloom,
-			BlurVert,
-			BlurHoriz
-		};
-
-		struct Viewport {
-			int width;
-			int height;
-		};
 
 		struct Source {
 			Source() = default;
@@ -152,7 +126,6 @@ class Shader {
 		};
 
 		std::atomic<GLuint> program_{}; /* Shader program id */
-		Fx local_effects_{};
 		std::unordered_map<std::string, GLint> mutable cached_uniform_locations_{};
 		std::map<std::string, glm::mat4> mutable stored_uniform_data_{};
 		std::vector<Source> sources_;
@@ -160,17 +133,7 @@ class Shader {
 
 		static GLuint fbo_;
 		static GLuint rbo_;
-		static std::array<GLuint, 2> blur_fbos_;
-		static std::array<GLuint, 4> texture_buffer_;
-		static std::size_t tex_buf_load_;
-		static std::array<GLuint, 4> constexpr color_attachments_{
-			GL_COLOR_ATTACHMENT0,
-			GL_COLOR_ATTACHMENT1,
-			GL_COLOR_ATTACHMENT2,
-			GL_COLOR_ATTACHMENT3
-		};
-		static Fx effects_;
-		static std::unique_ptr<Shader> blur_shader_;
+		static GLuint texture_buffer_;
 
 		static std::atomic_bool halt_execution_;
 		static std::mutex ics_mutex_;
@@ -182,9 +145,6 @@ class Shader {
 		void init();
 	
 		static void setup_texture_environment(int width, int height);
-		/* TODO: finish blur */
-		static void setup_blur(int width, int height);
-
 		static void delete_buffers() noexcept;
 
 		template <typename... Args, std::size_t... Is>

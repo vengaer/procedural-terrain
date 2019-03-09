@@ -4,24 +4,12 @@ Shader::Shader(Sources const&... src) : sources_(sizeof...(Sources)/2) {
 
 	static_assert(pack_size > 0u, "Cannot create empty shader");
 
-	if constexpr(pack_size % 2 == 1) {
-		static_assert(is_explicitly_convertible_v<Fx,remove_cvref_t<nth_type_t<pack_size - 1u, Sources...>>>, 
-					  "Number of arguments passed is odd and the last argument is not an Fx instance");
-		static_assert(even_parameters_acceptable<Sources...>(make_even_index_sequence<pack_size - 1u>{}), 
-					  "Even arguments must be convertible to std::string");
-		static_assert(odd_parameters_acceptable<Sources...>(make_odd_index_sequence<pack_size - 1u>{}), 
-					  "Odd arguments must be of type Shader::Type");
+    static_assert(even_parameters_acceptable<Sources...>(even_index_sequence_for<Sources...>{}), 
+                  "Even arguments must be convertible to std::string");
+    static_assert(odd_parameters_acceptable<Sources...>(odd_index_sequence_for<Sources...>{}),   
+                  "Odd arguments must be of type Shader::Type");
 
-		local_effects_ = get<pack_size - 1>(src...);
-	}
-	else {
-		static_assert(even_parameters_acceptable<Sources...>(even_index_sequence_for<Sources...>{}), 
-					  "Even arguments must be convertible to std::string");
-		static_assert(odd_parameters_acceptable<Sources...>(odd_index_sequence_for<Sources...>{}),   
-					  "Odd arguments must be of type Shader::Type");
-	}
-
-	generate_source<0u, pack_size/2u>(src...); /* Integer division => works even with Fx at end of pack */
+	generate_source<0u, pack_size/2u>(src...); 
 	init<pack_size/2>();
 }
 	
@@ -88,42 +76,8 @@ void Shader::init() {
 		instances_size = instances_.size();
 	}
 	if(!instances_size) {
-		tex_buf_load_ = 1u;
-		auto vp = viewport_info();
-		setup_texture_environment(vp.width, vp.height);
+		setup_texture_environment(Viewport::width, Viewport::height);
 		bind_main_framebuffer();
-	}
-	
-
-	LOG("Processing requested effects");
-	if((local_effects_ & Fx::Bloom) == Fx::Bloom && (effects_ & Fx::Bloom) != Fx::Bloom){
-		effects_ |= Fx::Bloom;
-		auto const bloom = enum_value(Texture::Bloom);
-		if(tex_buf_load_ < bloom) {
-			tex_buf_load_ = bloom;
-			auto const vp = viewport_info();
-			reallocate_textures(vp.width, vp.height);
-		}
-		//TODO: Setup bloom
-	}
-	if((local_effects_ & Fx::Blur) == Fx::Blur && (effects_ & Fx::Blur) != Fx::Blur) {
-		effects_ |= Fx::Blur;
-		auto const blur = enum_value(Texture::BlurHoriz);
-		auto const vp = viewport_info();	
-		if(tex_buf_load_ < blur) {
-			tex_buf_load_ = blur;
-			reallocate_textures(vp.width, vp.height);
-		}
-		setup_blur(vp.width, vp.height);
-		//TODO: Setup blur
-	}
-	if((local_effects_ & Fx::Reflect) == Fx::Reflect && (effects_ & Fx::Reflect) != Fx::Reflect) {
-		effects_ |= Fx::Reflect;
-		//TODO: Setup relection
-	}
-	if((local_effects_ & Fx::Refract) == Fx::Refract && (effects_ & Fx::Refract) != Fx::Refract) {
-		effects_ |= Fx::Refract;
-		//TODO: Setup refraction
 	}
 
 	std::lock_guard<std::mutex> lock{ics_mutex_};
@@ -139,37 +93,6 @@ void Shader::init() {
 		LOG("Thread with id", updater_thread_.get_id(), " successfully created");
 	}
 	#endif
-}
-
-template <typename Callable>
-void Shader::blur(Callable render) const {
-	using namespace std::string_literals;
-
-	std::size_t passes = 10u;
-	std::array<std::size_t, 2> idcs{enum_value(Texture::BlurVert), enum_value(Texture::BlurHoriz)};
-	if((local_effects_ & Fx::Blur) != Fx::Blur)
-		throw InvalidFxRequestException{"Blur was not requested when calling shader constructor"};
-
-	if(!blur_shader_)
-		throw InvalidFxRequestException{"No blur shader exists. This should not be possible."};
-
-	blur_shader_->enable();
-
-	auto texture = texture_buffer_[enum_value(Texture::Bloom)];
-	for(auto i = 0u; i < passes; i++) {
-		int const dir = 1 - i % 2;
-		auto const idx = idcs[dir];
-
-		glBindFramebuffer(GL_FRAMEBUFFER, blur_fbos_[dir]);
-		blur_shader_->upload_uniform("ufrm_direction"s, dir);
-
-		glBindTexture(GL_TEXTURE_2D, texture);
-
-		texture = texture_buffer_[idx];
-		render();
-	}
-
-	bind_main_framebuffer();
 }
 
 template <typename T, typename>
