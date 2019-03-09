@@ -9,6 +9,8 @@ template <typename ShaderPolicy>
 void Scene<ShaderPolicy>::render() const {
     if(!PostProcessing::enabled())
         Shader::bind_scene_texture();
+    
+
 	Shader::bind_default_framebuffer();
 	glClearColor(1.f, 1.f, 1.f, 1.f);
 	glClear(GL_COLOR_BUFFER_BIT);

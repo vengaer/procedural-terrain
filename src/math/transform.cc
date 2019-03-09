@@ -48,6 +48,11 @@ glm::mat4 Transform::model_matrix() const {
 	return transforms_.top();
 }
 
+glm::vec3 Transform::position() const {
+    auto model = model_matrix();
+    return glm::vec3{model[3]};
+}
+
 void Transform::add_transform(glm::mat4&& transform) {
 	transforms_.push(std::move(transform));
 	has_been_transformed_ = true;

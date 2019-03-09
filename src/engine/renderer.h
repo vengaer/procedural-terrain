@@ -56,6 +56,12 @@ class Renderer {
 
 		template <typename... Args>
 		void init(Args&&... args);
+
+		template <typename U = ShaderPolicy> 
+		static auto constexpr policy_is_automatic(int) noexcept -> std::remove_reference_t<decltype((void)U::is_automatic, std::declval<bool>())>;
+		static bool constexpr policy_is_automatic(long) noexcept;
+
+        static int constexpr OVERLOAD_RESOLVER = 0;
 	private:
 		GLuint vao_, vbo_;
 		GLuint idx_buffer_;
@@ -66,7 +72,6 @@ class Renderer {
 		GLuint size(vertices_tag) const;
 		GLuint size(indices_tag) const;
 
-        static int constexpr OVERLOAD_RESOLVER = 0;
 
 		template <typename U = T> /* Delay template instantiation */
 		static auto constexpr requires_setup(int) noexcept -> std::remove_reference_t<decltype((void)std::declval<U>().render_setup(), std::declval<bool>())>;
@@ -75,10 +80,6 @@ class Renderer {
 		template <typename U = T>
 		static auto constexpr requires_cleanup(int) noexcept -> std::remove_reference_t<decltype((void)std::declval<U>().render_cleanup(), std::declval<bool>())>;
 		static bool constexpr requires_cleanup(long) noexcept;
-
-		template <typename U = ShaderPolicy> 
-		static auto constexpr policy_is_automatic(int) noexcept -> std::remove_reference_t<decltype((void)U::is_automatic, std::declval<bool>())>;
-		static bool constexpr policy_is_automatic(long) noexcept;
 
 		template <typename U = T>
 		static auto constexpr object_is_transformable(int) noexcept -> std::remove_reference_t<decltype((void)std::declval<U>().has_been_transformed(), std::declval<bool>())>;

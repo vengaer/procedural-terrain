@@ -31,6 +31,7 @@ void Window::init(){
 
 	if(glewInit() != GLEW_OK)
 		throw GLException{"Failed to initialize GLEW\n"};
+    glEnable(GL_DEPTH_TEST);
 
     Viewport::update();
 }

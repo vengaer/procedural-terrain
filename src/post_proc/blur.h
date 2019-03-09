@@ -20,13 +20,12 @@ namespace impl {
             void bind() const;
             GLuint texture() const;
 
-        protected:
+        private:
             GLuint fbo_{};
             GLuint texture_{};
             Shader shader_;
             int width_{}, height_{};
 
-        private:
             void init();
             void setup_texture_environment();
             static int constexpr VERTICAL = 0, HORIZONTAL = 1;

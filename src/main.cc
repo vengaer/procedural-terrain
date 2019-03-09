@@ -12,8 +12,11 @@
 #include "scene.h"
 #include "shader.h"
 #include "traits.h"
+#include "terrain.h"
 #include "window.h"
 #include <type_traits>
+
+#include "height_generator.h"
 
 template <typename Exception, typename = std::enable_if_t<is_exception_v<Exception>>>
 int handle_exception(Exception const& err);
@@ -23,28 +26,43 @@ int main() {
 	
 	try{
 		Window window{"Main", width, height};
-		std::shared_ptr<Shader> canvas_shader = std::make_shared<Shader>("assets/shaders/canvas.vert", Shader::Type::Vertex,
-																		 "assets/shaders/canvas.frag", Shader::Type::Fragment);
-		std::shared_ptr<Shader> plane_shader  = std::make_shared<Shader>("assets/shaders/plane.vert", Shader::Type::Vertex, 
-											 							 "assets/shaders/plane.frag", Shader::Type::Fragment);
-		std::shared_ptr<Shader> sun_shader    = std::make_shared<Shader>("assets/shaders/sun.vert", Shader::Type::Vertex, 
-																		 "assets/shaders/sun.frag", Shader::Type::Fragment);
+		std::shared_ptr<Shader> canvas_shader  = std::make_shared<Shader>("assets/shaders/canvas.vert", Shader::Type::Vertex,
+																		  "assets/shaders/canvas.frag", Shader::Type::Fragment);
+		std::shared_ptr<Shader> terrain_shader = std::make_shared<Shader>("assets/shaders/terrain.vert", Shader::Type::Vertex, 
+											 							  "assets/shaders/terrain.frag", Shader::Type::Fragment);
+		std::shared_ptr<Shader> sun_shader     = std::make_shared<Shader>("assets/shaders/sun.vert", Shader::Type::Vertex, 
+																		  "assets/shaders/sun.frag", Shader::Type::Fragment);
+        std::shared_ptr<Shader> water_shader   = std::make_shared<Shader>("assets/shaders/water.vert", Shader::Type::Vertex,
+                                                                          "assets/shaders/water.frag", Shader::Type::Fragment);
 
 		std::shared_ptr<Camera> cam = std::make_shared<Camera>();
 		EventHandler::instantiate(cam);
 		Ellipsoid sun{automatic_shader_handler{sun_shader}};
-		Cuboid cube{automatic_shader_handler{plane_shader}};
-		cube.translate(glm::vec3{2.0, 0.0, 0.0});
+        sun.translate(glm::vec3{-80.0, 40.0, 0.0});
+        sun.scale(glm::vec3{10.0, 10.0, 10.0});
+
+        Plane water{automatic_shader_handler{water_shader}};
+        water.translate(glm::vec3{0.0, -10.8, 0.0});
+        water.scale(glm::vec3{40.0, 1.0, 40.0});
+        
+        Terrain terrain{automatic_shader_handler{terrain_shader}, 10.f, 2.f, .05f, 2.f, .05f};
+        terrain.translate(glm::vec3{0.0, -10.0, 0.0});
+        terrain.scale(glm::vec3{20.0, 1.0, 20.0});
 
 		Scene scene{automatic_shader_handler{canvas_shader}, {0.1f, 0.2f, 0.4f, 0.5f}};
 
+        Shader::upload_to_all("ufrm_sun_position", sun.position());
+        
         PostProcessing post_proc;
+
 		while(!window.should_close()){
 			window.clear();
 			frametime::update();
 
 			sun.render();			
-			cube.render();
+
+			terrain.render();
+            water.render();
 
             post_proc.perform();
 			scene.render(); 

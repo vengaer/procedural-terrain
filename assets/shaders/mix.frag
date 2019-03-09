@@ -11,5 +11,5 @@ void main() {
     vec4 scene_col = texture(scene_, tex_coords);
     vec4 highlight_col = texture(highlight_, tex_coords);
 
-    frag_color = scene_col + highlight_col * 15.0;
+    frag_color = scene_col + highlight_col * 4.0;
 }

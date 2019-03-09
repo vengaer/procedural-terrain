@@ -1,11 +1,13 @@
 template <typename ShaderPolicy>
-Plane<ShaderPolicy>::Plane(ShaderPolicy policy, GLfloat x_len, GLfloat dx, GLfloat z_len, GLfloat dz) : renderer_t{policy}, Transform{}, vertices_{}, indices_{} {
-	/* Initialize Renderer, pass parameters */
-	renderer_t::init(x_len, dx, z_len, dz);
+Terrain<ShaderPolicy>::Terrain(ShaderPolicy policy, GLfloat amplitude, GLfloat x_len, GLfloat dx, GLfloat z_len, GLfloat dz) : renderer_t{policy}, generator_{amplitude} {
+    if constexpr(renderer_t::template policy_is_automatic<ShaderPolicy>(renderer_t::OVERLOAD_RESOLVER))
+        policy.shader()->upload_uniform("ufrm_terrain_amplitude", amplitude);
+
+    renderer_t::init(x_len, dx, z_len, dz);
 }
 
 template <typename ShaderPolicy>
-void Plane<ShaderPolicy>::init(GLfloat x_len, GLfloat dx, GLfloat z_len, GLfloat dz){
+void Terrain<ShaderPolicy>::init(GLfloat x_len, GLfloat dx, GLfloat z_len, GLfloat dz) {
 	x_len = glm::clamp(x_len, 0.05f, 10.f);
 	z_len = glm::clamp(z_len, 0.05f, 10.f);
 	dx    = glm::clamp(dx, .01f, x_len);
@@ -29,13 +31,14 @@ void Plane<ShaderPolicy>::init(GLfloat x_len, GLfloat dx, GLfloat z_len, GLfloat
 
 			for(auto j = 0u; j < x_iters; j++, x += dx){
 				s = interpolation::linear(static_cast<GLfloat>(j)/static_cast<GLfloat>(x_iters-1));
+                auto normal = calculate_normal(j,i);
 
 				vertex[0] = x;   /* Position */
-				vertex[1] = 0.f;
+				vertex[1] = generator_.generate(j,i);
 				vertex[2] = z;
-				vertex[3] = 0.f; /* Normal */
-				vertex[4] = 1.f;	
-				vertex[5] = 0.f;
+				vertex[3] = normal.x; /* Normal */
+				vertex[4] = normal.y;	
+				vertex[5] = normal.z;
 				vertex[6] = s;   /* Texture */
 				vertex[7] = t;
 			
@@ -67,11 +70,24 @@ void Plane<ShaderPolicy>::init(GLfloat x_len, GLfloat dx, GLfloat z_len, GLfloat
 }
 
 template <typename ShaderPolicy>
-std::vector<GLfloat> const& Plane<ShaderPolicy>::vertices() const{
-	return vertices_;
+std::vector<GLfloat> const& Terrain<ShaderPolicy>::vertices() const {
+    return vertices_;
 }
 
 template <typename ShaderPolicy>
-std::vector<GLuint> const& Plane<ShaderPolicy>::indices() const {
-	return indices_;
+std::vector<GLuint> const& Terrain<ShaderPolicy>::indices() const {
+    return indices_;
+}
+
+template <typename ShaderPolicy>
+glm::vec3 Terrain<ShaderPolicy>::calculate_normal(int x, int z) {
+    float height_left  = generator_.generate(x-1, z);
+    float height_right = generator_.generate(x+1, z);
+    float height_up    = generator_.generate(x, z+1);
+    float height_down  = generator_.generate(x, z-1);
+    glm::vec3 normal = {height_left - height_right, 
+                        2.f, 
+                        height_down - height_up};
+
+    return glm::normalize(normal);
 }

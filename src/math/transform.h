@@ -25,6 +25,7 @@ class Transform {
 		void reset_transforms();
 
 		glm::mat4 model_matrix() const;
+        glm::vec3 position() const;
 		
 		bool& has_been_transformed() const;
 		

@@ -89,17 +89,16 @@ void Shader::setup_texture_environment(int width, int height) {
 	bind_main_framebuffer();
 
 	glGenTextures(1, &texture_buffer_);
-
     glBindTexture(GL_TEXTURE_2D, texture_buffer_);
     
     glTexImage2D(GL_TEXTURE_2D, 
                  0, 
-                 GL_RGB, 
+                 GL_RGBA16F, 
                  width, 
                  height, 
                  0, 
                  GL_RGB, 
-                 GL_UNSIGNED_BYTE, 
+                 GL_FLOAT, 
                  nullptr);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
