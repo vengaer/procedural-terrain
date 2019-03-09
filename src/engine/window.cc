@@ -1,4 +1,5 @@
 #include "exception.h"
+#include "viewport.h"
 #include "window.h"
 #include <cmath>
 
@@ -31,5 +32,6 @@ void Window::init(){
 	if(glewInit() != GLEW_OK)
 		throw GLException{"Failed to initialize GLEW\n"};
 
+    Viewport::update();
 }
 

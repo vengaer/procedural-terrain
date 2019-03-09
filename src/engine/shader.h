@@ -66,6 +66,8 @@ class Shader {
 		static void bind_scene_texture() noexcept;
 		static void unbind_scene_texture() noexcept;
 
+        static GLuint scene_texture() noexcept;
+
 		static void reallocate_textures(int width, int height);
 
 		GLuint program_id() const;

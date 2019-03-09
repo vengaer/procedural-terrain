@@ -69,6 +69,10 @@ void Shader::unbind_scene_texture() noexcept {
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+GLuint Shader::scene_texture() noexcept {
+    return texture_buffer_;
+}
+
 GLuint Shader::program_id() const {
 	return program_;
 }

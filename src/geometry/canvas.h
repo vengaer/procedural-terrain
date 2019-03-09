@@ -2,12 +2,12 @@
 #define CANVAS_H
 
 #pragma once
-#include "color_type.h"
 #include "renderer.h"
 #include "shader.h"
 #include "shader_handler.h"
-#include <GL/glew.h>
 #include <array>
+#include <GL/glew.h>
+#include <vector>
 
 template <typename ShaderPolicy = manual_shader_handler>
 class Canvas : public Renderer<Canvas<ShaderPolicy>, ShaderPolicy> {
@@ -17,22 +17,17 @@ class Canvas : public Renderer<Canvas<ShaderPolicy>, ShaderPolicy> {
 	
 	using renderer_t = Renderer<Canvas<ShaderPolicy>, ShaderPolicy>;
 	public:
-		using Color = ColorType<float>;
-
-		Canvas(Color clear_color = Color{1.f, 1.f, 1.f, 1.f});
-		Canvas(ShaderPolicy policy, Color clear_color = Color{1.f, 1.f, 1.f, 1.f});
-
-		void render_setup() const;
-		void render_cleanup() const;
+		Canvas(ShaderPolicy policy = {});
 	
 		std::array<GLfloat, VERTEX_ARRAY_SIZE> const& vertices() const;
 		std::array<GLuint, INDICES_ARRAY_SIZE> const& indices() const;
 
 	private:
-		Color clear_color_;
 
 		static std::array<GLfloat, VERTEX_ARRAY_SIZE> const vertices_;
 		static std::array<GLuint, INDICES_ARRAY_SIZE> const indices_;
+
+        friend class PostProcessing;
 };
 
 #include "canvas.tcc"

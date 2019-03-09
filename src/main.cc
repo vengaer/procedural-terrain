@@ -9,16 +9,11 @@
 #include "exception.h"
 #include "logger.h"
 #include "plane.h"
+#include "scene.h"
 #include "shader.h"
 #include "traits.h"
 #include "window.h"
 #include <type_traits>
-
-/* TODO: Fix bloom. Textures seem correct but the mixing doesn't work. 
- * 		 Blur doesn't seem ot work at all... 
- * 		 Will most likely crash if no shader requests bloom
- * 		 */
-
 
 template <typename Exception, typename = std::enable_if_t<is_exception_v<Exception>>>
 int handle_exception(Exception const& err);
@@ -33,8 +28,7 @@ int main() {
 		std::shared_ptr<Shader> plane_shader  = std::make_shared<Shader>("assets/shaders/plane.vert", Shader::Type::Vertex, 
 											 							 "assets/shaders/plane.frag", Shader::Type::Fragment);
 		std::shared_ptr<Shader> sun_shader    = std::make_shared<Shader>("assets/shaders/sun.vert", Shader::Type::Vertex, 
-																		 "assets/shaders/sun.frag", Shader::Type::Fragment,
-																		 Shader::Fx::Bloom | Shader::Fx::Blur);
+																		 "assets/shaders/sun.frag", Shader::Type::Fragment);
 
 		std::shared_ptr<Camera> cam = std::make_shared<Camera>();
 		EventHandler::instantiate(cam);
@@ -42,18 +36,9 @@ int main() {
 		Cuboid cube{automatic_shader_handler{plane_shader}};
 		cube.translate(glm::vec3{2.0, 0.0, 0.0});
 
-		Canvas canvas{automatic_shader_handler{canvas_shader}, {0.1f, 0.2f, 0.4f, 0.5f}};
+		Scene scene{automatic_shader_handler{canvas_shader}, {0.1f, 0.2f, 0.4f, 0.5f}};
 
-		/* Ugly, fix... */
-		canvas_shader->enable();
-		canvas_shader->upload_uniform("scene", 0);
-		canvas_shader->upload_uniform("bloom", 1);
-
-		sun_shader->blur([&sun]() {
-			sun.render();
-		});
-		/* ...until here */
-
+        PostProcessing post_proc;
 		while(!window.should_close()){
 			window.clear();
 			frametime::update();
@@ -61,7 +46,8 @@ int main() {
 			sun.render();			
 			cube.render();
 
-			canvas.render(); /* Draw the scene */
+            post_proc.perform();
+			scene.render(); 
 			window.update();
 		}
 	}

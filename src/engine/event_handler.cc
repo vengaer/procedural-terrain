@@ -2,6 +2,7 @@
 #include "event_handler.h"
 #include "exception.h"
 #include "shader.h"
+#include "viewport.h"
 #include <cstddef>
 #include <glm/glm.hpp>
 
@@ -38,6 +39,8 @@ void EventHandler::init() {
 	glfwSetInputMode(context_data, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetCursorPosCallback(context_data, mouse_callback);
 	glfwSetWindowSizeCallback(context_data, size_callback);
+
+    Viewport::update();
 }
 
 
@@ -61,7 +64,7 @@ void EventHandler::update_view() {
 void EventHandler::key_callback(GLFWwindow*, int key, int, int, int mod_bits) {
 	using Dir = Camera::Direction;
 	using Speed = Camera::Speed;
-	Mods modifiers = static_cast<Mods>(mod_bits);
+	Mods modifiers = static_cast<Mods>(std::move(mod_bits));
 
 	auto& camera = instance_->camera_;
 	
@@ -115,6 +118,7 @@ void EventHandler::size_callback(GLFWwindow*, int width, int height) {
 
 	update_perspective();
 	Shader::reallocate_textures(width, height);
+    Viewport::update();
 }
 
 bool EventHandler::instantiated_ = false;

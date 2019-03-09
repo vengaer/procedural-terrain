@@ -1,28 +1,6 @@
 template <typename ShaderPolicy>
-Canvas<ShaderPolicy>::Canvas(Color clear_color) : renderer_t{}, clear_color_{clear_color} {
+Canvas<ShaderPolicy>::Canvas(ShaderPolicy policy) : renderer_t{policy} {
 	renderer_t::init();
-}
-
-template <typename ShaderPolicy>
-Canvas<ShaderPolicy>::Canvas(ShaderPolicy policy, Color clear_color) : renderer_t{policy}, clear_color_{clear_color} {
-	renderer_t::init();
-}
-
-template <typename ShaderPolicy>
-void Canvas<ShaderPolicy>::render_setup() const {
-	Shader::bind_default_framebuffer();
-	glClearColor(1.f, 1.f, 1.f, 1.f);
-	glClear(GL_COLOR_BUFFER_BIT);
-	glDisable(GL_DEPTH_TEST);
-	Shader::bind_scene_texture();
-}
-
-template <typename ShaderPolicy>
-void Canvas<ShaderPolicy>::render_cleanup() const {
-	//Shader::unbind_scene_texture();
-	Shader::bind_main_framebuffer();
-	glClearColor(clear_color_.r, clear_color_.g, clear_color_.b, clear_color_.a);
-	glEnable(GL_DEPTH_TEST);
 }
 
 template <typename ShaderPolicy>

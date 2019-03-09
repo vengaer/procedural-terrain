@@ -50,10 +50,12 @@ class Renderer {
 		static GLuint constexpr VERTEX_SIZE = 8u;
 	protected:
 		Renderer(ShaderPolicy policy = {});
+        void bind() const;
+        void draw() const;
+        void unbind() const;
 
 		template <typename... Args>
 		void init(Args&&... args);
-	
 	private:
 		GLuint vao_, vbo_;
 		GLuint idx_buffer_;
@@ -63,6 +65,8 @@ class Renderer {
 		/* Tag dispatch */
 		GLuint size(vertices_tag) const;
 		GLuint size(indices_tag) const;
+
+        static int constexpr OVERLOAD_RESOLVER = 0;
 
 		template <typename U = T> /* Delay template instantiation */
 		static auto constexpr requires_setup(int) noexcept -> std::remove_reference_t<decltype((void)std::declval<U>().render_setup(), std::declval<bool>())>;

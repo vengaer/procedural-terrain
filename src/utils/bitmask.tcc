@@ -3,17 +3,17 @@ template <typename Bits>
 Bitmask<Bits>::Bitmask() noexcept : current_{static_cast<internal_type>(0)} { }
 
 template <typename Bits>
-Bitmask<Bits>::Bitmask(internal_type&& val) noexcept : current_{val} { }
+Bitmask<Bits>::Bitmask(internal_type val) noexcept : current_{val} { }
 
 template <typename Bits>
 template <typename T, typename>
-Bitmask<Bits>::Bitmask(T&& val) noexcept : current_{val} { 
+Bitmask<Bits>::Bitmask(T const&& val) noexcept : current_{val} { 
 	static_assert(std::is_integral_v<remove_cvref_t<T>>, "Invalid conversion from non-integral type to Bitmask<T>");
 }
 
 template <typename Bits>
 template <typename T>
-Bitmask<Bits>::Bitmask(T&& val) noexcept : current_{val} { 
+Bitmask<Bits>::Bitmask(T const&& val) noexcept : current_{val} { 
 	static_assert(std::is_integral_v<remove_cvref_t<T>>, "Invalid conversion from non-integral type to Bitmask<T>");
 }
 

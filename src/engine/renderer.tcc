@@ -11,26 +11,42 @@ Renderer<T, ShaderPolicy>::~Renderer() {
 
 template <typename T, typename ShaderPolicy>
 void Renderer<T, ShaderPolicy>::render() const {
-	if constexpr(requires_setup(0))
+	if constexpr(requires_setup(OVERLOAD_RESOLVER))
 		static_cast<T const&>(*this).render_setup();
 
-	if constexpr(object_is_transformable(0)) {
+	if constexpr(object_is_transformable(OVERLOAD_RESOLVER)) {
 		if(object_has_been_transformed()) {
 			policy_.shader()->template upload_uniform<true>(Shader::MODEL_UNIFORM_NAME, get_model_matrix());
 			object_has_been_transformed() = false;
 		}
 	}
 
-	if constexpr(policy_is_automatic(0))
+	if constexpr(policy_is_automatic(OVERLOAD_RESOLVER))
 		policy_();
+
+    bind();
+    draw();
+    unbind();
 	
-	glBindVertexArray(vao_);
-	glDrawElements(GL_TRIANGLES, idx_size_, GL_UNSIGNED_INT, static_cast<void*>(0));
-	glBindVertexArray(0);
-	
-	if constexpr(requires_cleanup(0)) 
+	if constexpr(requires_cleanup(OVERLOAD_RESOLVER)) 
 		static_cast<T const&>(*this).render_cleanup();
 }
+
+template <typename T, typename ShaderPolicy>
+void Renderer<T, ShaderPolicy>::bind() const {
+	glBindVertexArray(vao_);
+}   
+
+template <typename T, typename ShaderPolicy>
+void Renderer<T, ShaderPolicy>::draw() const {
+	glDrawElements(GL_TRIANGLES, idx_size_, GL_UNSIGNED_INT, static_cast<void*>(0));
+}
+
+template <typename T, typename ShaderPolicy>
+void Renderer<T, ShaderPolicy>::unbind() const {
+	glBindVertexArray(0);
+}
+
 
 template <typename T, typename ShaderPolicy>
 template <typename... Args>
@@ -54,7 +70,7 @@ void Renderer<T, ShaderPolicy>::init(Args&&... args) {
 
 		auto const NUMBER_OF_VERTICES = size(vertices_tag{});
 	
-		GLuint const TOTAL_SIZE = VALUE_TYPE_SIZE * NUMBER_OF_VERTICES * VERTEX_SIZE;
+		GLuint const TOTAL_SIZE = VALUE_TYPE_SIZE * NUMBER_OF_VERTICES;
 
 		/* Upload to gpu */
 		glBufferData(GL_ARRAY_BUFFER, TOTAL_SIZE, &vertices[0], GL_STATIC_DRAW);
