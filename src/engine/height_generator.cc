@@ -2,7 +2,7 @@
 #include "interpolation.h"
 #include <cmath>
 
-HeightGenerator::HeightGenerator(float amplitude) : amplitude_{amplitude}, rd_{}, mt_{rd_()}, dist_{-amplitude_, amplitude_} { }
+HeightGenerator::HeightGenerator(float amplitude) : amplitude_{amplitude}, mt_{std::random_device{}()}, dist_{-amplitude_, amplitude_}, seed_{seed_dist_(mt_)} { }
 
 float HeightGenerator::generate(int x, int z) {
     float height = 0.f;
@@ -22,7 +22,7 @@ float HeightGenerator::generate_noise(int x, int z) {
 
     auto it = cache_.find(hash);
     if(it == std::end(cache_)) {
-        mt_.seed(x * 1993 + z * 1290);
+        mt_.seed(seed_ + x * 1993 + z * 1290);
         it = cache_.emplace_hint(std::end(cache_), hash, dist_(mt_));
     }
     
@@ -63,3 +63,8 @@ float HeightGenerator::interpolated_noise(float x, float z) {
 
     return interpolation::cosine(rem_z, interp1, interp2);
 }
+
+std::uniform_int_distribution<int> HeightGenerator::seed_dist_{
+    -DISTR_MAX_MIN,
+     DISTR_MAX_MIN
+};
