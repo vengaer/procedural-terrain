@@ -41,7 +41,7 @@ class Framebuffer {
 
         void init();
         void setup_texture_environment();
-        void delete_textures();
+        void resize();
 
 };
 

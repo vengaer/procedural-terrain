@@ -8,7 +8,7 @@ Framebuffer<N>::Framebuffer(float width_ratio, float height_ratio) : width_ratio
 template <std::size_t N>
 Framebuffer<N>::~Framebuffer() {
     glDeleteFramebuffers(1, &fbo_);
-    delete_textures();
+    glDeleteTextures(N, &textures_[0]);
 
 	instances_.erase(
 		std::remove_if(std::begin(instances_), 
@@ -44,10 +44,27 @@ void Framebuffer<N>::unbind() {
 template <std::size_t N>
 void Framebuffer<N>::reallocate() {
     glBindTexture(GL_TEXTURE_2D, 0);
-    for(auto fb : instances_) {
-        fb.get().delete_textures();
-        fb.get().setup_texture_environment();
+    for(auto fb : instances_)
+        fb.get().resize();
+}
+
+template <std::size_t N>
+void Framebuffer<N>::resize() {
+    for(auto texture : textures_) {
+        glBindTexture(GL_TEXTURE_2D, texture);
+
+        glTexImage2D(GL_TEXTURE_2D,
+                     0,
+                     GL_RGBA16F,
+                     Viewport::width * width_ratio_,
+                     Viewport::height * height_ratio_,
+                     0,
+                     GL_RGB,
+                     GL_FLOAT,
+                     nullptr);
     }
+    glBindTexture(GL_TEXTURE_2D, 0);
+
 }
 
 template <std::size_t N>
@@ -98,11 +115,6 @@ void Framebuffer<N>::setup_texture_environment() {
 	if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		throw FramebufferException{"Generated framebuffer not complete"};
     unbind();
-}
-
-template <std::size_t N>
-void Framebuffer<N>::delete_textures() {
-    glDeleteTextures(N, &textures_[0]);
 }
 
 template <std::size_t N>

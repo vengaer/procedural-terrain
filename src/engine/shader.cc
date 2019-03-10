@@ -79,8 +79,18 @@ GLuint Shader::program_id() const {
 
 void Shader::reallocate_textures(int width, int height) {
 	unbind_scene_texture();
-	delete_buffers();
-	setup_texture_environment(width, height);
+
+    bind_scene_texture();
+    glTexImage2D(GL_TEXTURE_2D,
+                 0,
+                 GL_RGBA16F,
+                 width,
+                 height,
+                 0,
+                 GL_RGB,
+                 GL_FLOAT,
+                 nullptr);
+
 	bind_main_framebuffer();
 }
 
