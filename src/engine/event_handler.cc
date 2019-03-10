@@ -1,6 +1,7 @@
 #include "context.h"
 #include "event_handler.h"
 #include "exception.h"
+#include "framebuffer.h"
 #include "shader.h"
 #include "viewport.h"
 #include <cstddef>
@@ -119,6 +120,9 @@ void EventHandler::size_callback(GLFWwindow*, int width, int height) {
 	update_perspective();
 	Shader::reallocate_textures(width, height);
     Viewport::update();
+    
+    Framebuffer<1u>::reallocate();
+    Framebuffer<2u>::reallocate();
 }
 
 bool EventHandler::instantiated_ = false;

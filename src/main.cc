@@ -4,6 +4,7 @@
 #include "cuboid.h"
 #include "cylinder.h"
 #include "ellipsoid.h"
+#include "framebuffer.h"
 #include "frametime.h"
 #include "event_handler.h"
 #include "exception.h"
