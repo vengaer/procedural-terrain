@@ -17,7 +17,6 @@ void PostProcessing::perform() const {
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, mix_.texture());
-    //glBindTexture(GL_TEXTURE_2D, bloom_.textures()[0]);
 }
 
 bool PostProcessing::enabled() {

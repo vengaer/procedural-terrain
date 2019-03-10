@@ -34,6 +34,7 @@ template <std::size_t N>
 void Framebuffer<N>::bind() const {
     glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
     glDrawBuffers(N, &color_attachments_[0]);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 template <std::size_t N>

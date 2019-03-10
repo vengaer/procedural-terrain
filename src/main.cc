@@ -27,6 +27,7 @@ int main() {
 	
 	try{
 		Window window{"Main", width, height};
+
 		std::shared_ptr<Shader> scene_shader   = std::make_shared<Shader>("assets/shaders/scene.vert", Shader::Type::Vertex,
 																		  "assets/shaders/scene.frag", Shader::Type::Fragment);
 		std::shared_ptr<Shader> terrain_shader = std::make_shared<Shader>("assets/shaders/terrain.vert", Shader::Type::Vertex, 
@@ -38,6 +39,8 @@ int main() {
 
 		std::shared_ptr<Camera> cam = std::make_shared<Camera>();
 		EventHandler::instantiate(cam);
+
+
 		Ellipsoid sun{automatic_shader_handler{sun_shader}};
         sun.translate(glm::vec3{-80.0, 40.0, 0.0});
         sun.scale(glm::vec3{10.0, 10.0, 10.0});
@@ -56,19 +59,64 @@ int main() {
 
 		Scene scene{automatic_shader_handler{scene_shader}, {0.1f, 0.2f, 0.4f, 0.5f}};
 
-        Shader::upload_to_all("ufrm_sun_position", sun.position());
+        terrain_shader->upload_uniform("ufrm_sun_position", sun.position());
         
-        PostProcessing post_proc;
+        PostProcessing post_processing;
+
+        glm::vec4 refraction_clipping{0.f, -1.f, 0.f, height_diff};
+        glm::vec4 reflection_clipping{0.f, 1.f, 0.f, -height_diff};
+        glm::vec4 refraction_clipping_sun{0.f, -1.f, 0.f, -10.f};
+        glm::vec4 no_clipping{0.f, -1.f, 0.f, 10'000};
+
+    
+        using Framebuffer = Framebuffer<1u>;
+        Framebuffer reflection_fb{Framebuffer::FULL_WIDTH, Framebuffer::FULL_HEIGHT};
+        Framebuffer refraction_fb{Framebuffer::FULL_WIDTH, Framebuffer::FULL_HEIGHT};
+        water_shader->upload_uniform("refl_texture", 0);
+        water_shader->upload_uniform("refr_texture", 1);
 
 		while(!window.should_close()){
 			window.clear();
 			frametime::update();
+            
+            water_shader->upload_uniform("ufrm_camera_pos", cam->position());
+
+            reflection_fb.bind();
+            terrain_shader->upload_uniform("ufrm_clipping_plane", reflection_clipping);
+            sun_shader->upload_uniform("ufrm_clipping_plane", no_clipping);
+
+            glm::vec3 pos = cam->position();
+            float dist = 2.f * (pos.y - water_height);
+            cam->invert_pitch();
+            cam->set_position(glm::vec3{pos.x, pos.y-dist, pos.z});
+
+            sun.render();
+            terrain.render();
+
+            cam->set_position(pos);
+            cam->invert_pitch();
+
+            refraction_fb.bind();
+            terrain_shader->upload_uniform("ufrm_clipping_plane", refraction_clipping);
+            sun_shader->upload_uniform("ufrm_clipping_plane", refraction_clipping_sun);
+
+            sun.render();
+            terrain.render();
+
+            Shader::bind_main_framebuffer();
+            terrain_shader->upload_uniform("ufrm_clipping_plane", no_clipping);
+            sun_shader->upload_uniform("ufrm_clipping_plane", no_clipping);
 
 			sun.render();			
 			terrain.render();
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, reflection_fb.texture());
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, refraction_fb.texture());
             water.render();
 
-            post_proc.perform();
+            Shader::bind_scene_texture();
+            post_processing.perform();
 			scene.render(); 
 			window.update();
 		}

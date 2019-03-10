@@ -1,5 +1,6 @@
 #include "frametime.h"
 #include "camera.h"
+#include "shader.h"
 #include "type_conversion.h"
 #include <cmath>
 
@@ -61,6 +62,30 @@ glm::mat4 Camera::view() const {
 
 ClippingPlane Camera::clipping_plane() const {
 	return clipping_plane_;
+}
+
+glm::vec3 Camera::position() {
+    return position_;
+}
+
+void Camera::set_position(glm::vec3 pos) {
+    position_ = pos;
+    update_view();
+    Shader::template upload_to_all<true>(Shader::VIEW_UNIFORM_NAME, view());
+}
+
+void Camera::invert_pitch() {
+    pitch_ *= -1.f;
+	pitch_ = glm::clamp(pitch_, -89.f, 89.f);
+
+	local_z_.x = std::cos(glm::radians(yaw_)) * std::cos(glm::radians(pitch_));
+	local_z_.y = std::sin(glm::radians(pitch_));
+	local_z_.z = std::sin(glm::radians(yaw_)) * std::cos(glm::radians(pitch_));
+	local_z_ = glm::normalize(local_z_);
+
+	compute_local_xy();
+	update_view();
+    Shader::template upload_to_all<true>(Shader::VIEW_UNIFORM_NAME, view());
 }
 
 void Camera::compute_local_xy(){

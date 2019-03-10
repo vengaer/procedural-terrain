@@ -25,11 +25,16 @@ class Camera {
 
 		void translate(Direction dir, Speed speed = Speed::Default);
 		void rotate(double delta_x, double delta_y);
+        
 
 		float fov() const;
 		glm::mat4 view() const;
 
 		ClippingPlane clipping_plane() const;
+        
+        glm::vec3 position();
+        void set_position(glm::vec3 pos);
+        void invert_pitch();
 
 	private:
 		glm::vec3 position_;
