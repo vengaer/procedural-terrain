@@ -9,12 +9,14 @@
 #include "shader.h"
 #include "shader_handler.h"
 #include "texture.h"
+#include "traits.h"
 #include <cmath>
 #include <cstddef>
 #include <GL/glew.h>
 #include <memory>
 #include <string>
 #include <tuple>
+#include <type_traits>
 #include <utility>
 
 template <typename ShaderPolicy = manual_shader_handler>

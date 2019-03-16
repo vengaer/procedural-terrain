@@ -376,6 +376,15 @@ struct promote : type_is<decltype(std::declval<T>() | std::declval<T>())> { };
 template <typename T>
 using promote_t = typename promote<T>::type;
 
+template <typename, typename = void>
+struct is_trivially_callable : std::false_type { };
+
+template <typename T>
+struct is_trivially_callable<T, std::void_t<decltype(std::declval<T>()())>> : std::true_type { };
+
+template <typename T>
+inline bool constexpr is_trivially_callable_v = is_trivially_callable<T>::value;
+
 
 
 #endif
