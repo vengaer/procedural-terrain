@@ -34,9 +34,6 @@ class Water : public Plane<ShaderPolicy> {
         template <typename SceneRenderer, typename... Shaders>
         void prepare(SceneRenderer renderer, Shaders const&... shaders);
 
-        template <typename SceneRenderer, typename... Shaders>
-        void prepare(SceneRenderer, Shaders const&&...) = delete;
-
         void render();
         void translate(glm::vec3 direction);
 
