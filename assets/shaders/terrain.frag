@@ -9,7 +9,7 @@ in vec3 normal;
 
 in float terrain_amplitude;
 
-const float ambient_strength = 0.1;
+const float ambient_strength = 0.05;
 const vec3 sun_color = vec3(1.0, 1.0, 1.0);
 
 void main() {
@@ -23,8 +23,8 @@ void main() {
     float y_pos = float(position.y);
     float weight = (y_pos + terrain_amplitude) / (2*terrain_amplitude);
     
-    vec3 ridge_color  = vec3(0.96, 0.86, 0.65);
-    vec3 valley_color = vec3(0.0, 0.1, 0.1);
+    vec3 ridge_color  = vec3(0.96, 0.86, 0.65) * 0.7;
+    vec3 valley_color  = vec3(0.22, 0.21, 0.20);
 
     vec3 color = mix(valley_color, ridge_color, weight); 
 

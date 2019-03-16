@@ -19,7 +19,7 @@ uniform mat4 ufrm_view;
 uniform vec3 ufrm_camera_pos;
 uniform vec3 ufrm_sun_position;
 
-const float tiling = 6.0;
+const float tiling = 4.0;
 
 void main() {
     vec4 world_pos = ufrm_model * vec4(position_, 1.0);

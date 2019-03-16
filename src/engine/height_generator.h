@@ -14,7 +14,7 @@ class HeightGenerator {
         float generate(int x, int z);
 
         static std::size_t constexpr OCTAVES = 3u;
-        static float constexpr ROUGHNESS = 0.2f; 
+        static float constexpr ROUGHNESS = 0.3f; 
     private:
         float const amplitude_;
         std::mt19937 mt_;
