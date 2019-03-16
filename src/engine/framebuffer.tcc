@@ -59,7 +59,7 @@ void Framebuffer<N, T>::bind() const {
 }
 
 template <std::size_t N, std::size_t T>
-void Framebuffer<N, T>::unbind() {
+void Framebuffer<N, T>::unbind() const {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
@@ -72,29 +72,15 @@ void Framebuffer<N, T>::reallocate() {
 
 template <std::size_t N, std::size_t T>
 void Framebuffer<N, T>::resize() {
-    for(auto [texture, rbo] : zip(textures_, rbos_)) {
-        glBindTexture(GL_TEXTURE_2D, texture);
-
-        glTexImage2D(GL_TEXTURE_2D,
-                     0,
-                     GL_RGBA16F,
-                     Viewport::width * width_ratio_,
-                     Viewport::height * height_ratio_,
-                     0,
-                     GL_RGB,
-                     GL_FLOAT,
-                     nullptr);
-
-        glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-        glRenderbufferStorage(GL_RENDERBUFFER,
-                              GL_DEPTH_COMPONENT,
-                              Viewport::width * width_ratio_,
-                              Viewport::height * height_ratio_);
-    
+    if constexpr(has_color_attachment()) {
+        glDeleteTextures(N, &textures_[0]);
+        glDeleteRenderbuffers(N, &rbos_[0]);
     }
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
+    if constexpr(has_depth_attachment())
+        glDeleteTextures(N, &depth_textures_[0]);
+
+    setup_texture_environment();
 }
 
 template <std::size_t N, std::size_t T>

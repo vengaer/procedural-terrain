@@ -111,6 +111,7 @@ void EventHandler::mouse_callback(GLFWwindow*, double x, double y) {
 	mouse_position_ = { x, y };
 	update_view();
 }
+#include "logger.h"
 
 void EventHandler::size_callback(GLFWwindow*, int width, int height) {
 	auto* context = static_cast<Context*>(glfwGetWindowUserPointer(glfwGetCurrentContext()));
@@ -123,7 +124,7 @@ void EventHandler::size_callback(GLFWwindow*, int width, int height) {
     
     Framebuffer<1u>::reallocate();
     Framebuffer<2u>::reallocate();
-    Framebuffer<1u, TexType::Depth>::reallocate();
+    Framebuffer<1u, TexType::Color | TexType::Depth>::reallocate();
 }
 
 bool EventHandler::instantiated_ = false;

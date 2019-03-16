@@ -49,7 +49,7 @@ class Framebuffer {
         std::array<GLuint, N> depth_textures() const;
 
         void bind() const;
-        static void unbind();
+        void unbind() const;
 
         static void reallocate();
         
