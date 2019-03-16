@@ -44,7 +44,7 @@ single_thread: terrain
 	./terrain
 
 stats:
-	find ./ -type f \( -iname \*.cc -o -iname \*.tcc -o -iname \*.h -o -iname \*.vert -o -iname \*.frag -o -iname \*.glsl \) | xargs wc -l
+	find assets/shaders src -type f \( -iname \*.cc -o -iname \*.tcc -o -iname \*.h -o -iname \*.vert -o -iname \*.frag -o -iname \*.glsl \) | xargs wc -l
 
 TODO:
 	grep -lr TODO . | grep -vE 'Makefile|git'
