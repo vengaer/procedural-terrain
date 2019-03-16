@@ -1,5 +1,5 @@
-#ifndef COLLECTIONS_H
-#define COLLECTIONS_H
+#ifndef ITER_H
+#define ITER_H
 
 #pragma once
 #include "traits.h"
@@ -229,5 +229,5 @@ struct bind_enum {
 	}
 };
 
-#include "collections.tcc"
+#include "iter.tcc"
 #endif

@@ -3,7 +3,6 @@
 
 #pragma once
 #include "bitmask.h"
-#include "collections.h"
 #include "exception.h"
 #include "viewport.h"
 #include <algorithm>
