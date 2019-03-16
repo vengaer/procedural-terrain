@@ -72,8 +72,7 @@ try {
         water.prepare(render_scene, sun_shader, terrain_shader);
 
         Shader::bind_main_framebuffer();
-        sun.render();			
-        terrain.render();
+        render_scene();
         water.render();
 
         Shader::bind_scene_texture();
