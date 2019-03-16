@@ -2,11 +2,11 @@
 #define SHADER_H
 
 #pragma once
-#include "ct_sequence.h"
 #include "exception.h"
 #include "iter.h"
 #include "logger.h"
 #include "result.h"
+#include "sequence.h"
 #include "traits.h"
 #include "type_conversion.h"
 #include "uniform_impl.h"

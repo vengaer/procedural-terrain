@@ -1,5 +1,5 @@
-#ifndef CT_SEQUENCE_H
-#define CT_SEQUENCE_H
+#ifndef SEQUENCE_H
+#define SEQUENCE_H
 
 #pragma once
 #include "traits.h"
