@@ -19,10 +19,6 @@
 #include "window.h"
 #include <type_traits>
 
-#include <cmath>
-
-template <typename Exception, typename = std::enable_if_t<is_exception_v<Exception>>>
-int handle_exception(Exception const& err);
 
 int main() 
 try {
@@ -88,19 +84,13 @@ try {
 	return 0;
 }
 catch(std::exception const& err){
-    return handle_exception(err);
-}
-
-
-/* Return codes
-* 0 - 9 - Fundamental OpenGL calls
-* 10-19 - Error while reding, processing or reloading shaders
-* 20-29 - Function argument related
-* 30-39 - Over- or underflow
-* 40-49 - File system related
-*/
-template <typename Exception, typename>
-int handle_exception(Exception const& err) {
+    /* Return codes
+    * 0 - 9 - Fundamental OpenGL calls
+    * 10-19 - Error while reding, processing or reloading shaders
+    * 20-29 - Function argument related
+    * 30-39 - Over- or underflow
+    * 40-49 - File system related
+    */
 	using namespace std::string_literals;
 	std::string type;
 	int ret_val;
@@ -109,64 +99,67 @@ int handle_exception(Exception const& err) {
 		ret_val = 20;
 	}
 	else if(typeid(err) == typeid(BadUniformParametersException)) {
-			type = "BadUniformParametersException"s;
-			ret_val = 21;
+        type = "BadUniformParametersException"s;
+        ret_val = 21;
 	}
 	else if(typeid(err) == typeid(ContextCreationException)) {
-			type = "ContextCreationException"s;
-			ret_val = 2;
+        type = "ContextCreationException"s;
+        ret_val = 2;
 	}
 	else if(typeid(err) == typeid(FileSystemException)) {
-			type = "FileSystemException"s;
-			ret_val = 40;
+        type = "FileSystemException"s;
+        ret_val = 40;
 	}
 	else if(typeid(err) == typeid(FileIOException)) {
-			type = "FileIOException"s;
-			ret_val = 41;
+        type = "FileIOException"s;
+        ret_val = 41;
 	}
 	else if(typeid(err) == typeid(FramebufferException)) {
-			ret_val = 14;
-			type = "FramebufferException"s;
+        ret_val = 14;
+        type = "FramebufferException"s;
 	}
 	else if(typeid(err) == typeid(GLException)) {
-			type = "GLException"s;
-			ret_val = 1;
+        type = "GLException"s;
+        ret_val = 1;
 	}
 	else if(typeid(err) == typeid(InvalidArgumentException)) {
-			type = "InvalidArgumentException"s;
-			ret_val = 22;
+        type = "InvalidArgumentException"s;
+        ret_val = 22;
 	}
 	else if(typeid(err) == typeid(OutOfOrderInitializationException)) {
-			type = "OutOfOrderInitializationException"s;
-			ret_val = 23;
+        type = "OutOfOrderInitializationException"s;
+        ret_val = 23;
 	}
 	else if(typeid(err) == typeid(OverflowException)) {
-			type = "OverflowException"s;
-			ret_val = 30;
+        type = "OverflowException"s;
+        ret_val = 30;
 	}
 	else if(typeid(err) == typeid(ShaderCompilationException)) {
-			type = "ShaderCompilationException"s;
-			ret_val = 10;
+        type = "ShaderCompilationException"s;
+        ret_val = 10;
 	}
 	else if(typeid(err) == typeid(ShaderIncludeException)) {
-			type = "ShaderIncludeException"s;
-			ret_val = 11;
+        type = "ShaderIncludeException"s;
+        ret_val = 11;
 	}
 	else if(typeid(err) == typeid(ShaderLinkingException)) {
-			type = "ShaderLinkingException"s;
-			ret_val = 12;
+        type = "ShaderLinkingException"s;
+        ret_val = 12;
 	}
 	else if(typeid(err) == typeid(ShaderReloadException)) {
-			type = "ShaderReloadException"s;
-			ret_val = 13;
+        type = "ShaderReloadException"s;
+        ret_val = 13;
 	}
 	else if(typeid(err) == typeid(UnderflowException)) {
-			type = "UnderflowException"s;
-			ret_val = 31;
+        type = "UnderflowException"s;
+        ret_val = 31;
 	}
 	else {
 		throw;
 	}
+
 	ERR_LOG_CRIT("Program terminated after an instance of ", type,  " was thrown: ", err.what());
 	return ret_val;
 }
+
+
