@@ -14,10 +14,12 @@
 #include "shader.h"
 #include "traits.h"
 #include "terrain.h"
+#include "texture.h"
+#include "water.h"
 #include "window.h"
 #include <type_traits>
 
-#include "height_generator.h"
+#include <cmath>
 
 template <typename Exception, typename = std::enable_if_t<is_exception_v<Exception>>>
 int handle_exception(Exception const& err);
@@ -60,24 +62,40 @@ int main() {
 		Scene scene{automatic_shader_handler{scene_shader}, {0.1f, 0.2f, 0.4f, 0.5f}};
 
         terrain_shader->upload_uniform("ufrm_sun_position", sun.position());
+        water_shader->upload_uniform("ufrm_sun_position", sun.position());
         
         PostProcessing post_processing;
 
-        glm::vec4 refraction_clipping{0.f, -1.f, 0.f, height_diff};
+        Texture dudv{"assets/textures/waterDUDV.png"};
+        Texture normal{"assets/textures/normal.png"};
+
+        glm::vec4 refraction_clipping{0.f, -1.f, 0.f, height_diff + 1.f};
         glm::vec4 reflection_clipping{0.f, 1.f, 0.f, -height_diff};
         glm::vec4 refraction_clipping_sun{0.f, -1.f, 0.f, -10.f};
         glm::vec4 no_clipping{0.f, -1.f, 0.f, 10'000};
 
     
-        using Framebuffer = Framebuffer<1u>;
-        Framebuffer reflection_fb{Framebuffer::FULL_WIDTH, Framebuffer::FULL_HEIGHT};
-        Framebuffer refraction_fb{Framebuffer::FULL_WIDTH, Framebuffer::FULL_HEIGHT};
+        using ReflectionFb = Framebuffer<1u>;
+        using RefractionFb = Framebuffer<1u, TexType::Color | TexType::Depth>;
+        ReflectionFb reflection_fb{ReflectionFb::FULL_WIDTH, ReflectionFb::FULL_HEIGHT};
+        RefractionFb refraction_fb{RefractionFb::FULL_WIDTH, RefractionFb::FULL_HEIGHT};
+
         water_shader->upload_uniform("refl_texture", 0);
         water_shader->upload_uniform("refr_texture", 1);
+        water_shader->upload_uniform("dudv_map", 2);
+        water_shader->upload_uniform("normal_map", 3);
+        water_shader->upload_uniform("depth_map", 4);
+
+        float const wave_speed = 0.03f;
+        float dudv_offset = 0.f;
 
 		while(!window.should_close()){
 			window.clear();
 			frametime::update();
+
+            dudv_offset += wave_speed * frametime::delta();
+            dudv_offset = std::fmod(dudv_offset, 1.f);
+            water_shader->upload_uniform("dudv_offset", dudv_offset);
             
             water_shader->upload_uniform("ufrm_camera_pos", cam->position());
 
@@ -113,7 +131,14 @@ int main() {
             glBindTexture(GL_TEXTURE_2D, reflection_fb.texture());
             glActiveTexture(GL_TEXTURE1);
             glBindTexture(GL_TEXTURE_2D, refraction_fb.texture());
+            dudv.bind(2);
+            normal.bind(3);
+            glActiveTexture(GL_TEXTURE4);
+            glBindTexture(GL_TEXTURE_2D,refraction_fb.depth_texture());
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             water.render();
+            glDisable(GL_BLEND);
 
             Shader::bind_scene_texture();
             post_processing.perform();

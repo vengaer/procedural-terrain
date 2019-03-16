@@ -10,7 +10,7 @@ SRC = $(wildcard src/*.cc) \
 
 OBJ := $(addsuffix .o,$(basename $(SRC)))
 
-INC = -I src/ -I src/engine/ -I src/geometry/ -I src/math/ -I src/utils/ -I src/post_proc/
+INC = -I src/ -I src/engine/ -I src/geometry/ -I src/math/ -I src/utils/ -I src/post_proc/ -I src/environment/ -I assets/include/stb/
 
 ifeq ($(findstring Linux, $(UNAME)), Linux)
 XRUNNING := $(shell echo $(DISPLAY) &>/dev/null; echo $$?)

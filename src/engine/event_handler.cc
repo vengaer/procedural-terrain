@@ -123,6 +123,7 @@ void EventHandler::size_callback(GLFWwindow*, int width, int height) {
     
     Framebuffer<1u>::reallocate();
     Framebuffer<2u>::reallocate();
+    Framebuffer<1u, TexType::Depth>::reallocate();
 }
 
 bool EventHandler::instantiated_ = false;
