@@ -24,134 +24,73 @@
 template <typename Exception, typename = std::enable_if_t<is_exception_v<Exception>>>
 int handle_exception(Exception const& err);
 
-int main() {
+int main() 
+try {
 	unsigned constexpr width = 960, height = 540;
 	
-	try{
-		Window window{"Main", width, height};
+    Window window{"Main", width, height};
 
-		std::shared_ptr<Shader> scene_shader   = std::make_shared<Shader>("assets/shaders/scene.vert", Shader::Type::Vertex,
-																		  "assets/shaders/scene.frag", Shader::Type::Fragment);
-		std::shared_ptr<Shader> terrain_shader = std::make_shared<Shader>("assets/shaders/terrain.vert", Shader::Type::Vertex, 
-											 							  "assets/shaders/terrain.frag", Shader::Type::Fragment);
-		std::shared_ptr<Shader> sun_shader     = std::make_shared<Shader>("assets/shaders/sun.vert", Shader::Type::Vertex, 
-																		  "assets/shaders/sun.frag", Shader::Type::Fragment);
-        std::shared_ptr<Shader> water_shader   = std::make_shared<Shader>("assets/shaders/water.vert", Shader::Type::Vertex,
-                                                                          "assets/shaders/water.frag", Shader::Type::Fragment);
+    std::shared_ptr<Shader> scene_shader   = std::make_shared<Shader>("assets/shaders/scene.vert", Shader::Type::Vertex,
+                                                                      "assets/shaders/scene.frag", Shader::Type::Fragment);
+    std::shared_ptr<Shader> terrain_shader = std::make_shared<Shader>("assets/shaders/terrain.vert", Shader::Type::Vertex, 
+                                                                      "assets/shaders/terrain.frag", Shader::Type::Fragment);
+    std::shared_ptr<Shader> sun_shader     = std::make_shared<Shader>("assets/shaders/sun.vert", Shader::Type::Vertex, 
+                                                                      "assets/shaders/sun.frag", Shader::Type::Fragment);
+    std::shared_ptr<Shader> water_shader   = std::make_shared<Shader>("assets/shaders/water.vert", Shader::Type::Vertex,
+                                                                      "assets/shaders/water.frag", Shader::Type::Fragment);
 
-		std::shared_ptr<Camera> cam = std::make_shared<Camera>();
-		EventHandler::instantiate(cam);
+    std::shared_ptr<Camera> camera = std::make_shared<Camera>();
+    EventHandler::instantiate(camera);
 
-
-		Ellipsoid sun{automatic_shader_handler{sun_shader}};
-        sun.translate(glm::vec3{-80.0, 40.0, 0.0});
-        sun.scale(glm::vec3{10.0, 10.0, 10.0});
-        
-        float const water_height   = -10.8f;
-        float const terrain_height = -10.f;
-        float const height_diff = water_height - terrain_height;
-
-        Plane water{automatic_shader_handler{water_shader}};
-        water.translate(glm::vec3{0.0, water_height, 0.0});
-        water.scale(glm::vec3{40.0, 1.0, 40.0});
-        
-        Terrain terrain{automatic_shader_handler{terrain_shader}, 10.f, 2.f, .05f, 2.f, .05f};
-        terrain.translate(glm::vec3{0.0, terrain_height, 0.0});
-        terrain.scale(glm::vec3{20.0, 1.0, 20.0});
-
-		Scene scene{automatic_shader_handler{scene_shader}, {0.1f, 0.2f, 0.4f, 0.5f}};
-
-        terrain_shader->upload_uniform("ufrm_sun_position", sun.position());
-        water_shader->upload_uniform("ufrm_sun_position", sun.position());
-        
-        PostProcessing post_processing;
-
-        Texture dudv{"assets/textures/waterDUDV.png"};
-        Texture normal{"assets/textures/normal.png"};
-
-        glm::vec4 refraction_clipping{0.f, -1.f, 0.f, height_diff + 1.f};
-        glm::vec4 reflection_clipping{0.f, 1.f, 0.f, -height_diff};
-        glm::vec4 refraction_clipping_sun{0.f, -1.f, 0.f, -10.f};
-        glm::vec4 no_clipping{0.f, -1.f, 0.f, 10'000};
-
+    Ellipsoid sun{automatic_shader_handler{sun_shader}};
+    sun.translate(glm::vec3{-80.0, 40.0, 0.0});
+    sun.scale(glm::vec3{10.0, 10.0, 10.0});
     
-        using ReflectionFb = Framebuffer<1u>;
-        using RefractionFb = Framebuffer<1u, TexType::Color | TexType::Depth>;
-        ReflectionFb reflection_fb{ReflectionFb::FULL_WIDTH, ReflectionFb::FULL_HEIGHT};
-        RefractionFb refraction_fb{RefractionFb::FULL_WIDTH, RefractionFb::FULL_HEIGHT};
+    float const water_height   = -10.8f;
+    float const terrain_height = -10.f;
 
-        water_shader->upload_uniform("refl_texture", 0);
-        water_shader->upload_uniform("refr_texture", 1);
-        water_shader->upload_uniform("dudv_map", 2);
-        water_shader->upload_uniform("normal_map", 3);
-        water_shader->upload_uniform("depth_map", 4);
+    Water water{water_shader, camera, terrain_height, automatic_shader_handler{water_shader}};
+    water.translate(glm::vec3{0.0, water_height, 0.0});
+    water.scale(glm::vec3{40.0, 1.0, 40.0});
+    
+    Terrain terrain{automatic_shader_handler{terrain_shader}, 10.f, 2.f, .05f, 2.f, .05f};
+    terrain.translate(glm::vec3{0.0, terrain_height, 0.0});
+    terrain.scale(glm::vec3{20.0, 1.0, 20.0});
 
-        float const wave_speed = 0.03f;
-        float dudv_offset = 0.f;
+    Scene scene{automatic_shader_handler{scene_shader}, {0.1f, 0.2f, 0.4f, 0.5f}};
 
-		while(!window.should_close()){
-			window.clear();
-			frametime::update();
+    terrain_shader->upload_uniform("ufrm_sun_position", sun.position());
+    water_shader->upload_uniform("ufrm_sun_position", sun.position());
+    
+    PostProcessing post_processing;
 
-            dudv_offset += wave_speed * frametime::delta();
-            dudv_offset = std::fmod(dudv_offset, 1.f);
-            water_shader->upload_uniform("dudv_offset", dudv_offset);
-            
-            water_shader->upload_uniform("ufrm_camera_pos", cam->position());
+    auto render_scene = [&sun, &terrain]() {
+        sun.render();
+        terrain.render();
+    };
 
-            reflection_fb.bind();
-            terrain_shader->upload_uniform("ufrm_clipping_plane", reflection_clipping);
-            sun_shader->upload_uniform("ufrm_clipping_plane", no_clipping);
+    while(!window.should_close()){
+        window.clear();
+        frametime::update();
 
-            glm::vec3 pos = cam->position();
-            float dist = 2.f * (pos.y - water_height);
-            cam->invert_pitch();
-            cam->set_position(glm::vec3{pos.x, pos.y-dist, pos.z});
+        water.prepare(render_scene, sun_shader, terrain_shader);
 
-            sun.render();
-            terrain.render();
+        Shader::bind_main_framebuffer();
+        sun.render();			
+        terrain.render();
+        water.render();
 
-            cam->set_position(pos);
-            cam->invert_pitch();
-
-            refraction_fb.bind();
-            terrain_shader->upload_uniform("ufrm_clipping_plane", refraction_clipping);
-            sun_shader->upload_uniform("ufrm_clipping_plane", refraction_clipping_sun);
-
-            sun.render();
-            terrain.render();
-
-            Shader::bind_main_framebuffer();
-            terrain_shader->upload_uniform("ufrm_clipping_plane", no_clipping);
-            sun_shader->upload_uniform("ufrm_clipping_plane", no_clipping);
-
-			sun.render();			
-			terrain.render();
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, reflection_fb.texture());
-            glActiveTexture(GL_TEXTURE1);
-            glBindTexture(GL_TEXTURE_2D, refraction_fb.texture());
-            dudv.bind(2);
-            normal.bind(3);
-            glActiveTexture(GL_TEXTURE4);
-            glBindTexture(GL_TEXTURE_2D,refraction_fb.depth_texture());
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            water.render();
-            glDisable(GL_BLEND);
-
-            Shader::bind_scene_texture();
-            post_processing.perform();
-			scene.render(); 
-			window.update();
-		}
-	}
-	catch(std::exception const& err){
-		return handle_exception(err);
-	}
-
+        Shader::bind_scene_texture();
+        post_processing.perform();
+        scene.render(); 
+        window.update();
+    }
 	return 0;
 }
+catch(std::exception const& err){
+    return handle_exception(err);
+}
+
 
 /* Return codes
 * 0 - 9 - Fundamental OpenGL calls

@@ -11,7 +11,7 @@ in vec2 tex_coords;
 in float near;
 in float far;
 
-uniform float dudv_offset;
+uniform float ufrm_dudv_offset;
 
 uniform sampler2D refl_texture;
 uniform sampler2D refr_texture;
@@ -41,8 +41,8 @@ void main() {
 
     depth = floor_dist - water_dist;
 
-    vec2 dist_coords = texture(dudv_map, vec2(tex_coords.x + dudv_offset, tex_coords.y)).rg*0.1;
-    dist_coords = tex_coords + vec2(dist_coords.x, dist_coords.y + dudv_offset);
+    vec2 dist_coords = texture(dudv_map, vec2(tex_coords.x + ufrm_dudv_offset, tex_coords.y)).rg*0.1;
+    dist_coords = tex_coords + vec2(dist_coords.x, dist_coords.y + ufrm_dudv_offset);
     dist_coords = (texture(dudv_map, dist_coords).rg * 2.0 - 1.0) * magnitude * clamp(depth/20.0, 0.0, 1.0);
 
 
