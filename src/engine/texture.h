@@ -2,6 +2,7 @@
 #define TEXTURE_H
 
 #pragma once
+#include <cstddef>
 #include <GL/glew.h>
 #include <string>
 
@@ -11,7 +12,7 @@ class Texture {
         ~Texture();
 
         void bind() const;
-        void bind(int unit) const;
+        void bind(std::size_t unit) const;
         GLuint id() const;
 
     private:

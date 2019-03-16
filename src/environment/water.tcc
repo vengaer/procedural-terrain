@@ -57,6 +57,12 @@ void Water<ShaderPolicy>::prepare(SceneRenderer renderer, Shaders const&... shad
 
     renderer();
 
+    /* In case of driver issues */
+    upload_to_shaders("ufrm_clipping_plane",
+                      no_clip_,
+                      std::forward_as_tuple(shaders...),
+                      std::index_sequence_for<Shaders...>{});
+
     glDisable(GL_CLIP_DISTANCE0);
 }
 

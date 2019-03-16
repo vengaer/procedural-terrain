@@ -19,7 +19,7 @@ void Texture::bind() const {
     glBindTexture(GL_TEXTURE_2D, texture_);
 }
 
-void Texture::bind(int unit) const {
+void Texture::bind(std::size_t unit) const {
     glActiveTexture(GL_TEXTURE0 + unit);
     glBindTexture(GL_TEXTURE_2D, texture_);
 }
