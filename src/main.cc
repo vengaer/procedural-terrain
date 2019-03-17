@@ -1,23 +1,14 @@
-#include "bitmask.h"
 #include "camera.h"
-#include "canvas.h"
-#include "cuboid.h"
-#include "cylinder.h"
 #include "ellipsoid.h"
-#include "framebuffer.h"
 #include "frametime.h"
 #include "event_handler.h"
 #include "exception.h"
-#include "logger.h"
-#include "plane.h"
 #include "scene.h"
 #include "shader.h"
-#include "traits.h"
 #include "terrain.h"
-#include "texture.h"
 #include "water.h"
 #include "window.h"
-#include <type_traits>
+#include <memory>
 
 
 int main() 
