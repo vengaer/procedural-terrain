@@ -23,10 +23,10 @@ class EventHandler {
 
 		struct KeyMods {
 			using value_type = int;
-			static value_type constexpr shift = 0x1;
-			static value_type constexpr ctrl  = 0x2;
-			static value_type constexpr alt   = 0x4;
-			static value_type constexpr super = 0x8;
+			static value_type constexpr Shift = 0x1;
+			static value_type constexpr Ctrl  = 0x2;
+			static value_type constexpr Alt   = 0x4;
+			static value_type constexpr Super = 0x8;
 		};
 		using Mods = Bitmask<KeyMods>;
 	
@@ -43,7 +43,7 @@ class EventHandler {
 		static void update_perspective();
 		static void update_view();
 
-		static void key_callback(GLFWwindow*, int key, int, int, int mod_bits);
+		static void key_callback(GLFWwindow*, int key, int, int action, int mod_bits);
 		static void mouse_callback(GLFWwindow*, double x, double y);
 		static void size_callback(GLFWwindow*, int widht, int height);
 };

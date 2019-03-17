@@ -16,28 +16,6 @@ void Camera::init(glm::vec3 target_view) {
 	update_view();
 }
 
-void Camera::translate(Direction dir, Speed speed) {
-	int sign = std::pow(-1, enum_value(dir));
-	float speed_modifier = static_cast<float>(speed) * frametime::delta();
-	float increment = sign * speed_modifier;
-	glm::mat4 translation_matrix{1.f};
-
-	switch(enum_value(dir) / 2) {
-		case 0: 
-			translation_matrix = glm::translate(translation_matrix, increment * local_x_);
-			break;
-		case 1:
-			translation_matrix = glm::translate(translation_matrix, increment * local_y_);
-			break;
-		case 2:
-			translation_matrix = glm::translate(translation_matrix, increment * local_z_);
-			break;
-	}
-
-	position_ = translation_matrix * glm::vec4{position_, 1.f};
-	update_view();
-}
-
 void Camera::rotate(double delta_x, double delta_y) {
 	yaw_   += delta_x;
 	pitch_ += delta_y * (invert_y_ ? -1.f : 1.f);
@@ -50,6 +28,46 @@ void Camera::rotate(double delta_x, double delta_y) {
 
 	compute_local_xy();
 	update_view();
+}
+
+void Camera::set_state(Direction dir, KeyState state) {
+    if(state == KeyState::Down)
+        direction_ |= enum_value(dir);
+    else
+        direction_ &= ~enum_value(dir);
+}
+
+void Camera::set_state(Speed speed) {
+    speed_ = speed;
+}
+
+void Camera::update() {
+    if(direction_ == 0u ||
+       direction_ == (MoveDir::Right | MoveDir::Left) ||
+       direction_ == (MoveDir::Forward | MoveDir::Backward))
+        return;
+
+    glm::vec3 dir{0.f};
+
+    if((direction_ & MoveDir::Right)    == MoveDir::Right)
+        dir += local_x_;
+    if((direction_ & MoveDir::Left)     == MoveDir::Left)
+        dir -= local_x_;
+    if((direction_ & MoveDir::Up)       == MoveDir::Up)
+        dir += local_y_;
+    if((direction_ & MoveDir::Down)     == MoveDir::Down)
+        dir -= local_y_;
+    if((direction_ & MoveDir::Backward) == MoveDir::Backward)
+        dir += local_z_;
+    if((direction_ & MoveDir::Forward)  == MoveDir::Forward)
+        dir -= local_z_;
+
+    dir = glm::normalize(dir);
+
+    float speed = static_cast<float>(speed_) * frametime::delta();
+
+    position_ = glm::translate(glm::mat4{1.f}, speed * dir) * glm::vec4{position_, 1.f};
+    update_view();
 }
 
 float Camera::fov() const {

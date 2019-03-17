@@ -68,6 +68,7 @@ try {
     while(!window.should_close()){
         window.clear();
         frametime::update();
+        camera->update();
 
         water.prepare(render_scene, sun_shader, terrain_shader);
 

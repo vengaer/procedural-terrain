@@ -62,43 +62,42 @@ void EventHandler::update_view() {
 	Shader::template upload_to_all<true>(Shader::VIEW_UNIFORM_NAME, view);
 }
 
-void EventHandler::key_callback(GLFWwindow*, int key, int, int, int mod_bits) {
+void EventHandler::key_callback(GLFWwindow*, int key, int, int action, int mod_bits) {
 	using Dir = Camera::Direction;
 	using Speed = Camera::Speed;
+    using State = Camera::KeyState;
+    auto& camera = instance_->camera_;
 	Mods modifiers = static_cast<Mods>(std::move(mod_bits));
+    
+    State state = action == GLFW_RELEASE ? State::Up : State::Down;
 
-	auto& camera = instance_->camera_;
-	
-	Speed speed = ((modifiers & Mods::shift) == Mods::shift) ?
-													Speed::Fast :
-													Speed::Default;
-
-	switch(key) {
-		case GLFW_KEY_W:
-			camera->translate(Dir::Forward, speed);
-			update_view();
-			break;
-		case GLFW_KEY_S:
-			camera->translate(Dir::Backward, speed);
-			update_view();
-			break;
-		case GLFW_KEY_D:
-			camera->translate(Dir::Right, speed);
-			update_view();
-			break;
-		case GLFW_KEY_A:
-			camera->translate(Dir::Left, speed);
-			update_view();
-			break;
-		case GLFW_KEY_SPACE:
-			if((modifiers & Mods::ctrl) == Mods::ctrl)
-				camera->translate(Dir::Down, speed);
-			else
-				camera->translate(Dir::Up, speed);
-			update_view();
-			break;
-	}
-
+    switch(key) {
+        case GLFW_KEY_W:
+            camera->set_state(Dir::Forward, state);
+            break;
+        case GLFW_KEY_S:
+            camera->set_state(Dir::Backward, state);
+            break;
+        case GLFW_KEY_D:
+            camera->set_state(Dir::Right, state);
+            break;
+        case GLFW_KEY_A:
+            camera->set_state(Dir::Left, state);
+            break;
+        case GLFW_KEY_SPACE:
+            if((modifiers & Mods::Ctrl) == Mods::Ctrl)
+                camera->set_state(Dir::Down, state);
+            else
+                camera->set_state(Dir::Up, state);
+            break;
+        case GLFW_KEY_LEFT_SHIFT:
+            if(action == GLFW_RELEASE)
+                camera->set_state(Speed::Default);
+            else
+                camera->set_state(Speed::Fast);
+            break;
+    }
+    update_view();
 }
 
 
@@ -111,7 +110,6 @@ void EventHandler::mouse_callback(GLFWwindow*, double x, double y) {
 	mouse_position_ = { x, y };
 	update_view();
 }
-#include "logger.h"
 
 void EventHandler::size_callback(GLFWwindow*, int width, int height) {
 	auto* context = static_cast<Context*>(glfwGetWindowUserPointer(glfwGetCurrentContext()));

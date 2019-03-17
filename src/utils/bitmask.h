@@ -75,9 +75,9 @@ class Bitmask : public Bits {
 		template <typename T>
 		friend Bitmask<T>& operator|=(Bitmask<T>& left, typename Bitmask<T>::internal_type right);
 		template <typename T>
-		friend Bitmask<T>& operator&=(Bitmask<T> left, Bitmask<T> right);
+		friend Bitmask<T>& operator&=(Bitmask<T>& left, Bitmask<T> right);
 		template <typename T>
-		friend Bitmask<T>& operator&=(Bitmask<T> left, typename Bitmask<T>::internal_type right);
+		friend Bitmask<T>& operator&=(Bitmask<T>& left, typename Bitmask<T>::internal_type right);
 		template <typename T>
 		friend Bitmask<T>& operator^=(Bitmask<T> left, Bitmask<T> right);
 		template <typename T>
