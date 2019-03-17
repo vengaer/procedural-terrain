@@ -85,10 +85,16 @@ void EventHandler::key_callback(GLFWwindow*, int key, int, int action, int mod_b
             camera->set_state(Dir::Left, state);
             break;
         case GLFW_KEY_SPACE:
-            if((modifiers & Mods::Ctrl) == Mods::Ctrl)
-                camera->set_state(Dir::Down, state);
-            else
-                camera->set_state(Dir::Up, state);
+            if(action == GLFW_RELEASE) {
+                camera->set_state(Dir::Down, State::Up);
+                camera->set_state(Dir::Up, State::Up);
+            }
+            else {
+                if((modifiers & Mods::Ctrl) == Mods::Ctrl)
+                    camera->set_state(Dir::Down, state);
+                else
+                    camera->set_state(Dir::Up, state);
+            }
             break;
         case GLFW_KEY_LEFT_SHIFT:
             if(action == GLFW_RELEASE)

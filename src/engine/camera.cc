@@ -44,7 +44,8 @@ void Camera::set_state(Speed speed) {
 void Camera::update() {
     if(direction_ == 0u ||
        direction_ == (MoveDir::Right | MoveDir::Left) ||
-       direction_ == (MoveDir::Forward | MoveDir::Backward))
+       direction_ == (MoveDir::Forward | MoveDir::Backward) ||
+       direction_ == (MoveDir::Up | MoveDir::Down))
         return;
 
     glm::vec3 dir{0.f};
