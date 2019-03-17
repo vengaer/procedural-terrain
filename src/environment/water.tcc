@@ -18,7 +18,7 @@ template <typename SceneRenderer, typename... Shaders>
 void Water<ShaderPolicy>::prepare(SceneRenderer renderer, Shaders const&... shaders) {
     static_assert(is_trivially_callable_v<SceneRenderer>, "SceneRenderer must be a functor");
     static_assert((std::is_same_v<remove_cvref_t<Shaders>, std::shared_ptr<Shader>> && ...), 
-                  "Parameter pack may only contain variablers of type shader_ptr<Shader>");
+                  "Parameter pack may only contain variablers of type shared_ptr<Shader>");
 
     glEnable(GL_CLIP_DISTANCE0);
 
