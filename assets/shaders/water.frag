@@ -51,7 +51,7 @@ vec3 calculate_normal(vec2 coords) {
 
 float fresnel(vec3 view_dir, vec3 normal) {
     float refr_factor = dot(view_dir, normal);
-    refr_factor = pow(refr_factor, 1.5);
+    refr_factor = pow(refr_factor, 0.8);
     return clamp(refr_factor, 0.0, 1.0);
 }
 
