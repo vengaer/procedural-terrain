@@ -40,7 +40,7 @@ class Camera {
 			   float yaw = 0.f,			/* Relative to negative local z */
 			   float pitch = 0.f,
 			   bool invert_y = false,
-			   ClippingPlane plane = {0.1f, 100.f});
+			   ClippingPlane plane = {0.1f, 200.f});
 
 		void rotate(double delta_x, double delta_y);
 

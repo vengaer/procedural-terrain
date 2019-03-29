@@ -8,20 +8,23 @@
 
 class Texture {
     public:
+        Texture() = default;
+        Texture(GLuint tex_id);
         Texture(std::string const& path);
+        Texture(unsigned char* data, std::size_t width, std::size_t height);
         ~Texture();
 
-        void bind() const;
-        void bind(std::size_t unit) const;
+        void bind(std::size_t unit = 0u) const;
         GLuint id() const;
 
-    private:
-        int width_{}, height_{}, channels_{};
-        unsigned char* data_{};
-        GLuint texture_{};
-        
+        std::size_t width() const;
+        std::size_t height() const;
 
-        void init(std::string const& path);
+    private:
+        std::size_t width_{}, height_{};
+        GLuint id_{};
+
+        void init(unsigned char* data);
 };
 
 #endif

@@ -6,11 +6,11 @@ SRC = $(wildcard src/*.cc) \
 	  $(wildcard src/math/*.cc) \
 	  $(wildcard src/geometry/*.cc) \
 	  $(wildcard src/utils/*.cc) \
-	  $(wildcard src/post_proc/*.cc)
+	  $(wildcard src/processing/*.cc)
 
 OBJ := $(addsuffix .o,$(basename $(SRC)))
 
-INC = -I src/ -I src/engine/ -I src/geometry/ -I src/math/ -I src/utils/ -I src/post_proc/ -I src/environment/ -I assets/include/stb/
+INC = -I src/ -I src/engine/ -I src/geometry/ -I src/math/ -I src/utils/ -I src/processing/ -I src/environment/ -I assets/include/stb/
 
 ifeq ($(findstring Linux, $(UNAME)), Linux)
 XRUNNING := $(shell echo $(DISPLAY) &>/dev/null; echo $$?)

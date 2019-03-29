@@ -6,7 +6,7 @@ Water<ShaderPolicy>::Water(std::shared_ptr<Shader> const& shader,
 : plane_t{policy}, shader_{shader}, camera_{cam}, 
   refl_fb_{ReflFb::FULL_WIDTH, ReflFb::FULL_HEIGHT},
   refr_fb_{RefrFb::FULL_WIDTH, RefrFb::FULL_HEIGHT},
-  dudv_{DUDV_MAP}, normal_{NORMAL_MAP},
+  dudv_{TileableNoise{}()}, normal_{NORMAL_MAP},
   terrain_height_{terrain_height},
   refr_clip_{0.f, -1.f, 0.f, 1.f},
   refl_clip_{0.f, 1.f, 0.f, -1.f} {

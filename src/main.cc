@@ -69,9 +69,11 @@ try {
 
         Shader::bind_scene_texture();
         post_processing.perform();
+
         scene.render(); 
         window.update();
     }
+
 	return 0;
 }
 catch(std::exception const& err){

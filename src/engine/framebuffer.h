@@ -30,11 +30,16 @@ inline bool constexpr has_color_attachment_v = has_color_attachment<T>::value;
 template <std::size_t T>
 inline bool constexpr has_depth_attachment_v = has_depth_attachment<T>::value;
 
+enum class FramebufferState{Static, Dynamic};
 
-template <std::size_t N = 1u, std::size_t T = TexType::Color>
+
+template <std::size_t N = 1u, std::size_t T = TexType::Color, FramebufferState S = FramebufferState::Dynamic>
 class Framebuffer {
     public:
+        template <FramebufferState U = S, typename = std::enable_if_t<U==FramebufferState::Dynamic>>
         Framebuffer(float width_ratio, float height_ratio);
+        template <FramebufferState U = S, typename = std::enable_if_t<U==FramebufferState::Static>>
+        Framebuffer(std::size_t width, std::size_t height);
         ~Framebuffer();
 
         template <std::size_t M = N, typename = std::enable_if_t<has_color_attachment_v<T> && M == 1u>>
@@ -50,13 +55,15 @@ class Framebuffer {
         void bind() const;
         void unbind() const;
 
+        template <FramebufferState U = S, typename = std::enable_if_t<U==FramebufferState::Dynamic>>
         static void reallocate();
         
         static float constexpr FULL_WIDTH = 1.f;
         static float constexpr FULL_HEIGHT = 1.f;
 
     private:
-        float width_ratio_, height_ratio_;
+        float width_ratio_{}, height_ratio_{};      // Used for dynamic fbos
+        std::size_t width_{}, height_{};            // Used for static fbos
         GLuint fbo_{};
         std::array<GLuint, N> textures_{};
         std::array<GLuint, N> rbos_{};

@@ -1,16 +1,17 @@
-
-template <std::size_t N, std::size_t T>
-Framebuffer<N, T>::Framebuffer(float width_ratio, float height_ratio) : width_ratio_{width_ratio}, height_ratio_{height_ratio} {
-    static_assert(N > 0u, "Cannot create framebuffer without attached texture");
-    static_assert(T == TexType::Color ||
-                  T == TexType::Depth ||
-                  T == (TexType::Color | TexType::Depth),
-                  "Texture type must be either Color, Depth or both");
+template <std::size_t N, std::size_t T, FramebufferState S>
+template <FramebufferState, typename>
+Framebuffer<N, T, S>::Framebuffer(float width_ratio, float height_ratio) : width_ratio_{width_ratio}, height_ratio_{height_ratio} {
     init();
 }
 
-template <std::size_t N, std::size_t T>
-Framebuffer<N, T>::~Framebuffer() {
+template <std::size_t N, std::size_t T, FramebufferState S>
+template <FramebufferState, typename>
+Framebuffer<N, T, S>::Framebuffer(std::size_t width, std::size_t height) : width_{width}, height_{height} {
+    init();
+}
+
+template <std::size_t N, std::size_t T, FramebufferState S>
+Framebuffer<N, T, S>::~Framebuffer() {
     glDeleteFramebuffers(1, &fbo_);
     if constexpr(has_color_attachment()) {
         glDeleteTextures(N, &textures_[0]);
@@ -28,50 +29,51 @@ Framebuffer<N, T>::~Framebuffer() {
 		}));
 }
 
-template <std::size_t N, std::size_t T>
+template <std::size_t N, std::size_t T, FramebufferState S>
 template <std::size_t, typename>
-GLuint Framebuffer<N, T>::texture() const {
+GLuint Framebuffer<N, T, S>::texture() const {
     return textures_[0];
 }
 
-template <std::size_t N, std::size_t T>
+template <std::size_t N, std::size_t T, FramebufferState S>
 template <std::size_t, typename>
-std::array<GLuint, N> Framebuffer<N, T>::textures() const {
+std::array<GLuint, N> Framebuffer<N, T, S>::textures() const {
     return textures_;
 }
-template <std::size_t N, std::size_t T>
+template <std::size_t N, std::size_t T, FramebufferState S>
 template <std::size_t, typename>
-GLuint Framebuffer<N,T>::depth_texture() const {
+GLuint Framebuffer<N, T, S>::depth_texture() const {
     return depth_textures_[0];
 }
 
-template <std::size_t N, std::size_t T>
+template <std::size_t N, std::size_t T, FramebufferState S>
 template <std::size_t, typename>
-std::array<GLuint, N> Framebuffer<N,T>::depth_textures() const{
+std::array<GLuint, N> Framebuffer<N, T, S>::depth_textures() const{
     return depth_textures_;
 }
 
-template <std::size_t N, std::size_t T>
-void Framebuffer<N, T>::bind() const {
+template <std::size_t N, std::size_t T, FramebufferState S>
+void Framebuffer<N, T, S>::bind() const {
     glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
     glDrawBuffers(N, &color_attachments_[0]);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-template <std::size_t N, std::size_t T>
-void Framebuffer<N, T>::unbind() const {
+template <std::size_t N, std::size_t T, FramebufferState S>
+void Framebuffer<N, T, S>::unbind() const {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-template <std::size_t N, std::size_t T>
-void Framebuffer<N, T>::reallocate() {
+template <std::size_t N, std::size_t T, FramebufferState S>
+template <FramebufferState, typename>
+void Framebuffer<N, T, S>::reallocate() {
     glBindTexture(GL_TEXTURE_2D, 0);
     for(auto fb : instances_)
         fb.get().resize();
 }
 
-template <std::size_t N, std::size_t T>
-void Framebuffer<N, T>::resize() {
+template <std::size_t N, std::size_t T, FramebufferState S>
+void Framebuffer<N, T, S>::resize() {
     if constexpr(has_color_attachment()) {
         glDeleteTextures(N, &textures_[0]);
         glDeleteRenderbuffers(N, &rbos_[0]);
@@ -83,8 +85,14 @@ void Framebuffer<N, T>::resize() {
     setup_texture_environment();
 }
 
-template <std::size_t N, std::size_t T>
-void Framebuffer<N, T>::init() {
+template <std::size_t N, std::size_t T, FramebufferState S>
+void Framebuffer<N, T, S>::init() {
+    static_assert(N > 0u, "Cannot create framebuffer without attached texture");
+    static_assert(T == TexType::Color ||
+                  T == TexType::Depth ||
+                  T == (TexType::Color | TexType::Depth),
+                  "Texture type must be either Color, Depth or both");
+
     if(instances_.size() == 0u) {
         for(auto i = 0u; i < N; i++)
             color_attachments_[i] = GL_COLOR_ATTACHMENT0 + i;
@@ -95,9 +103,18 @@ void Framebuffer<N, T>::init() {
     setup_texture_environment();
 }
 
-template <std::size_t N, std::size_t T>
-void Framebuffer<N, T>::setup_texture_environment() {
+template <std::size_t N, std::size_t T, FramebufferState S>
+void Framebuffer<N, T, S>::setup_texture_environment() {
     bind();
+    GLuint width{}, height{};
+    if constexpr(S == FramebufferState::Dynamic) {
+        width = width_ratio_ * Viewport::width;
+        height = height_ratio_ * Viewport::height;
+    }
+    else {
+        width = width_;
+        height = height_;
+    }
 
     if constexpr(has_color_attachment()) {
         glGenTextures(N, &textures_[0]);
@@ -109,8 +126,8 @@ void Framebuffer<N, T>::setup_texture_environment() {
             glTexImage2D(GL_TEXTURE_2D,
                          0,
                          GL_RGBA16F,
-                         Viewport::width * width_ratio_,
-                         Viewport::height * height_ratio_,
+                         width,
+                         height,
                          0,
                          GL_RGB,
                          GL_FLOAT,
@@ -131,8 +148,8 @@ void Framebuffer<N, T>::setup_texture_environment() {
             glBindRenderbuffer(GL_RENDERBUFFER, rbos_[i]);
             glRenderbufferStorage(GL_RENDERBUFFER,
                                   GL_DEPTH_COMPONENT,
-                                  Viewport::width * width_ratio_,
-                                  Viewport::height * height_ratio_);
+                                  width,
+                                  height);
         
             glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
@@ -150,8 +167,8 @@ void Framebuffer<N, T>::setup_texture_environment() {
             glTexImage2D(GL_TEXTURE_2D,
                          0,
                          GL_DEPTH_COMPONENT32,
-                         Viewport::width * width_ratio_,
-                         Viewport::height * height_ratio_,
+                         width,
+                         height,
                          0,
                          GL_DEPTH_COMPONENT,
                          GL_FLOAT,
@@ -178,18 +195,18 @@ void Framebuffer<N, T>::setup_texture_environment() {
     unbind();
 }
 
-template <std::size_t N, std::size_t T>
-bool constexpr Framebuffer<N,T>::has_color_attachment() {
+template <std::size_t N, std::size_t T, FramebufferState S>
+bool constexpr Framebuffer<N, T, S>::has_color_attachment() {
     return has_color_attachment_v<T>;
 }
 
-template <std::size_t N, std::size_t T>
-bool constexpr Framebuffer<N,T>::has_depth_attachment() {
+template <std::size_t N, std::size_t T, FramebufferState S>
+bool constexpr Framebuffer<N, T, S>::has_depth_attachment() {
     return has_depth_attachment_v<T>;
 }
 
-template <std::size_t N, std::size_t T>
-std::vector<std::reference_wrapper<Framebuffer<N, T>>> Framebuffer<N, T>::instances_{};
+template <std::size_t N, std::size_t T, FramebufferState S>
+std::vector<std::reference_wrapper<Framebuffer<N, T, S>>> Framebuffer<N, T, S>::instances_{};
 
-template <std::size_t N, std::size_t T>
-std::array<GLuint, N> Framebuffer<N, T>::color_attachments_{};
+template <std::size_t N, std::size_t T, FramebufferState S>
+std::array<GLuint, N> Framebuffer<N, T, S>::color_attachments_{};

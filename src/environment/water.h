@@ -8,6 +8,7 @@
 #include "plane.h"
 #include "shader.h"
 #include "shader_handler.h"
+#include "tileable_noise.h"
 #include "texture.h"
 #include "traits.h"
 #include <cmath>
