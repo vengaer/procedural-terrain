@@ -6,7 +6,7 @@ Water<ShaderPolicy>::Water(std::shared_ptr<Shader> const& shader,
 : plane_t{policy}, shader_{shader}, camera_{cam}, 
   refl_fb_{ReflFb::FULL_WIDTH, ReflFb::FULL_HEIGHT},
   refr_fb_{RefrFb::FULL_WIDTH, RefrFb::FULL_HEIGHT},
-  dudv_{TileableNoise{}()}, normal_{NORMAL_MAP},
+  dudv_{dudv_map()}, normal_{normal_map()},
   terrain_height_{terrain_height},
   refr_clip_{0.f, -1.f, 0.f, 1.f},
   refl_clip_{0.f, 1.f, 0.f, -1.f} {
@@ -59,7 +59,7 @@ void Water<ShaderPolicy>::prepare(SceneRenderer renderer, Shaders const&... shad
 
     /* In case of driver issues */
     upload_to_shaders("ufrm_clipping_plane",
-                      no_clip_,
+                      NO_CLIP,
                       std::forward_as_tuple(shaders...),
                       std::index_sequence_for<Shaders...>{});
 
@@ -110,13 +110,62 @@ void Water<ShaderPolicy>::upload_to_shaders(std::string const& name, Uniform con
 }
 
 template <typename ShaderPolicy>
-std::string const Water<ShaderPolicy>::DUDV_MAP{"assets/textures/waterDUDV.png"};
+void Water<ShaderPolicy>::generate_map_data() {
+    std::size_t constexpr period = 128;
+    std::size_t constexpr size = 3u * TEXTURE_SIZE;
+
+    for(auto i = 0u; i < size; i++) {
+        for(auto j = 0u; j < size; j += 3u) {
+            float fi = static_cast<float>(i) * NOISE_FREQUENCY;
+            float fj = static_cast<float>(j) * NOISE_FREQUENCY;
+
+            map_data_[i][j]   = static_cast<unsigned char>((tileable_noise::generate(4.f*fj, 4.f*fi, period) + 1.f) * 0.5f * 255);
+            map_data_[i][j+1] = static_cast<unsigned char>((tileable_noise::generate(4.f*fi, 4.f*fj, period) + 1.f) * 0.5f * 255);
+            map_data_[i][j+2] = 0u;
+        }
+    }
+
+    map_data_generated_ = true;
+}
 
 template <typename ShaderPolicy>
-std::string const Water<ShaderPolicy>::NORMAL_MAP{"assets/textures/normal.png"};
+Texture Water<ShaderPolicy>::dudv_map() {
+    if(!map_data_generated_)
+        generate_map_data();
+
+
+    return Texture{&map_data_[0][0], TEXTURE_SIZE, TEXTURE_SIZE};
+}
+
+template <typename ShaderPolicy>
+Texture Water<ShaderPolicy>::normal_map() {
+    if(!map_data_generated_)
+        generate_map_data();
+
+    std::size_t constexpr size = 3u * TEXTURE_SIZE;
+    image_t<unsigned char, size> data;
+
+    /* Invert dudv map and maximize brightness */
+    for(auto i = 0u; i < size; i++) {
+        for(auto j = 0u; j < size; j += 3u) {
+            auto r = 255 - map_data_[i][j];
+            auto g = 255 - map_data_[i][j+1];
+            auto b = 255 - map_data_[i][j+2];
+
+            auto max = std::max(std::max(r,g),b);
+            float scale_factor = 255.f / static_cast<float>(max);
+
+            data[i][j]   = static_cast<unsigned char>(static_cast<float>(r) * scale_factor);
+            data[i][j+1] = static_cast<unsigned char>(static_cast<float>(g) * scale_factor);
+            data[i][j+2] = static_cast<unsigned char>(static_cast<float>(b) * scale_factor);
+        }
+    }
+
+    return Texture{&data[0][0], TEXTURE_SIZE, TEXTURE_SIZE};
+}
 
 template <typename ShaderPolicy>
 GLfloat const Water<ShaderPolicy>::WAVE_SPEED{0.03f};
 
 template <typename ShaderPolicy>
-glm::vec4 const Water<ShaderPolicy>::no_clip_{0.f, -1.f, 0.f, 10'000};
+glm::vec4 const Water<ShaderPolicy>::NO_CLIP{0.f, -1.f, 0.f, 10'000};
