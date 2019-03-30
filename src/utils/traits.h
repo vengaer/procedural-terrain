@@ -18,6 +18,11 @@ struct type_is {
 	using type = T;
 };
 
+template <typename T, T V>
+struct has_value {
+    static T constexpr value = V;
+};
+
 template <typename T>
 using type_is_t = typename type_is<T>::type;
 

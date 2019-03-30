@@ -10,7 +10,6 @@
 #include "window.h"
 #include <memory>
 
-
 int main() 
 try {
 	unsigned constexpr width = 960, height = 540;
