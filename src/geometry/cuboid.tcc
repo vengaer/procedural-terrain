@@ -6,10 +6,6 @@ Cuboid<ShaderPolicy>::Cuboid(ShaderPolicy policy, GLfloat x_scale, GLfloat y_sca
 
 template <typename ShaderPolicy>
 void Cuboid<ShaderPolicy>::init(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale) {
-	x_scale = glm::clamp(x_scale, 0.1f, 2.f);
-	y_scale = glm::clamp(y_scale, 0.1f, 2.f);
-	z_scale = glm::clamp(z_scale, 0.1f, 2.f);
-
 	auto constexpr VERTEX_SIZE = renderer_t::VERTEX_SIZE;
 	vertices_.reserve(VERTEX_SIZE * 4u * 6u);
 

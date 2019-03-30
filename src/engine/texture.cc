@@ -1,11 +1,10 @@
-#ifndef STB_IMAGE_IMPLEMENTATION
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
-#endif
 #include "exception.h"
 #include "texture.h"
-
-#include <iostream>
+#ifndef STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_IMPLEMENTATION
+#include <cmath>
+#include "stb_image.h"
+#endif
 
 Texture::Texture(GLuint tex_id) : id_{tex_id} {
     glBindTexture(GL_TEXTURE_2D, id_);

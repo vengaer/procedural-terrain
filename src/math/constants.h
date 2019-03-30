@@ -3,7 +3,7 @@
 
 #pragma once
 
-inline namespace math{
+namespace math{
 	inline namespace constants {
 		extern double const PI;
 		extern double const e;

@@ -51,8 +51,7 @@ try {
     
     PostProcessing post_processing;
 
-    auto render_scene = [&sun, &terrain]() {
-        sun.render();
+    auto render_scene = [&terrain]() {
         terrain.render();
     };
 
@@ -65,6 +64,7 @@ try {
 
         Shader::bind_main_framebuffer();
         render_scene();
+        sun.render();
         water.render();
 
         Shader::bind_scene_texture();

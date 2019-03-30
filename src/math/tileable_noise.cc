@@ -98,8 +98,8 @@ std::array<glm::vec2, 256> tileable_noise::compute_directions() {
     
     std::generate(std::begin(dirs), std::end(dirs), [n = 0] () mutable {
         auto i = n++;
-        return glm::vec2{std::cos(i * 2.f * PI / 256),
-                         std::sin(i * 2.f * PI / 256)};
+        return glm::vec2{std::cos(i * 2.f * math::PI / 256),
+                         std::sin(i * 2.f * math::PI / 256)};
     });
     
     return dirs;

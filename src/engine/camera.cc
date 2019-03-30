@@ -93,8 +93,12 @@ void Camera::set_position(glm::vec3 pos) {
     Shader::template upload_to_all<true>(Shader::VIEW_UNIFORM_NAME, view());
 }
 
-void Camera::invert_pitch() {
-    pitch_ *= -1.f;
+float Camera::pitch() const {
+    return pitch_;
+}
+
+void Camera::set_pitch(float pitch) {
+    pitch_ = pitch;
 	pitch_ = glm::clamp(pitch_, -89.f, 89.f);
 
 	local_z_.x = std::cos(glm::radians(yaw_)) * std::cos(glm::radians(pitch_));
@@ -105,6 +109,14 @@ void Camera::invert_pitch() {
 	compute_local_xy();
 	update_view();
     Shader::template upload_to_all<true>(Shader::VIEW_UNIFORM_NAME, view());
+}
+
+void Camera::invert_pitch() {
+    set_pitch(-pitch_);
+}
+
+glm::vec3 Camera::view_direction() const {
+    return -local_z_;
 }
 
 void Camera::compute_local_xy(){

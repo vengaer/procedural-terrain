@@ -44,14 +44,14 @@ void Ellipsoid<ShaderPolicy>::init(GLuint vertical_segments, GLuint horizontal_s
 
 		for(auto i = 0u; i < vertical_segments - 1; i++){
 			t = 1.f - interpolation::linear(static_cast<GLfloat>(i+1) / static_cast<GLfloat>(vertical_segments));
-			theta = PI * static_cast<GLfloat>(i+1) / static_cast<GLfloat>(vertical_segments);
+			theta = math::PI * static_cast<GLfloat>(i+1) / static_cast<GLfloat>(vertical_segments);
 			y = cos(theta);
 			sin_theta = sin(theta);
 
 			for(auto j = 0u; j < horizontal_segments ; j++){
 				s = interpolation::linear(static_cast<GLfloat>(j) / static_cast<GLfloat>(horizontal_segments));
 				
-				phi = 2.f * PI * static_cast<GLfloat>(j) / static_cast<GLfloat>(horizontal_segments);
+				phi = 2.f * math::PI * static_cast<GLfloat>(j) / static_cast<GLfloat>(horizontal_segments);
 				
 				x = sin_theta * sin(phi);
 				z = sin_theta * cos(phi);

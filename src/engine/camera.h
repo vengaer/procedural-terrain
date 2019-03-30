@@ -38,7 +38,7 @@ class Camera {
 			   glm::vec3 target_view = glm::vec3{0.f, 0.f, 0.f}, 
 			   float fov = 60.f,
 			   float yaw = 0.f,			/* Relative to negative local z */
-			   float pitch = 0.f,
+			   float pitch = 35.f,
 			   bool invert_y = false,
 			   ClippingPlane plane = {0.1f, 200.f});
 
@@ -49,7 +49,6 @@ class Camera {
 
         void update();
         
-
 		float fov() const;
 		glm::mat4 view() const;
 
@@ -57,7 +56,12 @@ class Camera {
         
         glm::vec3 position();
         void set_position(glm::vec3 pos);
+
+        float pitch() const;
+        void set_pitch(float pitch);
         void invert_pitch();
+
+        glm::vec3 view_direction() const;
 
 	private:
 		glm::vec3 position_;
