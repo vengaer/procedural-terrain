@@ -8,7 +8,6 @@
 namespace tileable_noise {
 
     float generate(float x, float y, unsigned period);
-    Texture texture();
 
 }
 
