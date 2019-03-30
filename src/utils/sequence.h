@@ -6,39 +6,60 @@
 #include <cstddef>
 #include <type_traits>
 
-template <std::size_t...>
-struct odd_index_sequence { };
+template <typename Numeric, Numeric...>
+struct odd_integer_sequence{ };
 
-template <std::size_t N, std::size_t... Seq>
-struct odd_seq_gen : std::conditional_t<N % 2 != 0,
-									odd_seq_gen<N-1, Seq...>,
-									odd_seq_gen<N-1, N-1, Seq...>> { };
+namespace detail {
+    template <typename Numeric, std::size_t N, Numeric... Seq>
+    struct odd_seq_gen : std::conditional_t<N % 2 != 0,
+                                            odd_seq_gen<Numeric, N-1, Seq...>,
+                                            odd_seq_gen<Numeric, N-1, N-1, Seq...>>{ };
 
-template <std::size_t... Seq>
-struct odd_seq_gen<0u, Seq...> : type_is<odd_index_sequence<Seq...>> { };
+    template <typename Numeric, Numeric... Seq>
+    struct odd_seq_gen<Numeric, 0u, Seq...> : type_is<odd_integer_sequence<Numeric, Seq...>>{ };
+}
 
-template <std::size_t N>
-using make_odd_index_sequence = typename odd_seq_gen<N>::type;
+template <typename Numeric, std::size_t N>
+using make_odd_integer_sequence = typename detail::odd_seq_gen<Numeric, N>::type;
 
-template <typename... Args>
-using odd_index_sequence_for = make_odd_index_sequence<sizeof...(Args)>;
+template <typename Numeric, typename... Args>
+using odd_integer_sequence_for = make_odd_integer_sequence<Numeric, sizeof...(Args)>;
 
-template <std::size_t...>
-struct even_index_sequence { };
-
-template <std::size_t N, std::size_t... Seq>
-struct even_seq_gen : std::conditional_t<N % 2 == 0,
-									even_seq_gen<N-1, Seq...>,
-									even_seq_gen<N-1, N-1, Seq...>> { };
-
-template <std::size_t... Seq>
-struct even_seq_gen<0u, Seq...> : type_is<even_index_sequence<Seq...>> { };
+template <std::size_t... Is>
+using odd_index_sequence = odd_integer_sequence<std::size_t, Is...>;
 
 template <std::size_t N>
-using make_even_index_sequence = typename even_seq_gen<N>::type;
+using make_odd_index_sequence = make_odd_integer_sequence<std::size_t, N>;
 
 template <typename... Args>
-using even_index_sequence_for = make_even_index_sequence<sizeof...(Args)>;
-	
+using odd_index_sequence_for = odd_integer_sequence_for<std::size_t, Args...>;
+
+template <typename Numeric, Numeric...>
+struct even_integer_sequence{ };
+
+namespace detail {
+    template <typename Numeric, std::size_t N, Numeric... Seq>
+    struct even_seq_gen : std::conditional_t<N % 2 == 0,
+                                             even_seq_gen<Numeric, N-1, Seq...>,
+                                             even_seq_gen<Numeric, N-1, N-1, Seq...>>{ };
+
+    template <typename Numeric, Numeric... Seq>
+    struct even_seq_gen<Numeric, 0u, Seq...> : type_is<even_integer_sequence<Numeric, Seq...>>{ };
+}
+
+template <typename Numeric, std::size_t N>
+using make_even_integer_sequence = typename detail::even_seq_gen<Numeric, N>::type;
+
+template <typename Numeric, typename... Args>
+using even_integer_sequence_for = make_even_integer_sequence<Numeric, sizeof...(Args)>;
+
+template <std::size_t... Is>
+using even_index_sequence = even_integer_sequence<std::size_t, Is...>;
+
+template <std::size_t N>
+using make_even_index_sequence = make_even_integer_sequence<std::size_t, N>;
+
+template <typename... Args>
+using even_index_sequence_for = even_integer_sequence_for<std::size_t, Args...>;
 
 #endif
