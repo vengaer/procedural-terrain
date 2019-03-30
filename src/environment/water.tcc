@@ -20,8 +20,6 @@ void Water<ShaderPolicy>::prepare(SceneRenderer renderer, Shaders const&... shad
     static_assert((std::is_same_v<remove_cvref_t<Shaders>, std::shared_ptr<Shader>> && ...), 
                   "Parameter pack may only contain variablers of type shared_ptr<Shader>");
 
-    using namespace math;
-
     glEnable(GL_CLIP_DISTANCE0);
 
     dudv_offset_ += WAVE_SPEED * frametime::delta();
