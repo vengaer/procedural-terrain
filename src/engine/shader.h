@@ -51,9 +51,7 @@ class Shader {
 		~Shader();
 		
 		Shader(Shader const&) = delete;
-		Shader(Shader&&) = default;
 		Shader& operator=(Shader const&) = delete;
-		Shader& operator=(Shader&&) = default;
 
 		void enable() const;
 		static void enable(GLuint program);
