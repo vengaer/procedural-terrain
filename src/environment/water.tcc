@@ -123,7 +123,7 @@ typename Water<ShaderPolicy>::image_t Water<ShaderPolicy>::generate_map_data() {
             float fj = static_cast<float>(j) * NOISE_FREQUENCY;
 
             data[i][j]   = static_cast<unsigned char>((tileable_noise::generate(4.f*fj, 4.f*fi, period) + 1.f) * 0.5f * 255);
-            data[i][j+1] = static_cast<unsigned char>((tileable_noise::generate(4.f*fi, 4.f*fj, period) + 1.f) * 0.5f * 255);
+            data[i][j+1] = static_cast<unsigned char>((tileable_noise::generate(2.f*fj, 8.f*fi, period) + 1.f) * 0.5f * 255);
             data[i][j+2] = 0u;
         }
     }
