@@ -35,31 +35,6 @@ float tileable_noise::generate(float x, float y, unsigned period) {
            surflet(x, y, ix, iy + 1, period) + surflet(x, y, ix + 1, iy + 1, period);
 }
 
-Texture tileable_noise::texture() {
-    std::size_t constexpr period = 128, image_size = 128;
-    std::size_t constexpr size = 3u * image_size;
-
-    using image_t = std::array<std::array<unsigned char, size>,size>;
-    image_t data;
-
-    float freq = 1.f/32.f;
-
-    for(auto i = 0u; i < size; i++) {
-        for(auto j = 0u; j < size; j += 3) {
-            float fi = static_cast<float>(i) * freq;
-            float fj = static_cast<float>(j) * freq;
-
-            data[i][j]   = static_cast<unsigned char>((tileable_noise::generate(4.f*fj, 4.f*fi, period) + 1.f) * 0.5f * 255);
-            data[i][j+1] = static_cast<unsigned char>((tileable_noise::generate(4.f*fi, 4.f*fj, period) + 1.f) * 0.5f * 255);
-            data[i][j+2] = 0u;
-        }
-    }
-
-    return Texture{&data[0][0], image_size, image_size};
-
-}
-
-
 float tileable_noise::fade(float t) {
     return t * t * t * (t * (t * 6 - 15) + 10);
 }

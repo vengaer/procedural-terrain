@@ -99,7 +99,7 @@ namespace math {
             static_assert(M != 0);
         };
 
-        /* N-th fibonacci sequence, 0-indexed */
+        /* N-th fibonacci number, 0-indexed */
         template <std::size_t N>
         struct fibonacci : impl::fibonacci_impl<0, 1, N-1> { };
 
