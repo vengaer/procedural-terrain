@@ -50,6 +50,7 @@ try {
     
     PostProcessing post_processing;
 
+    /* Render part of scene that should be reflected and refracted in the water */
     auto render_scene = [&terrain]() {
         terrain.render();
     };
@@ -59,7 +60,7 @@ try {
         frametime::update();
         camera->update();
 
-        water.prepare(render_scene, sun_shader, terrain_shader);
+        water.pre_process(render_scene, sun_shader, terrain_shader);
 
         Shader::bind_main_framebuffer();
         render_scene();
