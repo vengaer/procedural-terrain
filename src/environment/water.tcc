@@ -68,11 +68,11 @@ void Water<ShaderPolicy>::prepare(SceneRenderer renderer, Shaders const&... shad
 
 template <typename ShaderPolicy>
 void Water<ShaderPolicy>::render() {
-    Texture::bind(refl_fb_.texture(), 0u);
-    Texture::bind(refr_fb_.texture(), 1u);
-    Texture::bind(dudv_.id(), 2u);
-    Texture::bind(normal_.id(), 3u);
-    Texture::bind(refr_fb_.depth_texture(), 4u);
+    Texture::bind(refl_fb_.texture(), Texture::Unit0);
+    Texture::bind(refr_fb_.texture(), Texture::Unit1);
+    Texture::bind(dudv_.id(), Texture::Unit2);
+    Texture::bind(normal_.id(), Texture::Unit3);
+    Texture::bind(refr_fb_.depth_texture(), Texture::Unit4);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     plane_t::render();

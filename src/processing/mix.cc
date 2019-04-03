@@ -10,8 +10,8 @@ void Mix::apply(GLuint texture0, GLuint texture1) const {
     fb_.bind();
 
     shader_.enable();
-    Texture::bind(texture0, 0u);
-    Texture::bind(texture1, 1u);
+    Texture::bind(texture0, Texture::Unit0);
+    Texture::bind(texture1, Texture::Unit1);
 }
 
 GLuint Mix::texture() const {
