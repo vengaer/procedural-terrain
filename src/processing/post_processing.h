@@ -17,6 +17,8 @@ class PostProcessing {
         void perform() const;
         static bool enabled();
 
+        static std::size_t constexpr NUM_BLUR_PASSES{10u};
+
     private:
         HorizontalBlur h_blur_;
         VerticalBlur v_blur_;

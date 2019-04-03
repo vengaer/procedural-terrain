@@ -5,6 +5,7 @@
 #include "framebuffer.h"
 #include "viewport.h"
 #include "shader.h"
+#include "texture.h"
 #include <GL/glew.h>
 
 namespace impl {

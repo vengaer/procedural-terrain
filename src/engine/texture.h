@@ -14,7 +14,7 @@ class Texture {
         Texture(unsigned char* data, std::size_t width, std::size_t height);
         ~Texture();
 
-        void bind(std::size_t unit = 0u) const;
+        static void bind(GLuint id, std::size_t unit = 0u);
         GLuint id() const;
 
         std::size_t width() const;

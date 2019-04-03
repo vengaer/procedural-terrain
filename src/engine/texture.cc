@@ -35,9 +35,9 @@ Texture::~Texture() {
     glDeleteTextures(1, &id_);
 }
 
-void Texture::bind(std::size_t unit) const {
+void Texture::bind(GLuint id, std::size_t unit) {
     glActiveTexture(GL_TEXTURE0 + unit);
-    glBindTexture(GL_TEXTURE_2D, id_);
+    glBindTexture(GL_TEXTURE_2D, id);
 }
 
 GLuint Texture::id() const {

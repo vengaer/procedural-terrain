@@ -6,9 +6,7 @@ impl::Blur<dir>::Blur(int width, int height) : shader_{"assets/shaders/blur.vert
 
 template <impl::Direction dir>
 void impl::Blur<dir>::apply(GLuint texture) const {
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
-
+    Texture::bind(texture);
     fb_.bind();
     shader_.enable();
 }
