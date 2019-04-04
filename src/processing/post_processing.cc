@@ -1,7 +1,7 @@
 #include "post_processing.h"
 #include "texture.h"
 #include "viewport.h"
-PostProcessing::PostProcessing() : h_blur_{Viewport::width / 8, Viewport::height / 8}, v_blur_{Viewport::width / 8, Viewport::height / 8}, bloom_{Viewport::width, Viewport::height} { 
+PostProcessing::PostProcessing() : h_blur_{Viewport::width / 16, Viewport::height / 16}, v_blur_{Viewport::width / 16, Viewport::height / 16}, bloom_{Viewport::width, Viewport::height} { 
     instantiated_ = true;
 }
 
