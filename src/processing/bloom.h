@@ -13,11 +13,10 @@ class Bloom {
         Bloom(int width, int height);
 
         void apply(GLuint texture) const;
-        std::array<GLuint, 2> textures() const;
+        std::array<GLuint, 2> texture_ids() const;
 
     private:
         Shader shader_;
-
         Framebuffer fb_;
 };
 

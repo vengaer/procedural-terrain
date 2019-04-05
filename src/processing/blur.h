@@ -18,7 +18,7 @@ namespace impl {
             Blur(int width, int height);
 
             void apply(GLuint texture) const;
-            GLuint texture() const;
+            GLuint texture_id() const;
 
         private:
             Shader shader_;

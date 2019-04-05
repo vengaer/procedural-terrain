@@ -10,18 +10,18 @@ void PostProcessing::perform() const {
     bloom_.apply(scene);
     canvas_.render();
 
-    auto to_blur = bloom_.textures()[1];
+    auto to_blur = bloom_.texture_ids()[1];
     for(auto i = 0u; i < NUM_BLUR_PASSES; i++) {
         h_blur_.apply(to_blur);
         canvas_.render();
-        v_blur_.apply(h_blur_.texture());
+        v_blur_.apply(h_blur_.texture_id());
         canvas_.render();
-        to_blur = v_blur_.texture();
+        to_blur = v_blur_.texture_id();
     }
-    mix_.apply(bloom_.textures()[0], v_blur_.texture());
+    mix_.apply(bloom_.texture_ids()[0], v_blur_.texture_id());
     canvas_.render();
 
-    Texture::bind(mix_.texture());
+    Texture::bind(mix_.texture_id());
 }
 
 bool PostProcessing::enabled() {

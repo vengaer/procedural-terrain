@@ -8,14 +8,13 @@ Mix::Mix() : shader_{"assets/shaders/mix.vert", Shader::Type::Vertex, "assets/sh
 
 void Mix::apply(GLuint texture0, GLuint texture1) const {
     fb_.bind();
-
     shader_.enable();
     Texture::bind(texture0, Texture::Unit0);
     Texture::bind(texture1, Texture::Unit1);
 }
 
-GLuint Mix::texture() const {
-    return fb_.texture();
+GLuint Mix::texture_id() const {
+    return fb_.texture_id();
 }
 
 void Mix::init() {

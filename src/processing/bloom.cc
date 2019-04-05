@@ -10,6 +10,6 @@ void Bloom::apply(GLuint texture) const {
     shader_.enable();
 }
 
-std::array<GLuint, 2> Bloom::textures() const {
-    return fb_.textures();
+std::array<GLuint, 2> Bloom::texture_ids() const {
+    return fb_.texture_ids();
 }

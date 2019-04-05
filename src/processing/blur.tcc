@@ -12,8 +12,8 @@ void impl::Blur<dir>::apply(GLuint texture) const {
 }
 
 template <impl::Direction dir>
-GLuint impl::Blur<dir>::texture() const {
-    return fb_.texture();
+GLuint impl::Blur<dir>::texture_id() const {
+    return fb_.texture_id();
 }
 
 template <impl::Direction dir>

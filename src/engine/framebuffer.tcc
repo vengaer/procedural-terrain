@@ -31,24 +31,24 @@ Framebuffer<N, T, S>::~Framebuffer() {
 
 template <std::size_t N, std::size_t T, FramebufferState S>
 template <std::size_t, typename>
-GLuint Framebuffer<N, T, S>::texture() const {
+GLuint Framebuffer<N, T, S>::texture_id() const {
     return textures_[0];
 }
 
 template <std::size_t N, std::size_t T, FramebufferState S>
 template <std::size_t, typename>
-std::array<GLuint, N> Framebuffer<N, T, S>::textures() const {
+std::array<GLuint, N> Framebuffer<N, T, S>::texture_ids() const {
     return textures_;
 }
 template <std::size_t N, std::size_t T, FramebufferState S>
 template <std::size_t, typename>
-GLuint Framebuffer<N, T, S>::depth_texture() const {
+GLuint Framebuffer<N, T, S>::depth_texture_id() const {
     return depth_textures_[0];
 }
 
 template <std::size_t N, std::size_t T, FramebufferState S>
 template <std::size_t, typename>
-std::array<GLuint, N> Framebuffer<N, T, S>::depth_textures() const{
+std::array<GLuint, N> Framebuffer<N, T, S>::depth_texture_ids() const{
     return depth_textures_;
 }
 

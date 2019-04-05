@@ -12,7 +12,7 @@ class Mix {
         Mix();
 
         void apply(GLuint texture0, GLuint texture1) const;
-        GLuint texture() const;
+        GLuint texture_id() const;
 
     private:
         Shader shader_;

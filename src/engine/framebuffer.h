@@ -32,7 +32,9 @@ inline bool constexpr has_depth_attachment_v = has_depth_attachment<T>::value;
 
 enum class FramebufferState{Static, Dynamic};
 
-
+/* N - number of textures to attach */
+/* T - Type of texture (TexType::Color, TexType::Depth or TexType::Color | TexType::Depth) */
+/* S - Whether the framebuffer should be dynamic (resizable) or static (non-resizable) */
 template <std::size_t N = 1u, std::size_t T = TexType::Color, FramebufferState S = FramebufferState::Dynamic>
 class Framebuffer {
     public:
@@ -42,15 +44,19 @@ class Framebuffer {
         Framebuffer(std::size_t width, std::size_t height);
         ~Framebuffer();
 
+        /* Available if a single color texture is attached */
         template <std::size_t M = N, typename = std::enable_if_t<has_color_attachment_v<T> && M == 1u>>
-        GLuint texture() const;
+        GLuint texture_id() const;
+        /* Available if more than one color texture is attached */
         template <std::size_t M = N, typename = std::enable_if_t<has_color_attachment_v<T> && (M > 1u)>>
-        std::array<GLuint, N> textures() const;
+        std::array<GLuint, N> texture_ids() const;
 
+        /* Available if a single depth texture is attached */
         template <std::size_t M = N, typename = std::enable_if_t<has_depth_attachment_v<T> && M == 1u>>
-        GLuint depth_texture() const;
+        GLuint depth_texture_id() const;
+        /* Available if more than one depth texture is attached */
         template <std::size_t M = N, typename = std::enable_if_t<has_depth_attachment_v<T> && (M > 1u)>>
-        std::array<GLuint, N> depth_textures() const;
+        std::array<GLuint, N> depth_texture_ids() const;
 
         void bind() const;
         void unbind() const;
