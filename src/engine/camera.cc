@@ -4,7 +4,7 @@
 #include "type_conversion.h"
 #include <cmath>
 
-Camera::Camera(glm::vec3 position, glm::vec3 target_view, float fov, float yaw, float pitch, bool invert_y, ClippingPlane plane) 
+Camera::Camera(glm::vec3 position, glm::vec3 target_view, float fov, float yaw, float pitch, bool invert_y, ClipSpace plane) 
 : position_{position}, local_x_{}, local_y_{}, local_z_{}, view_{}, fov_{fov}, yaw_{yaw}, pitch_{pitch}, invert_y_{invert_y}, clipping_plane_{plane} { 
 	init(target_view);
 }
@@ -79,7 +79,7 @@ glm::mat4 Camera::view() const {
 	return view_;
 }
 
-ClippingPlane Camera::clipping_plane() const {
+ClipSpace Camera::clipping_plane() const {
 	return clipping_plane_;
 }
 

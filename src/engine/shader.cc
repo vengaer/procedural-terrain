@@ -77,11 +77,11 @@ GLuint Shader::program_id() const {
 	return program_;
 }
 
-void Shader::reallocate_textures(int width, int height) {
+void Shader::reallocate_textures() {
 	unbind_scene_texture();
 
     delete_buffers();
-    setup_texture_environment(width, height);
+    setup_texture_environment(Viewport::width, Viewport::height);
 
 	bind_main_framebuffer();
 }

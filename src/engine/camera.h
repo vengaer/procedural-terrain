@@ -6,7 +6,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-struct ClippingPlane{
+struct ClipSpace {
 	float near;
 	float far;
 };
@@ -40,7 +40,7 @@ class Camera {
 			   float yaw = 0.f,			/* Relative to negative local z */
 			   float pitch = 35.f,
 			   bool invert_y = false,
-			   ClippingPlane plane = {0.1f, 200.f});
+			   ClipSpace plane = {0.1f, 200.f});
 
 		void rotate(double delta_x, double delta_y);
 
@@ -52,7 +52,7 @@ class Camera {
 		float fov() const;
 		glm::mat4 view() const;
 
-		ClippingPlane clipping_plane() const;
+		ClipSpace clipping_plane() const;
         
         glm::vec3 position();
         void set_position(glm::vec3 pos);
@@ -73,7 +73,7 @@ class Camera {
 		float yaw_;
 		float pitch_;
 		bool invert_y_;
-		ClippingPlane const clipping_plane_;
+		ClipSpace const clipping_plane_;
         MoveDir direction_{};
         Speed speed_{Speed::Default};
 

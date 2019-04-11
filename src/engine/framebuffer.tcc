@@ -102,7 +102,7 @@ void Framebuffer<N, T, S>::init() {
     glGenFramebuffers(1, &fbo_);
     setup_texture_environment();
 }
-
+#include <iostream>
 template <std::size_t N, std::size_t T, FramebufferState S>
 void Framebuffer<N, T, S>::setup_texture_environment() {
     bind();

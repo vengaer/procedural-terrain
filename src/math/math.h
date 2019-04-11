@@ -3,6 +3,7 @@
 
 #pragma once
 #include "constants.h"
+#include "exception.h"
 #include "traits.h"
 #include <type_traits>
 
@@ -12,6 +13,9 @@ namespace math {
 
     template <typename P0, typename... P1toN>
     std::common_type_t<P0, P1toN...> min(P0 p0, P1toN... p1ton);
+
+    template <typename T>
+    std::decay_t<T> gcd(T num, T den);
 
     namespace angle {
         double to_radians(double degrees);

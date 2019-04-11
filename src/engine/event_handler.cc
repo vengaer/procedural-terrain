@@ -1,3 +1,4 @@
+#include "blur.h"
 #include "context.h"
 #include "event_handler.h"
 #include "exception.h"
@@ -123,12 +124,14 @@ void EventHandler::size_callback(GLFWwindow*, int width, int height) {
 	glViewport(0, 0, width, height);
 
 	update_perspective();
-	Shader::reallocate_textures(width, height);
     Viewport::update();
-    
+
+	Shader::reallocate_textures();
     Framebuffer<1u>::reallocate();
     Framebuffer<2u>::reallocate();
     Framebuffer<1u, TexType::Color | TexType::Depth>::reallocate();
+    HorizontalBlur::update_size();
+    VerticalBlur::update_size();
 }
 
 bool EventHandler::instantiated_ = false;

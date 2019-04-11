@@ -73,6 +73,10 @@ struct TextureLoadingException : std::runtime_error {
     using std::runtime_error::runtime_error;
 };
 
+struct UndefinedOperationException : std::runtime_error {
+    using std::runtime_error::runtime_error;
+};
+
 struct UnderflowException : std::underflow_error {
 	using std::underflow_error::underflow_error;
 };

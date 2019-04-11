@@ -5,6 +5,7 @@ layout(location = 1) out vec4 bloom_color;
 
 in vec2 tex_coords;
 
+uniform vec4 clear_col;
 uniform sampler2D texture_;
 
 void main() {
@@ -12,4 +13,8 @@ void main() {
     float brightness = dot(frag_color.rgb, vec3(0.2126, 0.7152, 0.0722));
     
     bloom_color = frag_color * brightness * 1.5;
+
+    // Hide HDR object in RT0 as it might otherwise cause scaling issues
+    if(brightness > 0.8)
+        frag_color = clear_col;
 }

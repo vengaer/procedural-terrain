@@ -20,7 +20,7 @@ uniform sampler2D normal_map;
 uniform sampler2D depth_map;
 
 const float magnitude = 0.04;
-const vec3 sun_color = vec3(1.0, 1.0, 1.0);
+const vec3 sun_color = vec3(1.3, 0.85, 0.85);
 
 const float shine = 40.0;
 const float reflectivity = 0.5;
