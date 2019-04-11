@@ -14,7 +14,7 @@ void main() {
     
     bloom_color = frag_color * brightness * 1.5;
 
-    // Hide HDR object in RT0 as it might otherwise cause scaling issues
+    // Hide HDR object in RT0 as it might cause scaling issues otherwise
     if(brightness > 0.8)
         frag_color = clear_col;
 }
