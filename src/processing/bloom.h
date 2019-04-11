@@ -23,6 +23,8 @@ class Bloom {
         Shader shader_;
         Framebuffer fb_;
         mutable glm::vec4 clear_color_;
+
+        void upload_clear_color() const;
 };
 
 #endif

@@ -1,11 +1,12 @@
 #include "frametime.h"
 #include "camera.h"
+#include "logger.h"
 #include "shader.h"
 #include "type_conversion.h"
 #include <cmath>
 
-Camera::Camera(glm::vec3 position, glm::vec3 target_view, float fov, float yaw, float pitch, bool invert_y, ClipSpace plane) 
-: position_{position}, local_x_{}, local_y_{}, local_z_{}, view_{}, fov_{fov}, yaw_{yaw}, pitch_{pitch}, invert_y_{invert_y}, clipping_plane_{plane} { 
+Camera::Camera(glm::vec3 position, glm::vec3 target_view, float fov, float yaw, float pitch, bool invert_y, ClipSpace space) 
+: position_{position}, local_x_{}, local_y_{}, local_z_{}, view_{}, fov_{fov}, yaw_{yaw}, pitch_{pitch}, invert_y_{invert_y}, clip_space_{space} { 
 	init(target_view);
 }
 
@@ -17,6 +18,7 @@ void Camera::init(glm::vec3 target_view) {
 }
 
 void Camera::rotate(double delta_x, double delta_y) {
+    LOG("Rotating, x_diff: ", delta_x, "y_diff: ", delta_y);
 	yaw_   += delta_x;
 	pitch_ += delta_y * (invert_y_ ? -1.f : 1.f);
 	pitch_ = glm::clamp(pitch_, -89.f, 89.f);
@@ -79,8 +81,8 @@ glm::mat4 Camera::view() const {
 	return view_;
 }
 
-ClipSpace Camera::clipping_plane() const {
-	return clipping_plane_;
+ClipSpace Camera::clip_space() const {
+	return clip_space_;
 }
 
 glm::vec3 Camera::position() {
@@ -88,6 +90,7 @@ glm::vec3 Camera::position() {
 }
 
 void Camera::set_position(glm::vec3 pos) {
+    LOG("Setting camera position {", pos.x, ", ", pos.y, ", ", pos.z, "}");
     position_ = pos;
     update_view();
     Shader::template upload_to_all<true>(Shader::VIEW_UNIFORM_NAME, view());
@@ -98,6 +101,7 @@ float Camera::pitch() const {
 }
 
 void Camera::set_pitch(float pitch) {
+    LOG("Setting pitch ", pitch);
     pitch_ = pitch;
 	pitch_ = glm::clamp(pitch_, -89.f, 89.f);
 
@@ -112,6 +116,7 @@ void Camera::set_pitch(float pitch) {
 }
 
 void Camera::invert_pitch() {
+    LOG("Inverting pitch");
     set_pitch(-pitch_);
 }
 

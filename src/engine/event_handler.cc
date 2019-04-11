@@ -47,7 +47,8 @@ void EventHandler::init() {
 
 
 void EventHandler::update_perspective() {
-	auto const [near, far] = instance_->camera_->clipping_plane();
+    LOG("Updating perspective");
+	auto const [near, far] = instance_->camera_->clip_space();
 	auto* context = static_cast<Context*>(glfwGetWindowUserPointer(glfwGetCurrentContext()))->primary();
 
 	auto perspective = glm::perspective(glm::radians(instance_->camera_->fov()), 
@@ -97,13 +98,28 @@ void EventHandler::key_callback(GLFWwindow*, int key, int, int action, int mod_b
                     camera->set_state(Dir::Up, state);
             }
             break;
+        case GLFW_KEY_LEFT_SHIFT:
+            if(action == GLFW_RELEASE) {
+                if((modifiers & Mods::Ctrl) == Mods::Ctrl)
+                    camera->set_state(Speed::Slow);
+                else
+                    camera->set_state(Speed::Default);
+            }
+            else
+                camera->set_state(Speed::Fast);
+            break;
+        case GLFW_KEY_LEFT_CONTROL:
+            if(action == GLFW_RELEASE) {
+                if((modifiers & Mods::Shift) == Mods::Shift)
+                    camera->set_state(Speed::Fast);
+                else
+                    camera->set_state(Speed::Default);
+            }
+            else
+                camera->set_state(Speed::Slow);
+            break;
     }
-    if((modifiers & Mods::Shift) == Mods::Shift)
-        camera->set_state(Speed::Fast);
-    else if((modifiers & Mods::Ctrl) == Mods::Ctrl)
-        camera->set_state(Speed::Slow);
-    else
-        camera->set_state(Speed::Default);
+
     update_view();
 }
 

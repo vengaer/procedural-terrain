@@ -40,7 +40,7 @@ class Camera {
 			   float yaw = 0.f,			/* Relative to negative local z */
 			   float pitch = 35.f,
 			   bool invert_y = false,
-			   ClipSpace plane = {0.1f, 200.f});
+			   ClipSpace space = {0.1f, 200.f});
 
 		void rotate(double delta_x, double delta_y);
 
@@ -52,7 +52,7 @@ class Camera {
 		float fov() const;
 		glm::mat4 view() const;
 
-		ClipSpace clipping_plane() const;
+		ClipSpace clip_space() const;
         
         glm::vec3 position();
         void set_position(glm::vec3 pos);
@@ -73,7 +73,7 @@ class Camera {
 		float yaw_;
 		float pitch_;
 		bool invert_y_;
-		ClipSpace const clipping_plane_;
+		ClipSpace const clip_space_;
         MoveDir direction_{};
         Speed speed_{Speed::Default};
 
