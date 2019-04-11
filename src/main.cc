@@ -18,10 +18,10 @@ try {
 
     std::shared_ptr<Shader> scene_shader   = std::make_shared<Shader>("assets/shaders/scene.vert", Shader::Type::Vertex,
                                                                       "assets/shaders/scene.frag", Shader::Type::Fragment);
-    std::shared_ptr<Shader> terrain_shader = std::make_shared<Shader>("assets/shaders/terrain.vert", Shader::Type::Vertex, 
-                                                                      "assets/shaders/terrain.frag", Shader::Type::Fragment);
     std::shared_ptr<Shader> sun_shader     = std::make_shared<Shader>("assets/shaders/sun.vert", Shader::Type::Vertex, 
                                                                       "assets/shaders/sun.frag", Shader::Type::Fragment);
+    std::shared_ptr<Shader> terrain_shader = std::make_shared<Shader>("assets/shaders/terrain.vert", Shader::Type::Vertex, 
+                                                                      "assets/shaders/terrain.frag", Shader::Type::Fragment);
     std::shared_ptr<Shader> water_shader   = std::make_shared<Shader>("assets/shaders/water.vert", Shader::Type::Vertex,
                                                                       "assets/shaders/water.frag", Shader::Type::Fragment);
 
@@ -78,7 +78,7 @@ try {
 }
 catch(std::exception const& err){
     /* Return codes
-    * 0 - 9 - Fundamental OpenGL calls
+    * 1 - 9 - Fundamental OpenGL calls
     * 10-19 - Error while reding, processing or reloading shaders
     * 20-29 - Function argument related
     * 30-39 - Over- or underflow

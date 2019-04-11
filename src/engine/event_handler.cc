@@ -36,7 +36,7 @@ void EventHandler::init() {
 	auto* context_data = static_cast<GLFWwindow*>(*primary_context);
 
 	LOG("Setting callbacks");
-	glfwSetInputMode(context_data, GLFW_STICKY_KEYS, GL_TRUE);
+	glfwSetInputMode(context_data, GLFW_STICKY_KEYS, GLFW_TRUE);
 	glfwSetKeyCallback(context_data, key_callback);
 	glfwSetInputMode(context_data, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetCursorPosCallback(context_data, mouse_callback);
@@ -68,7 +68,7 @@ void EventHandler::key_callback(GLFWwindow*, int key, int, int action, int mod_b
 	using Speed = Camera::Speed;
     using State = Camera::KeyState;
     auto& camera = instance_->camera_;
-	Mods modifiers = static_cast<Mods>(std::move(mod_bits));
+	Mods modifiers = static_cast<Mods>(mod_bits);
     
     State state = action == GLFW_RELEASE ? State::Up : State::Down;
 
@@ -91,19 +91,19 @@ void EventHandler::key_callback(GLFWwindow*, int key, int, int action, int mod_b
                 camera->set_state(Dir::Up, State::Up);
             }
             else {
-                if((modifiers & Mods::Ctrl) == Mods::Ctrl)
+                if((modifiers & Mods::Super) == Mods::Super)
                     camera->set_state(Dir::Down, state);
                 else
                     camera->set_state(Dir::Up, state);
             }
             break;
-        case GLFW_KEY_LEFT_SHIFT:
-            if(action == GLFW_RELEASE)
-                camera->set_state(Speed::Default);
-            else
-                camera->set_state(Speed::Fast);
-            break;
     }
+    if((modifiers & Mods::Shift) == Mods::Shift)
+        camera->set_state(Speed::Fast);
+    else if((modifiers & Mods::Ctrl) == Mods::Ctrl)
+        camera->set_state(Speed::Slow);
+    else
+        camera->set_state(Speed::Default);
     update_view();
 }
 

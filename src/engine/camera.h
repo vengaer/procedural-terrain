@@ -31,7 +31,7 @@ class Camera {
             Backward = 0x10, 
             Forward  = 0x20 
         };
-		enum class Speed { Default = 10, Fast = 15 };
+		enum class Speed { Slow = 1, Default = 5, Fast = 15 };
         enum class KeyState { Up, Down };
 
 		Camera(glm::vec3 position = glm::vec3{0.f, 0.f, 3.f}, 

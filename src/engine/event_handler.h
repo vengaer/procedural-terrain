@@ -23,10 +23,10 @@ class EventHandler {
 
 		struct KeyMods {
 			using value_type = int;
-			static value_type constexpr Shift = 0x1;
-			static value_type constexpr Ctrl  = 0x2;
-			static value_type constexpr Alt   = 0x4;
-			static value_type constexpr Super = 0x8;
+			static value_type constexpr Shift = GLFW_MOD_SHIFT;
+			static value_type constexpr Ctrl  = GLFW_MOD_CONTROL;
+			static value_type constexpr Alt   = GLFW_MOD_ALT;
+			static value_type constexpr Super = GLFW_MOD_SUPER;
 		};
 		using Mods = Bitmask<KeyMods>;
 	
