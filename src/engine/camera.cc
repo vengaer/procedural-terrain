@@ -41,11 +41,11 @@ void Camera::set_state(Direction dir, KeyState state) {
         direction_ &= ~enum_value(dir);
 }
 
-void Camera::set_state(PitchDirection dir, KeyState state) {
+void Camera::set_state(RotationDirection dir, KeyState state) {
     if(state == KeyState::Down)
-        pitch_change_ |= enum_value(dir);
+        rotation_ |= enum_value(dir);
     else
-        pitch_change_ &= ~enum_value(dir);
+        rotation_ &= ~enum_value(dir);
 }
 
 void Camera::set_state(Speed speed) {
@@ -53,33 +53,37 @@ void Camera::set_state(Speed speed) {
 }
 
 void Camera::update() {
-    if(pitch_change_ != 0u && 
-       pitch_change_ != (PitchDir::Up | PitchDir::Down)) {
-        if((pitch_change_ & PitchDir::Up) == PitchDir::Up)
-            rotate(0, PITCH_SPEED*-frametime::delta());
-        else
-            rotate(0, PITCH_SPEED*frametime::delta());
-
-    }
+    double x_rot{0.0}, y_rot{0.0};
+    if((rotation_ & RotationMask::Right) == RotationMask::Right)
+        x_rot += PITCH_SPEED * frametime::delta();
+    if((rotation_ & RotationMask::Left) == RotationMask::Left)
+        x_rot -= PITCH_SPEED * frametime::delta();
+    if((rotation_ & RotationMask::Up) == RotationMask::Up)
+        y_rot -= PITCH_SPEED * frametime::delta();
+    if((rotation_ & RotationMask::Down) == RotationMask::Down)
+        y_rot += PITCH_SPEED * frametime::delta();;
+    
+    rotate(x_rot, y_rot);
+    
     if(direction_ == 0u ||
-       direction_ == (MoveDir::Right | MoveDir::Left) ||
-       direction_ == (MoveDir::Forward | MoveDir::Backward) ||
-       direction_ == (MoveDir::Up | MoveDir::Down))
+       direction_ == (MoveMask::Right | MoveMask::Left) ||
+       direction_ == (MoveMask::Forward | MoveMask::Backward) ||
+       direction_ == (MoveMask::Up | MoveMask::Down))
         return;
 
     glm::vec3 dir{0.f};
 
-    if((direction_ & MoveDir::Right)    == MoveDir::Right)
+    if((direction_ & MoveMask::Right)    == MoveMask::Right)
         dir += local_x_;
-    if((direction_ & MoveDir::Left)     == MoveDir::Left)
+    if((direction_ & MoveMask::Left)     == MoveMask::Left)
         dir -= local_x_;
-    if((direction_ & MoveDir::Up)       == MoveDir::Up)
+    if((direction_ & MoveMask::Up)       == MoveMask::Up)
         dir += local_y_;
-    if((direction_ & MoveDir::Down)     == MoveDir::Down)
+    if((direction_ & MoveMask::Down)     == MoveMask::Down)
         dir -= local_y_;
-    if((direction_ & MoveDir::Backward) == MoveDir::Backward)
+    if((direction_ & MoveMask::Backward) == MoveMask::Backward)
         dir += local_z_;
-    if((direction_ & MoveDir::Forward)  == MoveDir::Forward)
+    if((direction_ & MoveMask::Forward)  == MoveMask::Forward)
         dir -= local_z_;
 
     dir = glm::normalize(dir);

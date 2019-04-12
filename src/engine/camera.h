@@ -22,13 +22,15 @@ class Camera {
         static value_type constexpr Forward  = 0x20;
     };
 
-    struct pitch_dir {
+    struct rot_dirs {
         using value_type = unsigned char;
-        static value_type constexpr Up   = 0x1;
-        static value_type constexpr Down = 0x2;
+        static value_type constexpr Right = 0x1;
+        static value_type constexpr Left  = 0x2;
+        static value_type constexpr Up    = 0x4;
+        static value_type constexpr Down  = 0x8;
     };
-    using MoveDir = Bitmask<dirs>;
-    using PitchDir = Bitmask<pitch_dir>;
+    using MoveMask = Bitmask<dirs>;
+    using RotationMask = Bitmask<rot_dirs>;
 	public:
 		enum class Direction{ 
             Right    = 0x1, 
@@ -38,9 +40,11 @@ class Camera {
             Backward = 0x10, 
             Forward  = 0x20 
         };
-        enum class PitchDirection {
-            Up   = 0x1,
-            Down = 0x2
+        enum class RotationDirection {
+            Right = 0x1,
+            Left  = 0x2,
+            Up    = 0x4,
+            Down  = 0x8
         };
 		enum class Speed { Slow = 1, Default = 5, Fast = 15 };
         enum class KeyState { Up, Down };
@@ -56,7 +60,7 @@ class Camera {
 		void rotate(double delta_x, double delta_y);
 
         void set_state(Direction dir, KeyState state);
-        void set_state(PitchDirection dir, KeyState state);
+        void set_state(RotationDirection dir, KeyState state);
         void set_state(Speed speed);
 
         void update();
@@ -86,8 +90,8 @@ class Camera {
 		float pitch_;
 		bool invert_y_;
 		ClipSpace const clip_space_;
-        MoveDir direction_{};
-        PitchDir pitch_change_{};
+        MoveMask direction_{};
+        RotationMask rotation_{};
         Speed speed_{Speed::Default};
 
         static std::size_t constexpr PITCH_SPEED{20u};
