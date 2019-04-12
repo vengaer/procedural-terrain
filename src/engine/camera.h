@@ -94,7 +94,7 @@ class Camera {
         RotationMask rotation_{};
         Speed speed_{Speed::Default};
 
-        static std::size_t constexpr PITCH_SPEED{20u};
+        static std::size_t constexpr ROTATION_SPEED{25u};
 
 		void init(glm::vec3 target_view);
 

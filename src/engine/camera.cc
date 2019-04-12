@@ -55,13 +55,13 @@ void Camera::set_state(Speed speed) {
 void Camera::update() {
     double x_rot{0.0}, y_rot{0.0};
     if((rotation_ & RotationMask::Right) == RotationMask::Right)
-        x_rot += PITCH_SPEED * frametime::delta();
+        x_rot += ROTATION_SPEED * frametime::delta();
     if((rotation_ & RotationMask::Left) == RotationMask::Left)
-        x_rot -= PITCH_SPEED * frametime::delta();
+        x_rot -= ROTATION_SPEED * frametime::delta();
     if((rotation_ & RotationMask::Up) == RotationMask::Up)
-        y_rot -= PITCH_SPEED * frametime::delta();
+        y_rot -= ROTATION_SPEED * frametime::delta();
     if((rotation_ & RotationMask::Down) == RotationMask::Down)
-        y_rot += PITCH_SPEED * frametime::delta();;
+        y_rot += ROTATION_SPEED * frametime::delta();;
     
     rotate(x_rot, y_rot);
     
