@@ -88,6 +88,7 @@ void EventHandler::key_callback(GLFWwindow*, int key, int, int action, int mod_b
             camera->set_state(Dir::Left, state);
             break;
         case GLFW_KEY_E:
+        case GLFW_KEY_SPACE:
             camera->set_state(Dir::Up, state);
             break;
         case GLFW_KEY_Q:
