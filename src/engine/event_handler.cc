@@ -66,6 +66,7 @@ void EventHandler::update_view() {
 
 void EventHandler::key_callback(GLFWwindow*, int key, int, int action, int mod_bits) {
 	using Dir = Camera::Direction;
+    using PitchDir = Camera::PitchDirection;
 	using Speed = Camera::Speed;
     using State = Camera::KeyState;
     auto& camera = instance_->camera_;
@@ -86,17 +87,17 @@ void EventHandler::key_callback(GLFWwindow*, int key, int, int action, int mod_b
         case GLFW_KEY_A:
             camera->set_state(Dir::Left, state);
             break;
-        case GLFW_KEY_SPACE:
-            if(action == GLFW_RELEASE) {
-                camera->set_state(Dir::Down, State::Up);
-                camera->set_state(Dir::Up, State::Up);
-            }
-            else {
-                if((modifiers & Mods::Super) == Mods::Super)
-                    camera->set_state(Dir::Down, state);
-                else
-                    camera->set_state(Dir::Up, state);
-            }
+        case GLFW_KEY_E:
+            camera->set_state(Dir::Up, state);
+            break;
+        case GLFW_KEY_Q:
+            camera->set_state(Dir::Down, state);
+            break;
+        case GLFW_KEY_K:
+            camera->set_state(PitchDir::Up, state);
+            break;
+        case GLFW_KEY_J:
+            camera->set_state(PitchDir::Down, state);
             break;
         case GLFW_KEY_LEFT_SHIFT:
             if(action == GLFW_RELEASE) {

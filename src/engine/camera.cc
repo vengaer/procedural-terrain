@@ -5,6 +5,8 @@
 #include "type_conversion.h"
 #include <cmath>
 
+#include <iostream>
+
 Camera::Camera(glm::vec3 position, glm::vec3 target_view, float fov, float yaw, float pitch, bool invert_y, ClipSpace space) 
 : position_{position}, local_x_{}, local_y_{}, local_z_{}, view_{}, fov_{fov}, yaw_{yaw}, pitch_{pitch}, invert_y_{invert_y}, clip_space_{space} { 
 	init(target_view);
@@ -39,11 +41,26 @@ void Camera::set_state(Direction dir, KeyState state) {
         direction_ &= ~enum_value(dir);
 }
 
+void Camera::set_state(PitchDirection dir, KeyState state) {
+    if(state == KeyState::Down)
+        pitch_change_ |= enum_value(dir);
+    else
+        pitch_change_ &= ~enum_value(dir);
+}
+
 void Camera::set_state(Speed speed) {
     speed_ = speed;
 }
 
 void Camera::update() {
+    if(pitch_change_ != 0u && 
+       pitch_change_ != (PitchDir::Up | PitchDir::Down)) {
+        if((pitch_change_ & PitchDir::Up) == PitchDir::Up)
+            rotate(0, PITCH_SPEED*-frametime::delta());
+        else
+            rotate(0, PITCH_SPEED*frametime::delta());
+
+    }
     if(direction_ == 0u ||
        direction_ == (MoveDir::Right | MoveDir::Left) ||
        direction_ == (MoveDir::Forward | MoveDir::Backward) ||
@@ -70,6 +87,8 @@ void Camera::update() {
     float speed = static_cast<float>(speed_) * frametime::delta();
 
     position_ = glm::translate(glm::mat4{1.f}, speed * dir) * glm::vec4{position_, 1.f};
+
+       
     update_view();
 }
 

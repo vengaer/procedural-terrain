@@ -21,7 +21,14 @@ class Camera {
         static value_type constexpr Backward = 0x10;
         static value_type constexpr Forward  = 0x20;
     };
+
+    struct pitch_dir {
+        using value_type = unsigned char;
+        static value_type constexpr Up   = 0x1;
+        static value_type constexpr Down = 0x2;
+    };
     using MoveDir = Bitmask<dirs>;
+    using PitchDir = Bitmask<pitch_dir>;
 	public:
 		enum class Direction{ 
             Right    = 0x1, 
@@ -30,6 +37,10 @@ class Camera {
             Down     = 0x8, 
             Backward = 0x10, 
             Forward  = 0x20 
+        };
+        enum class PitchDirection {
+            Up   = 0x1,
+            Down = 0x2
         };
 		enum class Speed { Slow = 1, Default = 5, Fast = 15 };
         enum class KeyState { Up, Down };
@@ -45,6 +56,7 @@ class Camera {
 		void rotate(double delta_x, double delta_y);
 
         void set_state(Direction dir, KeyState state);
+        void set_state(PitchDirection dir, KeyState state);
         void set_state(Speed speed);
 
         void update();
@@ -75,7 +87,10 @@ class Camera {
 		bool invert_y_;
 		ClipSpace const clip_space_;
         MoveDir direction_{};
+        PitchDir pitch_change_{};
         Speed speed_{Speed::Default};
+
+        static std::size_t constexpr PITCH_SPEED{20u};
 
 		void init(glm::vec3 target_view);
 
