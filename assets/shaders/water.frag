@@ -23,7 +23,7 @@ const float magnitude = 0.04;
 const vec3 sun_color = vec3(1.25, 0.85, 0.85);
 
 const float shine = 40.0;
-const float reflectivity = 0.5;
+const float reflectivity = 0.6;
 
 float linearize(float depth) {
     return 2.0 * near * far / (far + near - (2.0 * depth - 1.0) * (far - near));
