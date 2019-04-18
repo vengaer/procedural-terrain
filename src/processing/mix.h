@@ -18,6 +18,9 @@ class Mix {
         Shader shader_;
         Framebuffer fb_;
 
+        static float constexpr BRIGHTNESS_FACTOR{1.8f};
+        static float constexpr HIGHLIGHT_FACTOR{2.f};
+
         void init();
 };
 

@@ -5,8 +5,6 @@
 #include "type_conversion.h"
 #include <cmath>
 
-#include <iostream>
-
 Camera::Camera(glm::vec3 position, glm::vec3 target_view, float fov, float yaw, float pitch, bool invert_y, ClipSpace space) 
 : position_{position}, local_x_{}, local_y_{}, local_z_{}, view_{}, fov_{fov}, yaw_{yaw}, pitch_{pitch}, invert_y_{invert_y}, clip_space_{space} { 
 	init(target_view);

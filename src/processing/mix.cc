@@ -20,4 +20,6 @@ GLuint Mix::texture_id() const {
 void Mix::init() {
     shader_.upload_uniform("scene_", 0);
     shader_.upload_uniform("highlight_", 1);
+    shader_.upload_uniform("brightness", BRIGHTNESS_FACTOR);
+    shader_.upload_uniform("highlight_factor", HIGHLIGHT_FACTOR);
 }
