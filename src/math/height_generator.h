@@ -2,11 +2,16 @@
 #define HEIGHT_GENERATOR_H
 
 #pragma once
+#include "interpolation.h"
 #include <array>
+#include <cmath>
 #include <cstddef>
 #include <random>
 #include <unordered_map>
 
+enum class InterpolationMethod { Cosine, Bilinear, Bicubic };
+
+template <InterpolationMethod IM = InterpolationMethod::Cosine> 
 class HeightGenerator {
     public:
         HeightGenerator(float amplitude);
@@ -30,4 +35,6 @@ class HeightGenerator {
         float interpolated_noise(float x, float z);
 };
 
+
+#include "height_generator.tcc"
 #endif

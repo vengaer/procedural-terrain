@@ -12,6 +12,7 @@
 template <typename ShaderPolicy>
 class Terrain : public Renderer<Terrain<ShaderPolicy>, ShaderPolicy>, public Transform {
     using renderer_t = Renderer<Terrain<ShaderPolicy>, ShaderPolicy>;
+    using HeightGenerator = HeightGenerator<InterpolationMethod::Bicubic>;
     public:
         Terrain(ShaderPolicy policy = {}, GLfloat amplitude = 10.f, GLfloat x_len = 1.f, GLfloat dx = .5f, GLfloat z_len = 1.f, GLfloat dz = .5f);
 
