@@ -30,17 +30,17 @@ inline bool constexpr has_color_attachment_v = has_color_attachment<T>::value;
 template <std::size_t T>
 inline bool constexpr has_depth_attachment_v = has_depth_attachment<T>::value;
 
-enum class FramebufferState{Static, Dynamic};
+enum class FramebufferType{Static, Dynamic};
 
 /* N - number of textures to attach */
 /* T - Type of texture (TexType::Color, TexType::Depth or TexType::Color | TexType::Depth) */
 /* S - Whether the framebuffer should be dynamic (resizable) or static (non-resizable) */
-template <std::size_t N = 1u, std::size_t T = TexType::Color, FramebufferState S = FramebufferState::Dynamic>
+template <std::size_t N = 1u, std::size_t T = TexType::Color, FramebufferType S = FramebufferType::Dynamic>
 class Framebuffer {
     public:
-        template <FramebufferState U = S, typename = std::enable_if_t<U==FramebufferState::Dynamic>>
+        template <FramebufferType U = S, typename = std::enable_if_t<U==FramebufferType::Dynamic>>
         Framebuffer(float width_ratio, float height_ratio);
-        template <FramebufferState U = S, typename = std::enable_if_t<U==FramebufferState::Static>>
+        template <FramebufferType U = S, typename = std::enable_if_t<U==FramebufferType::Static>>
         Framebuffer(std::size_t width, std::size_t height);
         ~Framebuffer();
 
@@ -61,7 +61,7 @@ class Framebuffer {
         void bind() const;
         void unbind() const;
 
-        template <FramebufferState U = S, typename = std::enable_if_t<U==FramebufferState::Dynamic>>
+        template <FramebufferType U = S, typename = std::enable_if_t<U==FramebufferType::Dynamic>>
         static void reallocate();
         
         static float constexpr FULL_WIDTH = 1.f;
