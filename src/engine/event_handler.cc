@@ -148,7 +148,7 @@ void EventHandler::size_callback(GLFWwindow*, int width, int height) {
 	glViewport(0, 0, width, height);
 
 	update_perspective();
-    Viewport::update();
+    Viewport::update(width, height);
 
 	Shader::reallocate_textures();
     Framebuffer<1u>::reallocate();

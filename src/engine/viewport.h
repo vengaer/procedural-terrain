@@ -6,6 +6,7 @@
 
 struct Viewport {
     static void update();
+    static void update(int width, int height);
 
     static int width;
     static int height;
