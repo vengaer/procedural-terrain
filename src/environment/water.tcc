@@ -50,6 +50,7 @@ void Water<ShaderPolicy>::pre_process(SceneRenderer renderer, Shaders const&... 
     /* Refraction pass */
     refr_fb_.bind();
 
+    // TODO: upload refr_clip_ and remove offset in shader
     upload_to_shaders("ufrm_clipping_plane",
                       NO_CLIP,
                       std::forward_as_tuple(shaders...),
