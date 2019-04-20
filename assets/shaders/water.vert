@@ -8,6 +8,7 @@ out vec3 to_camera;
 out vec2 tex_coords;
 out vec3 from_sun;
 
+out float to_cam_length;
 out float near;
 out float far;
 
@@ -23,7 +24,7 @@ const float tiling = 4.0;
 
 void main() {
     vec4 world_pos = ufrm_model * vec4(position_, 1.0);
-
+    to_cam_length = -world_pos.w;
     clip_space = ufrm_projection * ufrm_view * world_pos;
 
     gl_Position = clip_space;

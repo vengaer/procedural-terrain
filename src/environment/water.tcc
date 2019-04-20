@@ -51,7 +51,7 @@ void Water<ShaderPolicy>::pre_process(SceneRenderer renderer, Shaders const&... 
     refr_fb_.bind();
 
     upload_to_shaders("ufrm_clipping_plane",
-                      refr_clip_,
+                      NO_CLIP,
                       std::forward_as_tuple(shaders...),
                       std::index_sequence_for<Shaders...>{});
 

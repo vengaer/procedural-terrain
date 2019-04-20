@@ -8,6 +8,7 @@ in vec3 from_sun;
 in vec3 normal;
 in vec2 tex_coords;
 
+in float to_cam_length;
 in float near;
 in float far;
 
@@ -62,6 +63,14 @@ vec3 specular(vec3 view_dir, vec3 normal) {
     return sun_color * specular * reflectivity;
 }
 
+float refr_offset(vec3 normal, float depth) {
+    float theta1 = acos(dot(normal, normalize(to_camera)));
+    float theta2 = asin(1 / 1.33 * sin(theta1));
+    float d = to_cam_length * sin(theta1);
+    float d_prime = to_cam_length * sin(theta2);
+    return depth * 0.02 * (d - d_prime);
+}
+
 void main() {
     vec4 ndc = clip_space / clip_space.w;
 
@@ -74,6 +83,7 @@ void main() {
 
     vec3 normal = calculate_normal(dist_coords);
 
+    refr_coords.y -= refr_offset(normal, depth);
     refr_coords += dist_coords;
     refl_coords += dist_coords;
 
