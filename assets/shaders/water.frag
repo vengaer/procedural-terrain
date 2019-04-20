@@ -67,7 +67,7 @@ float refr_offset(vec3 normal, float depth) {
     float theta2 = asin(1 / 1.33 * sin(theta1));
     float d = to_cam_length * sin(theta1);
     float d_prime = to_cam_length * sin(theta2);
-    return clamp(depth * 0.02 * (d - d_prime), 0.0, 1.0);
+    return clamp(depth * 0.02 * (d - d_prime), -0.8, 0.8);
 }
 
 void main() {
