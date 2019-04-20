@@ -9,8 +9,7 @@ in vec3 normal;
 in vec2 tex_coords;
 
 in float to_cam_length;
-in float near;
-in float far;
+in float near; in float far;
 
 uniform float ufrm_dudv_offset;
 
@@ -68,7 +67,7 @@ float refr_offset(vec3 normal, float depth) {
     float theta2 = asin(1 / 1.33 * sin(theta1));
     float d = to_cam_length * sin(theta1);
     float d_prime = to_cam_length * sin(theta2);
-    return depth * 0.02 * (d - d_prime);
+    return clamp(depth * 0.02 * (d - d_prime), 0.0, 1.0);
 }
 
 void main() {
