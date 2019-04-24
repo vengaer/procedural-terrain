@@ -9,7 +9,7 @@ Procedural terrain created using OpenGL.
 ## Compiling
 The easiest way to compile the program is by using the supplied Makefile. In order for it to work, the dependencies listed above need to be accessible through the PATH variable or similarly. The code has been tested with Clang 8.0.0 and GCC 8.3.0.
 
-If not using the Makefile, make sure the src directory and all its subdirectories are added as include directories.
+If not using the Makefile, make sure the src directory, all its subdirectories and assets/include/stb are all added as include directories.
 
 ### Customization
 - Logging can be enabled and customized by defining one of the following project wide. By default, no logging is performed.
