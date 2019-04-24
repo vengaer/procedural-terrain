@@ -10,7 +10,7 @@
 #include <string>
 
 class Bloom {
-    using Framebuffer = Framebuffer<2u>;
+    using Framebuffer_ = Framebuffer<2u>;
     public:
         Bloom(int width, int height);
 
@@ -21,8 +21,8 @@ class Bloom {
 
     private:
         Shader shader_;
-        Framebuffer fb_;
-        mutable glm::vec4 clear_color_;
+        Framebuffer_ fb_;
+        mutable glm::vec4 clear_color_{};
 
         void upload_clear_color() const;
 };

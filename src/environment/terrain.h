@@ -12,7 +12,7 @@
 template <typename ShaderPolicy>
 class Terrain : public Renderer<Terrain<ShaderPolicy>, ShaderPolicy>, public Transform {
     using renderer_t = Renderer<Terrain<ShaderPolicy>, ShaderPolicy>;
-    using HeightGenerator = HeightGenerator<InterpolationMethod::Bicubic>;
+    using HeightGen = HeightGenerator<InterpolationMethod::Bicubic>;
     public:
         Terrain(ShaderPolicy policy = {}, GLfloat amplitude = 10.f, GLfloat x_len = 1.f, GLfloat dx = .5f, GLfloat z_len = 1.f, GLfloat dz = .5f);
 
@@ -22,7 +22,7 @@ class Terrain : public Renderer<Terrain<ShaderPolicy>, ShaderPolicy>, public Tra
         void init(GLfloat x_len, GLfloat dx, GLfloat z_len, GLfloat dz);
 
     private:
-        HeightGenerator generator_;
+        HeightGen generator_;
         std::vector<GLfloat> vertices_{};
         std::vector<GLuint> indices_{};
 

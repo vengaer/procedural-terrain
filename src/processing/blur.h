@@ -17,7 +17,7 @@ namespace impl {
 
     template <Direction dir>
     class Blur {
-        using Framebuffer = Framebuffer<1u>;
+        using Framebuffer_ = Framebuffer<1u>;
         public:
             Blur(int width, int height);
             ~Blur();
@@ -30,7 +30,7 @@ namespace impl {
         private:
             Shader shader_;
             float width_ratio_{}, height_ratio_{};
-            Framebuffer fb_;
+            Framebuffer_ fb_;
 
             static std::vector<std::reference_wrapper<Blur>> instances_;
 

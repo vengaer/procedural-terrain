@@ -7,7 +7,7 @@
 #include <GL/glew.h>
 
 class Mix {
-    using Framebuffer = Framebuffer<1u>;
+    using Framebuffer_ = Framebuffer<1u>;
     public:
         Mix();
 
@@ -16,7 +16,7 @@ class Mix {
 
     private:
         Shader shader_;
-        Framebuffer fb_;
+        Framebuffer_ fb_;
 
         static float constexpr BRIGHTNESS_FACTOR{1.8f};
         static float constexpr HIGHLIGHT_FACTOR{2.f};
