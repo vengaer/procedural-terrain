@@ -16,7 +16,7 @@ If not using the Makefile, make sure the src directory and all its subdirectorie
     - LOG\_ERROUT\_DEFAULT - Default logging level, stdin and stdout only, no log file.
     - LOG\_ERROUT\_VERBOSE - Verbose logging, stdin and stdout only, no log file.
     - LOG\_FULL\_DEFAULT - Default logging level, stdin, stdout and log file.
-    - LOG\_FULL\_VERBOSE - Verbose logging, stdin, stdout and log file.
+    - LOG\_FULL\_VERBOSE - Verbose logging, stdin, stdout and log file.  
   To explicitly disable logging, define LOG\_DISABLE\_ALL project wide.
 - Live reloading of shaders and compression of potential log files is enabled by default. To disable this, define RESTRICT\_THREAD\_USAGE project wide.
 
