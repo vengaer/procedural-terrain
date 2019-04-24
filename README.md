@@ -11,7 +11,7 @@ The easiest way to compile the program is by using the supplied Makefile. In ord
 
 If not using the Makefile, make sure the src directory and all its subdirectories are added as include directories.
 
-### Customizing
+### Customization
 - Logging can be enabled and customized by defining one of the following project wide. By default, no logging is performed.
     - LOG\_ERROUT\_DEFAULT - Default logging level, stdin and stdout only, no log file.
     - LOG\_ERROUT\_VERBOSE - Verbose logging, stdin and stdout only, no log file.
