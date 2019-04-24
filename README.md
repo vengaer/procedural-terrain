@@ -1,5 +1,5 @@
 # Procedural Terrain  
-Procedural terrain created using OpenGL
+Procedural terrain created using OpenGL.
 
 ## Dependencies
 - [GLEW](glew.sourceforge.net)
@@ -17,7 +17,8 @@ If not using the Makefile, make sure the src directory and all its subdirectorie
     - LOG\_ERROUT\_VERBOSE - Verbose logging, stdin and stdout only, no log file.
     - LOG\_FULL\_DEFAULT - Default logging level, stdin, stdout and log file.
     - LOG\_FULL\_VERBOSE - Verbose logging, stdin, stdout and log file.
+  To explicitly disable logging, define LOG\_DISABLE\_ALL project wide.
 - Live reloading of shaders and compression of potential log files is enabled by default. To disable this, define RESTRICT\_THREAD\_USAGE project wide.
 
-## Credit
-Some aspects, most notably the water, were inspired by content on [ThinMatrix' Youtube channel](https://www.youtube.com/user/ThinMatrix).
+## Credits
+A few aspects, including the water, were inspired by content on [ThinMatrix' Youtube channel](https://www.youtube.com/user/ThinMatrix).
