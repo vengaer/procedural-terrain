@@ -402,13 +402,13 @@ std::vector<std::reference_wrapper<Shader>> Shader::instances_{};
 typename Shader::callback_func Shader::reload_callback_{nullptr};
 
 /* Shader::Source */
-Shader::Source::Source(std::string const& file, Type t) : path{file}, last_write{std::chrono::system_clock::now()}, type{t} { }
+Shader::Source::Source(std::string const& file, Type t) : path{file}, last_write{std::filesystem::file_time_type::clock::now()}, type{t} { }
 
-Shader::Source::Source(std::filesystem::path const& file, Type t) : path{file}, last_write{std::chrono::system_clock::now()}, type{t} { }
+Shader::Source::Source(std::filesystem::path const& file, Type t) : path{file}, last_write{std::filesystem::file_time_type::clock::now()}, type{t} { }
 
-Shader::Source::Source(std::string&& file, Type t) : path{std::move(file)}, last_write{std::chrono::system_clock::now()}, type{t} { }
+Shader::Source::Source(std::string&& file, Type t) : path{std::move(file)}, last_write{std::filesystem::file_time_type::clock::now()}, type{t} { }
 
-Shader::Source::Source(std::filesystem::path&& file, Type t) : path{std::move(file)}, last_write{std::chrono::system_clock::now()}, type{t} { }
+Shader::Source::Source(std::filesystem::path&& file, Type t) : path{std::move(file)}, last_write{std::filesystem::file_time_type::clock::now()}, type{t} { }
 
 Shader::Source::Source(Source const& other) : last_write{other.last_write}, type{other.type} {
 	reconstruct();
@@ -440,7 +440,7 @@ Shader::Source& Shader::Source::operator=(Source&& other) & {
 Result<std::optional<std::string>> Shader::Source::touch() noexcept {
 	namespace fs = std::filesystem;
 
-	auto now = std::chrono::system_clock::now();
+    auto const now = std::filesystem::file_time_type::clock::now();
 	std::error_code err;
 	
 	fs::last_write_time(path, now, err);

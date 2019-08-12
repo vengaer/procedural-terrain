@@ -111,7 +111,7 @@ class Shader {
 			Source& operator=(Source&& other) &;
 
 			Result<std::optional<std::string>> touch() noexcept;
-			void update_write_time(std::filesystem::file_time_type time = std::chrono::system_clock::now()) noexcept;
+			void update_write_time(std::filesystem::file_time_type time = std::filesystem::file_time_type::clock::now()) noexcept;
 
 			Result<std::variant<std::string, std::filesystem::file_time_type>>
 				get_last_write_time() const noexcept;
