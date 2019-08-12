@@ -1,3 +1,4 @@
 *.o
 terrain
 logs/**
+*.mkv
