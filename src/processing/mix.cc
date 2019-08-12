@@ -2,7 +2,7 @@
 #include "texture.h"
 #include "viewport.h"
 
-Mix::Mix() : shader_{"assets/shaders/mix.vert", Shader::Type::Vertex, "assets/shaders/mix.frag", Shader::Type::Fragment}, fb_{Framebuffer::FULL_WIDTH, Framebuffer::FULL_HEIGHT} { 
+Mix::Mix() : shader_{"assets/shaders/mix.vert", Shader::Type::Vertex, "assets/shaders/mix.frag", Shader::Type::Fragment}, fb_{Framebuffer_::FULL_WIDTH, Framebuffer_::FULL_HEIGHT} { 
     init();
 }
 

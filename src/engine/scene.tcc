@@ -7,9 +7,9 @@ Scene<ShaderPolicy>::Scene(ShaderPolicy policy, Color clear_color) : canvas_{pol
 
 template <typename ShaderPolicy>
 void Scene<ShaderPolicy>::render() const {
-    if(!PostProcessing::enabled())
+    if(!PostProcessing::enabled()) {
         Shader::bind_scene_texture();
-    
+    }
 
 	Shader::bind_default_framebuffer();
 	glClearColor(1.f, 1.f, 1.f, 1.f);

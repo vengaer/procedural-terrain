@@ -18,8 +18,9 @@ Framebuffer<N, T, S>::~Framebuffer() {
         glDeleteRenderbuffers(N, &rbos_[0]);
     }
 
-    if constexpr(has_depth_attachment())
+    if constexpr(has_depth_attachment()) {
         glDeleteTextures(N, &depth_textures_[0]);
+    }
 
 	instances_.erase(
 		std::remove_if(std::begin(instances_), 
