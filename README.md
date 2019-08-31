@@ -4,9 +4,9 @@ Purely procedural terrain created using OpenGL.
 [![Build Status](https://gitlab.com/vilhelmengstrom/procedural-terrain/badges/master/build.svg)](https://gitlab.com/vilhelmengstrom/procedural-terrain/commits/master)
 
 ### Dependencies
-- [GLEW](https://glew.sourceforge.net)
+- [GLEW](http://glew.sourceforge.net)
 - [GLFW](https://www.glfw.org)
-- [GLM](https://glm.g-tru.net)
+- [GLM](https://glm.g-truc.net)
 - [STB](https://github.com/nothings/stb) (Included in assets/include)
 
 ### Compiling
