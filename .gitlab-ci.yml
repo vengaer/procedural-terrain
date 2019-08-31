@@ -2,7 +2,7 @@ image: archlinux/base:latest
 
 before_script:
     - pacman --noconfirm -Syu
-    - pacman -S gcc clang make glm glew glfw-x11
+    - pacman --noconfirm -S gcc clang make glm glew glfw-x11
 
 stages:
     - build
