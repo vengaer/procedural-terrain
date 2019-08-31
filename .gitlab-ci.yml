@@ -1,0 +1,23 @@
+image: archlinux/base:latest
+
+before_script:
+    - pacman --noconfirm -Syu
+    - pacman -S gcc clang make glm glew glfw-x11
+
+stages:
+    - build
+
+gcc:
+    stage: build
+    script:
+    - export CXX=g++
+    - make -j$(nproc)
+    artifacts:
+        paths:
+           - terrain 
+
+clang:
+    stage: build
+    script:
+    - export CXX=clang++
+    - make -j$(nproc)
