@@ -18,9 +18,9 @@ Uses periodic noise functions for generating the rocks and the ripples on the wa
 
 ### Compiler Compatibility
 
-- :white_check_mark:  GCC
-- :white_check_mark:  Clang
-- :x:[^2] MSVC
+- :white_check_mark: GCC
+- :white_check_mark: Clang
+- :x: MSVC[^2]
 
 ### Compiling
 
