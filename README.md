@@ -10,17 +10,9 @@ Uses periodic noise functions for generating the rocks and the ripples on the wa
 - [GLM](https://glm.g-truc.net)
 - [STB](https://github.com/nothings/stb)[^1]
 
-### Preview  
-
+### Preview (Click to View on Youtube)
 
 [![Preview](http://img.youtube.com/vi/ObkWN27MURQ/0.jpg)](http://www.youtube.com/watch?v=ObkWN27MURQ "Preview")
-
-    <iframe width="560" height="315"
-src="https://www.youtube.com/embed/ObkWN27MURQ" 
-frameborder="0" 
-allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" 
-allowfullscreen></iframe>
-
 
 ### Compiler Compatibility
 
