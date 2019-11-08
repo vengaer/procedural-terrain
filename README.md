@@ -10,8 +10,6 @@ Uses periodic noise functions for generating the rocks and the ripples on the wa
 - [GLM](https://glm.g-truc.net)
 - [STB](https://github.com/nothings/stb)[^1]
 
-[^1]: Included in assets/include
-
 ## Preview
 
 <figure class="video_container">
@@ -23,8 +21,6 @@ Uses periodic noise functions for generating the rocks and the ripples on the wa
 - :white_check_mark: GCC
 - :white_check_mark: Clang
 - :x:[^2] MSVC
-
-[^2]: Not verified, but due to prior experience of their poor SFINAE-support, I strongly suspect it would not compile. If wanting to run this on windows, look into [MSYS](https://www.msys2.org/) instead.
 
 ### Compiling
 
@@ -43,3 +39,8 @@ The application will continuously monitor active shader source files for changes
 
 ### Credits
 The water is a pure-procedural implementation of concepts introduced in a series on [ThinMatrix' Youtube channel](https://www.youtube.com/user/ThinMatrix). 
+
+### Footnotes
+[^1]: Included in assets/include
+[^2]: Not verified, but due to prior experience of their poor SFINAE-support, I strongly suspect it would not compile. If wanting to run this on windows, look into [MSYS](https://www.msys2.org/) instead.
+
