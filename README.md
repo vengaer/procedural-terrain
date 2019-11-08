@@ -13,11 +13,6 @@ Uses periodic noise functions for generating the rocks and the ripples on the wa
 ### Preview  
 
 
-<!-- blank line -->
-<figure class="video_container">
-  <iframe src="https://www.youtube.com/embed/ObkWN27MURQ" frameborder="0" allowfullscreen="true"> </iframe>
-</figure>
-<!-- blank line -->
 [![Preview](http://img.youtube.com/vi/ObkWN27MURQ/0.jpg)](http://www.youtube.com/watch?v=ObkWN27MURQ "Preview")
 
     <iframe width="560" height="315"
