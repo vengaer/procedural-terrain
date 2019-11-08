@@ -11,11 +11,13 @@ Uses periodic noise functions for generating the rocks and the ripples on the wa
 - [STB](https://github.com/nothings/stb)[^1]
 
 ## Preview
+ 
 
 <figure class="video_container">
   <iframe src="https://www.youtube.com/embed/ObkWN27MURQ" frameborder="0" allowfullscreen="true"> </iframe>
 </figure>
 
+ 
 ### Compiler Compatibility
 
 - :white_check_mark: GCC
