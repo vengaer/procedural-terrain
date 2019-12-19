@@ -1,7 +1,7 @@
 # Procedural Terrain  
 Purely procedural terrain created using OpenGL.
 
-[![Build Status](https://gitlab.com/vilhelmengstrom/procedural-terrain/badges/master/build.svg)](https://gitlab.com/vilhelmengstrom/procedural-terrain/commits/master)
+[![Build Status](https://gitlab.com/vilhelmengstrom/procedural-terrain/badges/master/pipeline.svg)](https://gitlab.com/vilhelmengstrom/procedural-terrain/commits/master)
 
 ### Dependencies
 - [GLEW](http://glew.sourceforge.net)
